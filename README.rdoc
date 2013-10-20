@@ -1,0 +1,3 @@
+Simple interface to libmagic for Go Programming Language
+
+{<img src="https://travis-ci.org/kwilczynski/ruby-magic.png?branch=master" alt="Build Status"/>}[https://travis-ci.org/kwilczynski/ruby-magic]
