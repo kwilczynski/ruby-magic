@@ -1,0 +1,24 @@
+language: ruby
+rvm:
+  - 1.8.7
+  - 1.9.2
+  - 1.9.3
+  - 2.0.0
+  - ree
+  - ruby-head
+  - rbx-18mode
+  - rbx-19mode
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: rbx-18mode
+    - rvm: rbx-19mode
+branches:
+  only:
+    - master
+install: true
+before_script:
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install --force-yes -y libmagic1 libmagic-dev
+  - travis_retry gem install --no-rdoc --no-ri rake rake-compiler test-unit rdoc
+script: rake test

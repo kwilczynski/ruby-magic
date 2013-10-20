@@ -1,0 +1,10 @@
+0       string/wt       #!\ /bin/sh             POSIX shell script text executable
+!:mime  text/x-shellscript
+0       string/wt       #!\ /bin/bash           Bourne-Again shell script text executable
+!:mime  text/x-shellscript
+0       string/wt       #!\ /usr/bin/bash       Bourne-Again shell script text executable
+!:mime  text/x-shellscript
+0       string/wt       #!\ /usr/local/bash     Bourne-Again shell script text executable
+!:mime  text/x-shellscript
+0       string/wt       #!\ /usr/local/bin/bash Bourne-Again shell script text executable
+!:mime  text/x-shellscript
