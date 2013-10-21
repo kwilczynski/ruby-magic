@@ -513,7 +513,7 @@ magic_free(void *data)
 VALUE
 magic_exception_wrapper(VALUE value)
 {
-    exception_t *e = (struct exception *)value;
+    magic_exception_t *e = (struct magic_exception *)value;
 
     return rb_exc_new2(e->klass, e->magic_error);
 }
@@ -524,7 +524,7 @@ magic_exception(void *data)
     int exception = 0;
     VALUE object = Qnil;
 
-    exception_t *e = data;
+    magic_exception_t *e = data;
 
     object = rb_protect(magic_exception_wrapper, (VALUE)e, &exception);
 
@@ -540,7 +540,7 @@ magic_exception(void *data)
 VALUE
 magic_generic_error(VALUE klass, int magic_errno, const char *magic_error)
 {
-    exception_t e;
+    magic_exception_t e;
 
     e.magic_errno = magic_errno;
     e.magic_error = magic_error;
@@ -552,7 +552,7 @@ magic_generic_error(VALUE klass, int magic_errno, const char *magic_error)
 VALUE
 magic_library_error(VALUE klass, void *data)
 {
-    exception_t e;
+    magic_exception_t e;
     const char *message = NULL;
 
     magic_t cookie = data;

@@ -93,13 +93,13 @@ enum error {
     E_INVALID_ARGUMENT
 };
 
-struct exception {
+struct magic_exception {
     int magic_errno;
     const char *magic_error;
     VALUE klass;
 };
 
-typedef struct exception exception_t;
+typedef struct magic_exception magic_exception_t;
 
 static const char *errors[] = {
     "unknown error",
