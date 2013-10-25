@@ -21,12 +21,12 @@
 #if !defined(_RUBY_MAGIC_H)
 #define _RUBY_MAGIC_H 1
 
-#include "common.h"
-#include "functions.h"
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "common.h"
+#include "functions.h"
 
 #define DATA_P(x)   (TYPE(x) == T_DATA)
 #define STRING_P(x) (TYPE(x) == T_STRING)
@@ -58,6 +58,32 @@ extern "C" {
 
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
+
+#define NOGVL_FUNCTION (VALUE (*)(void *))
+
+#if defined(HAVE_RB_THREAD_CALL_WITHOUT_GVL) && \
+     defined(HAVE_RUBY_THREAD_H) && HAVE_RUBY_THREAD_H
+# include <ruby/thread.h>
+# define NOGVL(f, d) \
+   rb_thread_call_without_gvl((f), (d), RUBY_UBF_IO, NULL)
+#elif defined(HAVE_RB_THREAD_BLOCKING_REGION)
+# define NOGVL(f, d) \
+   rb_thread_blocking_region(NOGVL_FUNCTION(f), (d), RUBY_UBF_IO, NULL)
+#else
+# include <rubysig.h>
+static inline VALUE
+fake_blocking_region(VALUE (*f)(void *), void *data)
+{
+  VALUE *rv;
+
+  TRAP_BEG;
+  rv = f(data);
+  TRAP_END;
+
+  return rv;
+}
+# define NOGVL(f, d) fake_blocking_region(NOGVL_FUNCTION(f), (d))
+#endif
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
@@ -99,7 +125,17 @@ struct magic_exception {
     VALUE klass;
 };
 
+struct magic_arguments {
+    int flags;
+    magic_t cookie;
+    union {
+        int fd;
+        const char *path;
+    } file;
+};
+
 typedef struct magic_exception magic_exception_t;
+typedef struct magic_arguments magic_arguments_t;
 
 static const char *errors[] = {
     "unknown error",

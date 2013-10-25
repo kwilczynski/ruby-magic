@@ -21,11 +21,11 @@
 #if !defined(_FUNCTIONS_H)
 #define _FUNCTIONS_H 1
 
-#include "common.h"
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "common.h"
 
 #define SUPPRESS_ERROR_OUTPUT(s, x, ...)            \
     do {                                            \

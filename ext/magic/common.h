@@ -29,6 +29,10 @@
 # define _BSD_SOURCE 1
 #endif
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,10 +40,6 @@
 #include <errno.h>
 #include <magic.h>
 #include <ruby.h>
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #if !defined(EFAULT)
 # define EFAULT 14
@@ -60,6 +60,12 @@ extern "C" {
 #  define ANYARGS
 # endif
 #endif
+
+#if defined(UNUSED)
+# undef(UNUSED)
+#endif
+
+#define UNUSED(x) (void)(x)
 
 extern int errno;
 

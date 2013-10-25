@@ -103,6 +103,9 @@ have_func('magic_version', 'magic.h')
 have_func('utime', ['utime.h', 'sys/types.h'])
 have_func('utimes', 'sys/time.h')
 
+have_func('rb_thread_call_without_gvl')
+have_func('rb_thread_blocking_region')
+
 dir_config('magic')
 
 create_header
