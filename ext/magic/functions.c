@@ -23,15 +23,6 @@
 static int suppress_error_output(void *data);
 static void restore_error_output(void *data);
 
-struct save {
-    int old_fd;
-    int new_fd;
-    int status;
-    fpos_t position;
-};
-
-typedef struct save save_t;
-
 static int
 suppress_error_output(void *data)
 {

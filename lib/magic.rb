@@ -59,15 +59,6 @@ class Magic
     flags
   end
 
-  #
-  # call-seq:
-  #
-  # Example:
-  #
-  def version_array
-    [self.version / 100, self.version % 100]
-  end
-
   class << self
     #
     # call-seq:
@@ -159,8 +150,7 @@ class Magic
     end
   end
 
-  alias_method :flags_ary,   :flags_array
-  alias_method :version_ary, :version_array
+  alias_method :flags_ary, :flags_array
 end
 
 # :enddoc:

@@ -38,10 +38,6 @@ static void* nogvl_magic_compile_wrapper(void *data);
 static void* nogvl_magic_file_wrapper(void *data);
 static void* nogvl_magic_descriptor_wrapper(void *data);
 
-static int magic_version(void);
-#if defined(HAVE_MAGIC_VERSION)
-static const char* magic_version_string(void);
-#endif
 static VALUE magic_allocate(VALUE klass);
 static void magic_free(void *data);
 
@@ -209,7 +205,7 @@ rb_mgc_get_flags(VALUE object)
 VALUE
 rb_mgc_set_flags(VALUE object, VALUE value)
 {
-    int old_errno;
+    int local_errno;
     magic_t cookie;
 
     Check_Type(value, T_FIXNUM);
@@ -219,9 +215,9 @@ rb_mgc_set_flags(VALUE object, VALUE value)
     MAGIC_COOKIE(object, cookie);
 
     if (magic_setflags_wrapper(cookie, NUM2INT(value)) < 0) {
-        old_errno = errno;
+        local_errno = errno;
 
-        switch (old_errno) {
+        switch (local_errno) {
             case ENOSYS:
                 MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
                         error(E_NOT_IMPLEMENTED));
@@ -441,11 +437,14 @@ VALUE
 rb_mgc_version(VALUE object)
 {
     int rv;
+    int local_errno;
 
     UNUSED(object);
 
-    rv = magic_version();
-    if (rv < 0) {
+    rv = magic_version_wrapper();
+    local_errno = errno;
+
+    if (rv < 0 && local_errno == ENOSYS) {
         MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
                 error(E_NOT_IMPLEMENTED));
     }
@@ -455,7 +454,7 @@ rb_mgc_version(VALUE object)
 
 /* :enddoc: */
 
-inline void*
+static inline void*
 nogvl_magic_load_wrapper(void *data)
 {
     int rv;
@@ -465,7 +464,7 @@ nogvl_magic_load_wrapper(void *data)
     return rv < 0 ? NULL : data;
 }
 
-inline void*
+static inline void*
 nogvl_magic_check_wrapper(void *data)
 {
     int rv;
@@ -475,7 +474,7 @@ nogvl_magic_check_wrapper(void *data)
     return rv < 0 ? NULL : data;
 }
 
-inline void*
+static inline void*
 nogvl_magic_compile_wrapper(void *data)
 {
     int rv;
@@ -485,52 +484,21 @@ nogvl_magic_compile_wrapper(void *data)
     return rv < 0 ? NULL : data;
 }
 
-inline void*
+static inline void*
 nogvl_magic_file_wrapper(void *data)
 {
     magic_arguments_t *ma = data;
     return (void *)magic_file(ma->cookie, ma->file.path);
 }
 
-inline void*
+static inline void*
 nogvl_magic_descriptor_wrapper(void *data)
 {
     magic_arguments_t *ma = data;
     return (void *)magic_descriptor(ma->cookie, ma->file.fd);
 }
 
-int
-magic_version(void)
-{
-    int rv;
-    int old_errno;
-
-    rv = magic_version_wrapper();
-    old_errno = errno;
-
-    if (rv < 0 && old_errno == ENOSYS) {
-        return -1;
-    }
-
-    return rv;
-}
-
-#if defined(HAVE_MAGIC_VERSION)
-const char*
-magic_version_string(void)
-{
-    int rv;
-
-    rv = magic_version();
-    if (rv < 0) {
-        return NULL;
-    }
-
-    return sprintf("%d.%02d", rv / 100, rv % 100);
-}
-#endif
-
-VALUE
+static VALUE
 magic_allocate(VALUE klass)
 {
     magic_t cookie;
@@ -543,7 +511,7 @@ magic_allocate(VALUE klass)
     return Data_Wrap_Struct(klass, NULL, magic_free, cookie);
 }
 
-void
+static void
 magic_free(void *data)
 {
     magic_t cookie = data;
@@ -554,7 +522,7 @@ magic_free(void *data)
     }
 }
 
-VALUE
+static VALUE
 magic_exception_wrapper(VALUE value)
 {
     magic_exception_t *e = (struct magic_exception *)value;
@@ -562,7 +530,7 @@ magic_exception_wrapper(VALUE value)
     return rb_exc_new2(e->klass, e->magic_error);
 }
 
-VALUE
+static VALUE
 magic_exception(void *data)
 {
     int exception = 0;
@@ -581,7 +549,7 @@ magic_exception(void *data)
     return object;
 }
 
-VALUE
+static VALUE
 magic_generic_error(VALUE klass, int magic_errno, const char *magic_error)
 {
     magic_exception_t e;
@@ -593,7 +561,7 @@ magic_generic_error(VALUE klass, int magic_errno, const char *magic_error)
     return magic_exception(&e);
 }
 
-VALUE
+static VALUE
 magic_library_error(VALUE klass, void *data)
 {
     magic_exception_t e;
@@ -617,10 +585,6 @@ magic_library_error(VALUE klass, void *data)
 void
 Init_magic(void)
 {
-#if defined(HAVE_MAGIC_VERSION)
-    int rv;
-#endif
-
     id_at_path  = rb_intern("@path");
     id_at_flags = rb_intern("@flags");
 
@@ -677,15 +641,6 @@ Init_magic(void)
     rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 
     rb_define_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
-
-    /*
-     *
-     */
-#if defined(HAVE_MAGIC_VERSION)
-    rb_define_const(rb_cMagic, "MAGIC_VERSION", CSTR2RVAL(magic_version_string()));
-#else
-    rb_define_const(rb_cMagic, "MAGIC_VERSION", Qnil);
-#endif
 
     /*
      *

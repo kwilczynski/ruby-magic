@@ -38,6 +38,15 @@ extern "C" {
         }                                           \
     } while(0)
 
+struct save {
+    int old_fd;
+    int new_fd;
+    int status;
+    fpos_t position;
+};
+
+typedef struct save save_t;
+
 extern const char* magic_getpath_wrapper(void);
 
 extern int magic_setflags_wrapper(struct magic_set *ms, int flags);

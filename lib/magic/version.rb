@@ -27,6 +27,27 @@ class Magic
   # Current version of _Magic_.
   #
   VERSION = '0.0.1'
+
+  #
+  # call-seq:
+  #
+  # Example:
+  #
+  def version_array
+    [self.version / 100, self.version % 100]
+  end
+
+  #
+  # call-seq:
+  #
+  # Example:
+  #
+  def version_string
+    '%d.%02d' % self.version_array
+  end
+
+  alias_method :version_ary, :version_array
+  alias_method :version_str, :version_string
 end
 
 # :enddoc:
