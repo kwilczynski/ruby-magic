@@ -74,7 +74,7 @@ extern "C" {
 static inline VALUE
 fake_blocking_region(VALUE (*f)(void *), void *data)
 {
-  VALUE *rv;
+  VALUE rv;
 
   TRAP_BEG;
   rv = f(data);

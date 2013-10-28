@@ -51,7 +51,7 @@ class Magic
     flags = []
 
     while i > 0
-      n = 2 ** Math.log2(i).to_i
+      n = 2 ** (Math.log(i) / Math.log(2)).to_i
       i = i - n
       flags.insert(0, n)
     end
