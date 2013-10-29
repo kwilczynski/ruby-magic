@@ -45,15 +45,17 @@ class Magic
   #
   # Example:
   #
-  def flags_array
+  def flags_array(names = false)
     n, i = 0, @flags
 
     flags = []
 
+    @flags_map ||= flags_as_map if names
+
     while i > 0
       n = 2 ** (Math.log(i) / Math.log(2)).to_i
       i = i - n
-      flags.insert(0, n)
+      flags.insert(0, names ? @flags_map[n] : n)
     end
 
     flags
@@ -151,6 +153,16 @@ class Magic
   end
 
   alias_method :flags_ary, :flags_array
+
+  private
+
+  def flags_as_map
+    self.class.constants.inject({}) do |flags,constant|
+      value        = self.class.const_get(constant)
+      flags[value] = constant if value.is_a?(Fixnum)
+      flags
+    end
+  end
 end
 
 # :enddoc:
