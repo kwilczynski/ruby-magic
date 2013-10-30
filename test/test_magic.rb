@@ -29,10 +29,13 @@ DEFAULT_SINGLETON_METHODS = [
   :type,
   :encoding,
   :compile,
-  :check
+  :check,
+  :version,
+  :version_array,
+  :version_string
 ]
 
-DEFAULT_INSTANCE_METHODS  = [
+DEFAULT_INSTANCE_METHODS = [
   :close,
   :closed?,
   :path,
@@ -45,7 +48,8 @@ DEFAULT_INSTANCE_METHODS  = [
   :compile,
   :check,
   :version,
-  :version_array
+  :version_array,
+  :version_string
 ]
 
 class MagicTest < Test::Unit::TestCase
@@ -66,7 +70,7 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(mgc.class, Magic)
   end
 
-  def test_fizzbuzz_instance_methods
+  def test_magic_instance_methods
     mgc = Magic.new
 
     assert_block do

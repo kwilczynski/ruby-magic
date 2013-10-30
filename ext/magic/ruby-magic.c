@@ -640,7 +640,7 @@ Init_magic(void)
 
     rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 
-    rb_define_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
+    rb_define_singleton_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
 
     /*
      *
