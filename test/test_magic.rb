@@ -31,8 +31,8 @@ DEFAULT_SINGLETON_METHODS = [
   :compile,
   :check,
   :version,
-  :version_array,
-  :version_string
+  :version_to_a,
+  :version_to_s
 ]
 
 DEFAULT_INSTANCE_METHODS = [
@@ -46,10 +46,7 @@ DEFAULT_INSTANCE_METHODS = [
   :descriptor,
   :load,
   :compile,
-  :check,
-  :version,
-  :version_array,
-  :version_string
+  :check
 ]
 
 class MagicTest < Test::Unit::TestCase

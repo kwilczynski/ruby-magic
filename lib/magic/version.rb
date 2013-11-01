@@ -34,7 +34,7 @@ class Magic
     #
     # Example:
     #
-    def version_array
+    def version_to_a
       [self.version / 100, self.version % 100]
     end
 
@@ -43,28 +43,13 @@ class Magic
     #
     # Example:
     #
-    def version_string
-      '%d.%02d' % self.version_array
+    def version_to_s
+      '%d.%02d' % self.version_to_a
     end
 
-    alias_method :version_ary, :version_array
-    alias_method :version_str, :version_string
+    alias_method :version_array,  :version_to_a
+    alias_method :version_string, :version_to_s
   end
-
-  def version
-    self.class.version
-  end
-
-  def version_array
-    self.class.version_array
-  end
-
-  def version_string
-    self.class.version_string
-  end
-
-  alias_method :version_ary, :version_array
-  alias_method :version_str, :version_string
 end
 
 # :enddoc:
