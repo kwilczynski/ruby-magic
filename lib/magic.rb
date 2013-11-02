@@ -45,7 +45,7 @@ class Magic
   #
   # Example:
   #
-  def flags_array(names = false)
+  def flags_to_a(names = false)
     n, i = 0, @flags
 
     flags = []
@@ -152,7 +152,7 @@ class Magic
     end
   end
 
-  alias_method :flags_ary, :flags_array
+  alias_method :flags_array, :flags_to_a
 
   private
 
