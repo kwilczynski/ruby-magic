@@ -537,6 +537,7 @@ magic_exception(void *data)
     VALUE object = Qnil;
 
     magic_exception_t *e = data;
+    assert(e != NULL && "Must be a valid pointer to `magic_exception_t' type");
 
     object = rb_protect(magic_exception_wrapper, (VALUE)e, &exception);
 

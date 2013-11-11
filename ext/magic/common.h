@@ -38,6 +38,7 @@ extern "C" {
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
 #include <magic.h>
 #include <ruby.h>
 

@@ -27,6 +27,7 @@ static int
 suppress_error_output(void *data)
 {
     save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
     fflush(stderr);
     fgetpos(stderr, &s->position);
@@ -56,6 +57,7 @@ static void
 restore_error_output(void *data)
 {
     save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
     if (s->old_fd < 0 && s->status != 0) {
         return;
