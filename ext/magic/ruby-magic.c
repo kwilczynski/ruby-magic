@@ -569,6 +569,7 @@ magic_library_error(VALUE klass, void *data)
     const char *message = NULL;
 
     magic_t cookie = data;
+    assert(cookie != NULL && "Must be a valid pointer to `magic_t' type");
 
     e.magic_errno = -1;
     e.magic_error = error(E_UNKNOWN);
