@@ -165,7 +165,7 @@ magic_join(VALUE a, VALUE b)
     return Qnil;
 }
 
-RUBY_EXTERN ID id_at_flags, id_at_path;
+RUBY_EXTERN ID id_at_flags, id_at_path, id_at_mutex;
 
 RUBY_EXTERN VALUE rb_cMagic;
 

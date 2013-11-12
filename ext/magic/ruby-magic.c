@@ -20,7 +20,7 @@
 
 #include "ruby-magic.h"
 
-ID id_at_flags, id_at_path;
+ID id_at_flags, id_at_path, id_at_mutex;
 
 VALUE rb_cMagic = Qnil;
 
@@ -48,6 +48,9 @@ static VALUE magic_library_error(VALUE klass, void *data);
 static VALUE magic_generic_error(VALUE klass, int magic_errno,
         const char *magic_error);
 
+static VALUE magic_synchronize(VALUE object, VALUE (*function)(VALUE *data), void *data);
+static VALUE magic_unlock(VALUE object);
+
 /* :startdoc: */
 
 /*
@@ -65,6 +68,8 @@ static VALUE magic_generic_error(VALUE klass, int magic_errno,
 VALUE
 rb_mgc_initialize(VALUE object)
 {
+    VALUE mutex;
+
     magic_arguments_t ma;
     const char *klass = NULL;
 
@@ -88,6 +93,9 @@ rb_mgc_initialize(VALUE object)
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
+    mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject, rb_intern("Mutex")));
+
+    rb_ivar_set(object, id_at_mutex, mutex);
     rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
 
     return object;
@@ -526,7 +534,6 @@ static VALUE
 magic_exception_wrapper(VALUE value)
 {
     magic_exception_t *e = (struct magic_exception *)value;
-
     return rb_exc_new2(e->klass, e->magic_error);
 }
 
@@ -584,11 +591,29 @@ magic_library_error(VALUE klass, void *data)
     return magic_exception(&e);
 }
 
+VALUE
+magic_synchronize(VALUE object, VALUE(*function)(VALUE *data), void *data)
+{
+    VALUE mutex = rb_ivar_get(object, id_at_mutex);
+
+    rb_funcall(mutex, rb_intern("lock"), 0, 0);
+    return rb_ensure(function, (VALUE)data, magic_unlock, object);
+}
+
+VALUE
+magic_unlock(VALUE object)
+{
+    VALUE mutex = rb_ivar_get(object, id_at_mutex);
+    rb_funcall(mutex, rb_intern("unlock"), 0, 0);
+    return Qnil;
+}
+
 void
 Init_magic(void)
 {
     id_at_path  = rb_intern("@path");
     id_at_flags = rb_intern("@flags");
+    id_at_mutex = rb_intern("@mutex");
 
     rb_cMagic = rb_define_class("Magic", rb_cObject);
     rb_define_alloc_func(rb_cMagic, magic_allocate);
