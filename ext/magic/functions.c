@@ -20,10 +20,10 @@
 
 #include "functions.h"
 
-static int suppress_error_output(void *data);
-static int restore_error_output(void *data);
+int suppress_error_output(void *data);
+int restore_error_output(void *data);
 
-static int
+int
 suppress_error_output(void *data)
 {
     int local_errno;
@@ -70,7 +70,7 @@ out:
     return -1;
 }
 
-static int
+int
 restore_error_output(void *data)
 {
     int local_errno;
