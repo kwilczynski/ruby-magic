@@ -72,7 +72,7 @@ extern "C" {
 #else
 # include <rubysig.h>
 static inline VALUE
-fake_blocking_region(VALUE (*f)(void *), void *data)
+fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 {
   VALUE rv;
 
@@ -85,10 +85,12 @@ fake_blocking_region(VALUE (*f)(void *), void *data)
 # define NOGVL(f, d) fake_blocking_region(NOGVL_FUNCTION(f), (d))
 #endif
 
-#define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
+#define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
-#define MAGIC_COOKIE(o, c) \
-    Data_Get_Struct((o), struct magic_set, (c))
+#define MAGIC_COOKIE(c) \
+    Data_Get_Struct(object, struct magic_set, (c))
+
+#define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
 #define MAGIC_GENERIC_ERROR(k, e, m)                        \
     do {                                                    \
