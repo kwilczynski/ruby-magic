@@ -159,7 +159,7 @@ class Magic
   def flags_as_map
     self.class.constants.inject({}) do |flags,constant|
       value        = self.class.const_get(constant)
-      flags[value] = constant if value.is_a?(Fixnum)
+      flags[value] = constant.to_s if value.is_a?(Fixnum)
       flags
     end
   end
