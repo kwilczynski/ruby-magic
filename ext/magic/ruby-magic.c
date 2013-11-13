@@ -32,6 +32,7 @@ VALUE rb_mgc_eNotImplementedError = Qnil;
 
 void Init_magic(void);
 
+static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
 static VALUE magic_check_internal(void *data);
 static VALUE magic_compile_internal(void *data);
@@ -126,7 +127,7 @@ rb_mgc_close(VALUE object)
     MAGIC_COOKIE(cookie);
 
     if (cookie) {
-        magic_free(cookie);
+        MAGIC_SYNCHRONIZED(magic_close_internal, cookie);
 
         if (DATA_P(object)) {
             DATA_PTR(object) = NULL;
@@ -513,6 +514,13 @@ nogvl_magic_descriptor(void *data)
 }
 
 static inline VALUE
+magic_close_internal(void *data)
+{
+    magic_free(data);
+    return Qnil;
+}
+
+static inline VALUE
 magic_load_internal(void *data)
 {
     return NOGVL(nogvl_magic_load, data);
@@ -556,6 +564,7 @@ static void
 magic_free(void *data)
 {
     magic_t cookie = data;
+    assert(cookie != NULL && "Must be a valid pointer to `magic_t' type");
 
     if (cookie) {
         magic_close(cookie);
