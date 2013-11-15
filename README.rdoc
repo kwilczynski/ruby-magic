@@ -2,3 +2,4 @@ Simple interface to libmagic for Go Programming Language
 
 {<img src="https://travis-ci.org/kwilczynski/ruby-magic.png?branch=master" alt="Build Status"/>}[https://travis-ci.org/kwilczynski/ruby-magic]
 {<img src="https://coveralls.io/repos/kwilczynski/ruby-magic/badge.png?branch=master" alt="Coverage Status" />}[https://coveralls.io/r/kwilczynski/ruby-magic?branch=master]
+{<img src="https://codeclimate.com/github/kwilczynski/ruby-magic.png" />}[https://codeclimate.com/github/kwilczynski/ruby-magic]
