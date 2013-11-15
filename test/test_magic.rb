@@ -20,6 +20,9 @@
 # limitations under the License.
 #
 
+require 'coveralls'
+Coveralls.wear!
+
 require 'test/unit'
 require 'magic'
 
