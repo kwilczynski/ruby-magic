@@ -104,21 +104,23 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
         rb_exc_raise(__e_library);                                          \
     } while(0)
 
-#define CHECK_MAGIC_OPEN(o)                                       \
-    do {                                                          \
-        if (MAGIC_CLOSED_P(o)) {                                  \
-            MAGIC_GENERIC_ERROR(rb_mgc_eBadAddressError, EFAULT,  \
-                                    error(E_BAD_ADDRESS));        \
-        }                                                         \
-    } while(0)                                                    \
+#define CHECK_MAGIC_OPEN(o)					    \
+    do {							    \
+        if (MAGIC_CLOSED_P(o)) {				    \
+            MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,	    \
+                                    error(E_MAGIC_LIBRARY_CLOSED)); \
+        }							    \
+    } while(0)							    \
 
 #define error(t) errors[(t)]
 
 enum error {
     E_UNKNOWN = 0,
-    E_BAD_ADDRESS,
     E_NOT_IMPLEMENTED,
-    E_INVALID_ARGUMENT
+    E_MAGIC_LIBRARY_INITIALIZE,
+    E_MAGIC_LIBRARY_CLOSED,
+    E_FLAG_INVALID_VALUE,
+    E_FLAG_NOT_IMPLEMENTED
 };
 
 struct magic_exception {
@@ -141,9 +143,11 @@ typedef struct magic_arguments magic_arguments_t;
 
 static const char *errors[] = {
     "unknown error",
-    "bad address",
-    "function not implemented",
-    "invalid argument",
+    "function is not implemented",
+    "failed to initialize Magic library",
+    "Magic library is not open",
+    "unknown or invalid flag specified",
+    "flag is not implemented",
     NULL
 };
 
@@ -173,7 +177,7 @@ RUBY_EXTERN VALUE rb_cMagic;
 
 RUBY_EXTERN VALUE rb_mgc_eError;
 RUBY_EXTERN VALUE rb_mgc_eMagicError;
-RUBY_EXTERN VALUE rb_mgc_eBadAddressError;
+RUBY_EXTERN VALUE rb_mgc_eLibraryError;
 RUBY_EXTERN VALUE rb_mgc_eFlagsError;
 RUBY_EXTERN VALUE rb_mgc_eNotImplementedError;
 

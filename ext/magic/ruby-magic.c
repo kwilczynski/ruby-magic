@@ -26,7 +26,7 @@ VALUE rb_cMagic = Qnil;
 
 VALUE rb_mgc_eError = Qnil;
 VALUE rb_mgc_eMagicError = Qnil;
-VALUE rb_mgc_eBadAddressError = Qnil;
+VALUE rb_mgc_eLibraryError = Qnil;
 VALUE rb_mgc_eFlagsError = Qnil;
 VALUE rb_mgc_eNotImplementedError = Qnil;
 
@@ -233,13 +233,13 @@ rb_mgc_set_flags(VALUE object, VALUE value)
         local_errno = errno;
 
         switch (local_errno) {
-            case ENOSYS:
-                MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
-                        error(E_NOT_IMPLEMENTED));
-                break;
             case EINVAL:
                 MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
-                        error(E_INVALID_ARGUMENT));
+                        error(E_FLAG_INVALID_VALUE));
+                break;
+            case ENOSYS:
+                MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+                        error(E_FLAG_NOT_IMPLEMENTED));
                 break;
             default:
                 MAGIC_LIBRARY_ERROR(cookie);
@@ -554,7 +554,8 @@ magic_allocate(VALUE klass)
 
     cookie = magic_open(MAGIC_NONE);
     if (!cookie) {
-        rb_memerror();
+        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, EPERM,
+                error(E_MAGIC_LIBRARY_INITIALIZE));
     }
 
     return Data_Wrap_Struct(klass, NULL, magic_free, cookie);
@@ -677,7 +678,7 @@ Init_magic(void)
     /*
      *
      */
-    rb_mgc_eBadAddressError = rb_define_class_under(rb_cMagic, "BadAddressError", rb_mgc_eError);
+    rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError", rb_mgc_eError);
 
     /*
      *

@@ -42,6 +42,10 @@ extern "C" {
 #include <magic.h>
 #include <ruby.h>
 
+#if !defined(EPERM)
+# define EPERM 1
+#endif
+
 #if !defined(EFAULT)
 # define EFAULT 14
 #endif
