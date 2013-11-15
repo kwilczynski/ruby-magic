@@ -20,8 +20,14 @@
 # limitations under the License.
 #
 
-require 'coveralls'
-Coveralls.wear!
+begin
+  require 'coveralls'
+  Coveralls.wear!
+rescue LoadError
+  STDERR.puts 'The Coveralls gem is not installed, skipping ...'
+end
+
+gem 'test-unit', '>= 2.5.2'
 
 require 'test/unit'
 require 'magic'
@@ -54,7 +60,7 @@ DEFAULT_INSTANCE_METHODS = [
 
 class MagicTest < Test::Unit::TestCase
   def test_magic_alias
-    assert_equal(FileMagic, Magic)
+    assert(FileMagic == Magic)
   end
 
   def test_magic_singleton_methods
@@ -67,7 +73,7 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_new_instance
     mgc = Magic.new
-    assert_equal(mgc.class, Magic)
+    assert(mgc.class == Magic)
   end
 
   def test_magic_instance_methods
