@@ -50,6 +50,8 @@ class Magic
 
     flags = []
 
+    return flags if @flags.zero?
+
     @flags_map ||= flags_as_map if names
 
     while i > 0
