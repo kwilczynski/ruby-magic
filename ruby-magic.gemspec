@@ -20,6 +20,8 @@
 # limitations under the License.
 #
 
+signing_key = File.expand_path('~/.gem/kwilczynski-private.pem')
+
 Gem::Specification.new do |s|
   s.name = 'ruby-magic'
 
@@ -54,7 +56,7 @@ Simple interface to libmagic for Ruby Programming Language
   s.add_development_dependency 'test-unit', '>= 2.5.2'
   s.add_development_dependency 'rake-compiler', '>= 0.7.1'
 
-  s.signing_key = File.expand_path('~/.gem/kwilczynski-private.pem')
+  s.signing_key = signing_key if File.exists?(signing_key)
 end
 
 # vim: set ts=2 sw=2 sts=2 et :
