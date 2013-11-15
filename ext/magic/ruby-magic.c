@@ -523,28 +523,28 @@ magic_close_internal(void *data)
 static inline VALUE
 magic_load_internal(void *data)
 {
-    return NOGVL(nogvl_magic_load, data);
+    return (VALUE)NOGVL(nogvl_magic_load, data);
 }
 
 static inline VALUE
 magic_check_internal(void *data)
 {
-    return NOGVL(nogvl_magic_check, data);
+    return (VALUE)NOGVL(nogvl_magic_check, data);
 }
 static inline VALUE
 magic_compile_internal(void *data)
 {
-    return NOGVL(nogvl_magic_compile, data);
+    return (VALUE)NOGVL(nogvl_magic_compile, data);
 }
 static inline VALUE
 magic_file_internal(void *data)
 {
-    return NOGVL(nogvl_magic_file, data);
+    return (VALUE)NOGVL(nogvl_magic_file, data);
 }
 static inline VALUE
 magic_descriptor_internal(void *data)
 {
-    return NOGVL(nogvl_magic_descriptor, data);
+    return (VALUE)NOGVL(nogvl_magic_descriptor, data);
 }
 
 static VALUE
