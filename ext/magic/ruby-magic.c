@@ -118,6 +118,8 @@ rb_mgc_initialize(VALUE object)
  *
  *    magic = Magic.new   #=> #<Magic:>
  *    magic.close         #=> nil
+ *
+ * See also: Magic#closed?
  */
 VALUE
 rb_mgc_close(VALUE object)
@@ -147,6 +149,8 @@ rb_mgc_close(VALUE object)
  *    magic.closed?       #=> false
  *    magic.close         #=> nil
  *    magic.closed?       #=> true
+ *
+ * See also: Magic#close
  */
 VALUE
 rb_mgc_closed(VALUE object)
@@ -200,6 +204,8 @@ rb_mgc_get_path(VALUE object)
  *    magic.flags                 #=> 0
  *    magic.flags = Magic::MIME   #=> 1040
  *    magic.flags                 #=> 1040
+ *
+ * See also: Magic#flags_to_a
  */
 VALUE
 rb_mgc_get_flags(VALUE object)
@@ -298,6 +304,8 @@ rb_mgc_load(VALUE object, VALUE arguments)
  * Example:
  *
  *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#compile, Magic::compile and Magic::check
  */
 VALUE
 rb_mgc_check(VALUE object, VALUE arguments)
@@ -330,6 +338,8 @@ rb_mgc_check(VALUE object, VALUE arguments)
  * Example:
  *
  *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#check, Magic::check and Magic::compile
  */
 VALUE
 rb_mgc_compile(VALUE object, VALUE arguments)
@@ -361,6 +371,8 @@ rb_mgc_compile(VALUE object, VALUE arguments)
  * Example:
  *
  *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#buffer and Magic#descriptor
  */
 VALUE
 rb_mgc_file(VALUE object, VALUE value)
@@ -390,6 +402,8 @@ rb_mgc_file(VALUE object, VALUE value)
  * Example:
  *
  *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#file and Magic#descriptor
  */
 VALUE
 rb_mgc_buffer(VALUE object, VALUE value)
@@ -417,6 +431,8 @@ rb_mgc_buffer(VALUE object, VALUE value)
  * Example:
  *
  *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#file and Magic#buffer
  */
 VALUE
 rb_mgc_descriptor(VALUE object, VALUE value)
@@ -441,12 +457,13 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 
 /*
  * call-seq:
- *    magic.version -> integer
+ *    Magic.version -> integer
  *
  * Example:
  *
- *    magic = Magic.new   #=> #<Magic:>
- *    magic.version       #=>
+ *    Magic.version   #=>
+ *
+ * See also: Magic::version_to_a and Magic::version_to_s
  */
 VALUE
 rb_mgc_version(VALUE object)
