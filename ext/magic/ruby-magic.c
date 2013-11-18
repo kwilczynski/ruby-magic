@@ -712,137 +712,142 @@ Init_magic(void)
     rb_define_singleton_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
 
     /*
-     *
+     * No special handling and/or flags specified. Default behaviour.
      */
     rb_define_const(rb_cMagic, "NONE", INT2NUM(MAGIC_NONE));
 
     /*
-     *
+     * Print debugging messages to standard error output.
      */
     rb_define_const(rb_cMagic, "DEBUG", INT2NUM(MAGIC_DEBUG));
 
     /*
-     *
+     * If the file queried is a symbolic link, follow it.
      */
     rb_define_const(rb_cMagic, "SYMLINK", INT2NUM(MAGIC_SYMLINK));
 
     /*
-     *
+     * If the file is compressed, unpack it and look at the contents.
      */
     rb_define_const(rb_cMagic, "COMPRESS", INT2NUM(MAGIC_COMPRESS));
 
     /*
-     *
+     * If the file is a block or character special device, then open
+     * the device and try to look at the contents.
      */
     rb_define_const(rb_cMagic, "DEVICES", INT2NUM(MAGIC_DEVICES));
 
     /*
-     *
+     * Return a MIME type string, instead of a textual description.
      */
     rb_define_const(rb_cMagic, "MIME_TYPE", INT2NUM(MAGIC_MIME_TYPE));
 
     /*
-     *
+     * Return all matches, not just the first.
      */
     rb_define_const(rb_cMagic, "CONTINUE", INT2NUM(MAGIC_CONTINUE));
 
     /*
-     *
+     * Check the Magic database for consistency and print warnings to
+     * standard error output.
      */
     rb_define_const(rb_cMagic, "CHECK", INT2NUM(MAGIC_CHECK));
 
     /*
-     *
+     * Attempt to preserve access time (atime, utime or utimes) of the
+     * file queried on systems that support such system calls.
      */
     rb_define_const(rb_cMagic, "PRESERVE_ATIME", INT2NUM(MAGIC_PRESERVE_ATIME));
 
     /*
-     *
+     * Do not translate unprintable characters to an octal representation.
      */
     rb_define_const(rb_cMagic, "RAW", INT2NUM(MAGIC_RAW));
 
     /*
-     *
+     * Treat operating system errors while trying to open files and follow
+     * symbolic links as first class errors, instead of storing them in the
+     * Magic library error buffer for retrieval later.
      */
     rb_define_const(rb_cMagic, "ERROR", INT2NUM(MAGIC_ERROR));
 
     /*
-     *
+     * Return a MIME encoding, instead of a textual description.
      */
     rb_define_const(rb_cMagic, "MIME_ENCODING", INT2NUM(MAGIC_MIME_ENCODING));
 
     /*
-     *
+     * A shorthand for using MIME_TYPE and MIME_ENCODING flags together.
      */
     rb_define_const(rb_cMagic, "MIME", INT2NUM(MAGIC_MIME));
 
     /*
-     *
+     * Return the Apple creator and type.
      */
     rb_define_const(rb_cMagic, "APPLE", INT2NUM(MAGIC_APPLE));
 
     /*
-     *
+     * Do not look for, or inside compressed files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_COMPRESS", INT2NUM(MAGIC_NO_CHECK_COMPRESS));
 
     /*
-     *
+     * Do not look for, or inside tar archive files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TAR", INT2NUM(MAGIC_NO_CHECK_TAR));
 
     /*
-     *
+     * Do not consult Magic files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_SOFT", INT2NUM(MAGIC_NO_CHECK_SOFT));
 
     /*
-     *
+     * Check for EMX application type (only supported on EMX).
      */
     rb_define_const(rb_cMagic, "NO_CHECK_APPTYPE", INT2NUM(MAGIC_NO_CHECK_APPTYPE));
 
     /*
-     *
+     * Do not check for ELF files (do not examine ELF file details).
      */
     rb_define_const(rb_cMagic, "NO_CHECK_ELF", INT2NUM(MAGIC_NO_CHECK_ELF));
 
     /*
-     *
+     * Do not check for various types of text files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TEXT", INT2NUM(MAGIC_NO_CHECK_TEXT));
 
     /*
-     *
+     * Do not check for CDF files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_CDF", INT2NUM(MAGIC_NO_CHECK_CDF));
 
     /*
-     *
+     * Do not look for known tokens inside ASCII files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TOKENS", INT2NUM(MAGIC_NO_CHECK_TOKENS));
 
     /*
-     *
+     * Return a MIME encoding, instead of a textual description.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_ENCODING", INT2NUM(MAGIC_NO_CHECK_ENCODING));
 
     /*
-     *
+     * Do not use built-in tests; only consult the Magic file.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_BUILTIN", INT2NUM(MAGIC_NO_CHECK_BUILTIN));
 
     /*
-     *
+     * Do not check for various types of text files, same as NO_CHECK_TEXT.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_ASCII", INT2NUM(MAGIC_NO_CHECK_ASCII));
 
     /*
-     *
+     * Do not look for Fortran sequences inside ASCII files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_FORTRAN", INT2NUM(MAGIC_NO_CHECK_FORTRAN));
 
     /*
-     *
+     * Do not look for troff sequences inside ASCII files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TROFF", INT2NUM(MAGIC_NO_CHECK_TROFF));
 }
