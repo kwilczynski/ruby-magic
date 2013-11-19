@@ -34,14 +34,14 @@ void Init_magic(void);
 
 static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
-static VALUE magic_check_internal(void *data);
 static VALUE magic_compile_internal(void *data);
+static VALUE magic_check_internal(void *data);
 static VALUE magic_file_internal(void *data);
 static VALUE magic_descriptor_internal(void *data);
 
 static void* nogvl_magic_load(void *data);
-static void* nogvl_magic_check(void *data);
 static void* nogvl_magic_compile(void *data);
+static void* nogvl_magic_check(void *data);
 static void* nogvl_magic_file(void *data);
 static void* nogvl_magic_descriptor(void *data);
 
@@ -298,40 +298,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 /*
  * call-seq:
- *    magic.check          -> true or false
- *    magic.check( array ) -> true or false
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:>
- *
- * See also: Magic#compile, Magic::compile and Magic::check
- */
-VALUE
-rb_mgc_check(VALUE object, VALUE arguments)
-{
-    magic_arguments_t ma;
-    VALUE value = Qnil;
-
-    CHECK_MAGIC_OPEN(object);
-    MAGIC_COOKIE(ma.cookie);
-
-    if (!RARRAY_EMPTY_P(arguments)) {
-        value = magic_join(arguments, CSTR2RVAL(":"));
-        ma.file.path = RVAL2CSTR(value);
-    }
-
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
-
-    if (!MAGIC_SYNCHRONIZED(magic_check_internal, &ma)) {
-        return Qfalse;
-    }
-
-    return Qtrue;
-}
-
-/*
- * call-seq:
  *    magic.compile          -> true
  *    magic.compile( array ) -> true
  *
@@ -359,6 +325,40 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 
     if (!MAGIC_SYNCHRONIZED(magic_compile_internal, &ma)) {
         MAGIC_LIBRARY_ERROR(ma.cookie);
+    }
+
+    return Qtrue;
+}
+
+/*
+ * call-seq:
+ *    magic.check          -> true or false
+ *    magic.check( array ) -> true or false
+ *
+ * Example:
+ *
+ *    magic = Magic.new   #=> #<Magic:>
+ *
+ * See also: Magic#compile, Magic::compile and Magic::check
+ */
+VALUE
+rb_mgc_check(VALUE object, VALUE arguments)
+{
+    magic_arguments_t ma;
+    VALUE value = Qnil;
+
+    CHECK_MAGIC_OPEN(object);
+    MAGIC_COOKIE(ma.cookie);
+
+    if (!RARRAY_EMPTY_P(arguments)) {
+        value = magic_join(arguments, CSTR2RVAL(":"));
+        ma.file.path = RVAL2CSTR(value);
+    }
+
+    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+
+    if (!MAGIC_SYNCHRONIZED(magic_check_internal, &ma)) {
+        return Qfalse;
     }
 
     return Qtrue;
@@ -497,22 +497,22 @@ nogvl_magic_load(void *data)
 }
 
 static inline void*
-nogvl_magic_check(void *data)
-{
-    int rv;
-    magic_arguments_t *ma = data;
-
-    rv = magic_check_wrapper(ma->cookie, ma->file.path, ma->flags);
-    return rv < 0 ? NULL : data;
-}
-
-static inline void*
 nogvl_magic_compile(void *data)
 {
     int rv;
     magic_arguments_t *ma = data;
 
     rv = magic_compile_wrapper(ma->cookie, ma->file.path, ma->flags);
+    return rv < 0 ? NULL : data;
+}
+
+static inline void*
+nogvl_magic_check(void *data)
+{
+    int rv;
+    magic_arguments_t *ma = data;
+
+    rv = magic_check_wrapper(ma->cookie, ma->file.path, ma->flags);
     return rv < 0 ? NULL : data;
 }
 
@@ -544,20 +544,23 @@ magic_load_internal(void *data)
 }
 
 static inline VALUE
-magic_check_internal(void *data)
-{
-    return (VALUE)NOGVL(nogvl_magic_check, data);
-}
-static inline VALUE
 magic_compile_internal(void *data)
 {
     return (VALUE)NOGVL(nogvl_magic_compile, data);
 }
+
+static inline VALUE
+magic_check_internal(void *data)
+{
+    return (VALUE)NOGVL(nogvl_magic_check, data);
+}
+
 static inline VALUE
 magic_file_internal(void *data)
 {
     return (VALUE)NOGVL(nogvl_magic_file, data);
 }
+
 static inline VALUE
 magic_descriptor_internal(void *data)
 {
