@@ -62,7 +62,8 @@ static VALUE magic_unlock(VALUE object);
 
 /*
  * call-seq:
- *    Magic.new -> self
+ *    Magic.new          -> self
+ *    Magic.new( array ) -> self
  *
  * Returns a new _Magic_.
  *
@@ -73,7 +74,7 @@ static VALUE magic_unlock(VALUE object);
  * See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, Magic::compile and Magic::check
  */
 VALUE
-rb_mgc_initialize(VALUE object)
+rb_mgc_initialize(VALUE object, VALUE arguments)
 {
     VALUE mutex;
 
@@ -101,11 +102,11 @@ rb_mgc_initialize(VALUE object)
     ma.flags = MAGIC_NONE;
     ma.file.path = NULL;
 
-    if (!MAGIC_SYNCHRONIZED(magic_load_internal, &ma)) {
-        MAGIC_LIBRARY_ERROR(ma.cookie);
-    }
-
     rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
+
+    if (!RARRAY_EMPTY_P(arguments)) {
+        rb_mgc_load(object, arguments);
+    }
 
     return object;
 }
@@ -710,7 +711,7 @@ Init_magic(void)
      */
     rb_mgc_eNotImplementedError = rb_define_class_under(rb_cMagic, "NotImplementedError", rb_mgc_eError);
 
-    rb_define_method(rb_cMagic, "initialize", RUBY_METHOD_FUNC(rb_mgc_initialize), 0);
+    rb_define_method(rb_cMagic, "initialize", RUBY_METHOD_FUNC(rb_mgc_initialize), -2);
 
     rb_define_method(rb_cMagic, "close", RUBY_METHOD_FUNC(rb_mgc_close), 0);
     rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_closed), 0);

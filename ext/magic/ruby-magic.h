@@ -181,7 +181,7 @@ RUBY_EXTERN VALUE rb_mgc_eLibraryError;
 RUBY_EXTERN VALUE rb_mgc_eFlagsError;
 RUBY_EXTERN VALUE rb_mgc_eNotImplementedError;
 
-RUBY_EXTERN VALUE rb_mgc_initialize(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
 
 RUBY_EXTERN VALUE rb_mgc_close(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_closed(VALUE object);

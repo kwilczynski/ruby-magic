@@ -115,6 +115,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_path
   end
 
+  def test_magic_path_MAGIC_environment_variable
+  end
+
   def test_magic_flags
   end
 
@@ -131,6 +134,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load
+  end
+
+  def test_magic_load_MAGIC_environment_variable
   end
 
   def test_magic_check
@@ -188,6 +194,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_library_error
+  end
+
+  def test_magic_new_instance_with_arguments
   end
 
   def test_file_integration
