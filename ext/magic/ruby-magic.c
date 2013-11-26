@@ -320,10 +320,13 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 
     if (!RARRAY_EMPTY_P(arguments)) {
         value = magic_join(arguments, CSTR2RVAL(":"));
-        ma.file.path = RVAL2CSTR(value);
+    }
+    else {
+        value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
     }
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_compile_internal, &ma)) {
         MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -354,10 +357,13 @@ rb_mgc_check(VALUE object, VALUE arguments)
 
     if (!RARRAY_EMPTY_P(arguments)) {
         value = magic_join(arguments, CSTR2RVAL(":"));
-        ma.file.path = RVAL2CSTR(value);
+    }
+    else {
+        value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
     }
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_check_internal, &ma)) {
         return Qfalse;
