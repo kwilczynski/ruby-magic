@@ -43,9 +43,12 @@ Simple interface to libmagic for Ruby Programming Language
   s.summary = 'Simple interface to libmagic for Ruby Programming Language'
 
   s.files = Dir['ext/**/*.{c,h,rb}'] +
-            Dir['lib/**/*.rb'] +
-            %w(Rakefile AUTHORS CHANGES CHANGES.rdoc COPYRIGHT
-               LICENSE README README.rdoc TODO VERSION)
+            Dir['lib/**/*.rb']       +
+            Dir['benchmark/**/*.rb'] +
+            Dir['test/**/*.rb']      +
+            %w(Rakefile ruby-magic.gemspec AUTHORS
+               CHANGES CHANGES.rdoc COPYRIGHT LICENSE
+               README README.rdoc TODO VERSION)
 
   s.executables   << 'magic'
   s.require_paths << 'lib'
