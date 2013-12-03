@@ -582,7 +582,7 @@ magic_allocate(VALUE klass)
 
     cookie = magic_open(MAGIC_NONE);
     if (!cookie) {
-        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, EPERM,
+        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EPERM,
                 error(E_MAGIC_LIBRARY_INITIALIZE));
     }
 
