@@ -245,9 +245,6 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_mutex_unlocked
   end
-
-  def test_magic_new_instance_with_arguments
-  end
 end
 
 # vim: set ts=2 sw=2 sts=2 et :
