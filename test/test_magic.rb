@@ -65,51 +65,53 @@ DEFAULT_INTEGRATION_METHODS = [
 ]
 
 class MagicTest < Test::Unit::TestCase
+  def setup
+    @magic = Magic.new
+  end
+
+  def teardown
+    @magic.close
+  end
+
   def test_magic_alias
     assert(FileMagic == Magic)
   end
 
   def test_magic_singleton_methods
-    mgc = Magic
     assert_block do
-      DEFAULT_SINGLETON_METHODS.all? {|i| mgc.respond_to?(i) }
+      DEFAULT_SINGLETON_METHODS.all? {|i| Magic.respond_to?(i) }
     end
   end
 
   def test_magic_new_instance
-    mgc = Magic.new
-    assert(mgc.class == Magic)
+    assert(@magic.class == Magic)
   end
 
   def test_magic_instance_methods
-    mgc = Magic.new
     assert_block do
-      DEFAULT_INSTANCE_METHODS.all? {|i| mgc.respond_to?(i) }
+      DEFAULT_INSTANCE_METHODS.all? {|i| @magic.respond_to?(i) }
     end
   end
 
   def test_magic_close
-    mgc = Magic.new
-    mgc.close
+    @magic.close
 
-    assert(mgc.closed?)
+    assert(@magic.closed?)
     assert_raise Magic::LibraryError do
-      mgc.file('')
+      @magic.file('')
     end
   end
 
   def test_magic_closed?
-    mgc = Magic.new
-    assert_equal(mgc.closed?, false)
-    mgc.close
-    assert_equal(mgc.closed?, true)
+    assert_equal(@magic.closed?, false)
+    @magic.close
+    assert_equal(@magic.closed?, true)
   end
 
   def test_magic_inspect
-    mgc = Magic.new
-    assert(mgc.inspect.match(%r{^#<Magic:0x.+>$}))
-    mgc.close
-    assert(mgc.inspect.match(%r{^#<Magic:0x.+ \(closed\)>$}))
+    assert(@magic.inspect.match(%r{^#<Magic:0x.+>$}))
+    @magic.close
+    assert(@magic.inspect.match(%r{^#<Magic:0x.+ \(closed\)>$}))
   end
 
   def test_magic_path
@@ -242,6 +244,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_mutex_unlocked
+  end
+
+  def test_magic_new_instance_with_arguments
   end
 end
 

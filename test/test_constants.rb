@@ -3,7 +3,7 @@
 # :enddoc:
 
 #
-# test_magic.rb
+# test_constants.rb
 #
 # Copyright 2013 Krzysztof Wilczynski
 #
@@ -33,6 +33,14 @@ require 'test/unit'
 require 'magic'
 
 class MagicConstantsTest < Test::Unit::TestCase
+  def setup
+  end
+
+  def teardown
+  end
+
+  def test_constants
+  end
 end
 
 # vim: set ts=2 sw=2 sts=2 et :
