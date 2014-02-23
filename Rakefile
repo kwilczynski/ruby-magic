@@ -72,7 +72,7 @@ end
 
 Rake::Task[:test].prerequisites << :compile
 
-task :default => :package
+task :default => :test
 
 # vim: set ts=2 sw=2 sts=2 et :
 # encoding: utf-8
