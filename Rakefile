@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 
-gem 'rdoc', '>= 3.12'
+gem 'rdoc', '>= 4.1.1'
 
 begin
   require 'rake'
