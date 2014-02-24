@@ -385,20 +385,38 @@ rb_mgc_check(VALUE object, VALUE arguments)
 VALUE
 rb_mgc_file(VALUE object, VALUE value)
 {
+    int rv;
     magic_arguments_t ma;
     const char *cstring = NULL;
+    const char *empty = "(null)";
 
     Check_Type(value, T_STRING);
 
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
+    ma.flags = NUM2INT(rb_mgc_get_flags(object));
     ma.file.path = RVAL2CSTR(value);
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
     if (!cstring) {
-        MAGIC_LIBRARY_ERROR(ma.cookie);
+        rv = magic_version_wrapper();
+
+        if (ma.flags & MAGIC_ERROR) {
+            MAGIC_LIBRARY_ERROR(ma.cookie);
+        }
+        else if (rv < 515) {
+            (void)magic_errno(ma.cookie);
+            cstring = magic_error(ma.cookie);
+        }
+        else {
+            assert(rv <= 515 && "Should be unreachable");
+        }
     }
+
+    assert(cstring != NULL && "Error message cannot be empty");
+    assert(strncmp(cstring, empty, strlen(empty)) != 0 && \
+            "Error message contains invalid value");
 
     return CSTR2RVAL(cstring);
 }
