@@ -414,9 +414,9 @@ rb_mgc_file(VALUE object, VALUE value)
         }
     }
 
-    assert(cstring != NULL && "Error message cannot be empty");
+    assert(cstring != NULL && "Unknown or empty result");
     assert(strncmp(cstring, empty, strlen(empty)) != 0 && \
-            "Error message contains invalid value");
+            "Unknown or invalid result");
 
     return CSTR2RVAL(cstring);
 }
