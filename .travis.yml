@@ -21,6 +21,7 @@ branches:
   only:
     - master
 before_script:
-  - travis_retry wget -q http://git.io/hwzpnA -O libmagic.sh
-  - sudo bash libmagic.sh
+  - export CC=$COMPILER
+  - travis_retry curl -L -s http://git.io/Zey2LA > libmagic.sh
+  - travis_retry sudo VERSION=$VERSION CHECKSUM=$CHECKSUM CC=$COMPILER bash libmagic.sh
 script: rake test
