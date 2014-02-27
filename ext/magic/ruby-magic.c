@@ -405,14 +405,11 @@ rb_mgc_file(VALUE object, VALUE value)
             (void)magic_errno(ma.cookie);
             cstring = magic_error(ma.cookie);
         }
-        else {
-            assert(rv <= 515 && "Should be unreachable");
-        }
     }
 
-    assert(cstring != NULL && "Unknown or empty result");
+    assert(cstring != NULL && "Must be a valid pointer to `const char' type");
     assert(strncmp(cstring, empty, strlen(empty)) != 0 && \
-            "Unknown or invalid result");
+            "Empty or invalid result");
 
     return CSTR2RVAL(cstring);
 }
@@ -659,6 +656,7 @@ magic_library_error(VALUE klass, void *data)
 {
     magic_exception_t e;
     const char *message = NULL;
+    const char *empty = "(null)";
 
     magic_t cookie = data;
     assert(cookie != NULL && "Must be a valid pointer to `magic_t' type");
@@ -672,6 +670,9 @@ magic_library_error(VALUE klass, void *data)
         e.magic_errno = magic_errno(cookie);
         e.magic_error = message;
     }
+
+    assert(strncmp(e.magic_error, empty, strlen(empty)) != 0 && \
+            "Empty or invalid error message");
 
     return magic_exception(&e);
 }
