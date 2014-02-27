@@ -105,10 +105,6 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
     rb_mgc_load(object, arguments);
 
-    if (!RARRAY_EMPTY_P(arguments)) {
-        rb_mgc_load(object, arguments);
-    }
-
     return object;
 }
 
