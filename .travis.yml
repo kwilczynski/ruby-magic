@@ -1,7 +1,6 @@
 language: ruby
 cache:
   - bundler
-  - apt
 rvm:
   - 1.9.2
   - 1.9.3
@@ -10,6 +9,10 @@ rvm:
   - 2.1.1
   - ruby-head
   - rbx-19mode
+env:
+  - VERSION=5.09 CHECKSUM=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
+  - VERSION=5.14 CHECKSUM=064c8f17a5f7ae1e336a9285131e046d3b2d04d7 COMPILER=gcc
+  - VERSION=5.17 CHECKSUM=f7e837a0d3e4f40a02ffe7da5e146b967448e0d8 COMPILER=gcc
 matrix:
   fast_finish: true
   allow_failures:
@@ -19,6 +22,6 @@ branches:
   only:
     - master
 before_script:
-  - travis_retry sudo apt-get update
-  - travis_retry sudo apt-get install --force-yes -y libmagic1 libmagic-dev
+  - travis_retry wget -q http://git.io/hwzpnA -O libmagic.sh
+  - sudo bash libmagic.sh
 script: rake test
