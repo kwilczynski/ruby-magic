@@ -1,4 +1,6 @@
 language: ruby
+cache:
+  - apt
 bundler_args: --jobs 4 --retry 2
 rvm:
   - 1.9.2
