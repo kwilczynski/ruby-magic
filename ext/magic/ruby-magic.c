@@ -37,6 +37,7 @@ static VALUE magic_load_internal(void *data);
 static VALUE magic_compile_internal(void *data);
 static VALUE magic_check_internal(void *data);
 static VALUE magic_file_internal(void *data);
+static VALUE magic_buffer_internal(void *data);
 static VALUE magic_descriptor_internal(void *data);
 
 static void* nogvl_magic_load(void *data);
@@ -100,7 +101,7 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = MAGIC_NONE;
-    ma.file.path = NULL;
+    ma.data.file.path = NULL;
 
     rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
     rb_mgc_load(object, arguments);
@@ -277,10 +278,10 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
     if (!RARRAY_EMPTY_P(arguments)) {
         value = magic_join(arguments, CSTR2RVAL(":"));
-        ma.file.path = RVAL2CSTR(value);
+        ma.data.file.path = RVAL2CSTR(value);
     }
     else {
-        ma.file.path = magic_getpath_wrapper();
+        ma.data.file.path = magic_getpath_wrapper();
     }
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
@@ -289,7 +290,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
-    value = magic_split(CSTR2RVAL(ma.file.path), CSTR2RVAL(":"));
+    value = magic_split(CSTR2RVAL(ma.data.file.path), CSTR2RVAL(":"));
 
     return rb_ivar_set(object, id_at_path, value);
 }
@@ -322,7 +323,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     }
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
-    ma.file.path = RVAL2CSTR(value);
+    ma.data.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_compile_internal, &ma)) {
         MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -359,7 +360,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
     }
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
-    ma.file.path = RVAL2CSTR(value);
+    ma.data.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_check_internal, &ma)) {
         return Qfalse;
@@ -392,7 +393,7 @@ rb_mgc_file(VALUE object, VALUE value)
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
-    ma.file.path = RVAL2CSTR(value);
+    ma.data.file.path = RVAL2CSTR(value);
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
     if (!cstring) {
@@ -428,6 +429,7 @@ VALUE
 rb_mgc_buffer(VALUE object, VALUE value)
 {
     magic_t cookie;
+    magic_arguments_t ma;
     const char *cstring = NULL;
 
     Check_Type(value, T_STRING);
@@ -435,7 +437,12 @@ rb_mgc_buffer(VALUE object, VALUE value)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(cookie);
 
-    cstring = magic_buffer(cookie, RVAL2CSTR(value), RSTRING_LEN(value));
+    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+
+    ma.data.buffer.size = RSTRING_LEN(value);
+    ma.data.buffer.buffer = RVAL2CSTR(value);
+
+    cstring = (const char *)MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
     if (!cstring) {
         MAGIC_LIBRARY_ERROR(cookie);
     }
@@ -464,7 +471,8 @@ rb_mgc_descriptor(VALUE object, VALUE value)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    ma.file.fd = NUM2INT(value);
+    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.data.file.fd = NUM2INT(value);
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
     if (!cstring) {
@@ -511,7 +519,7 @@ nogvl_magic_load(void *data)
     int rv;
     magic_arguments_t *ma = data;
 
-    rv = magic_load_wrapper(ma->cookie, ma->file.path, ma->flags);
+    rv = magic_load_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return rv < 0 ? NULL : data;
 }
 
@@ -521,7 +529,7 @@ nogvl_magic_compile(void *data)
     int rv;
     magic_arguments_t *ma = data;
 
-    rv = magic_compile_wrapper(ma->cookie, ma->file.path, ma->flags);
+    rv = magic_compile_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return rv < 0 ? NULL : data;
 }
 
@@ -531,7 +539,7 @@ nogvl_magic_check(void *data)
     int rv;
     magic_arguments_t *ma = data;
 
-    rv = magic_check_wrapper(ma->cookie, ma->file.path, ma->flags);
+    rv = magic_check_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return rv < 0 ? NULL : data;
 }
 
@@ -539,14 +547,14 @@ static inline void*
 nogvl_magic_file(void *data)
 {
     magic_arguments_t *ma = data;
-    return (void *)magic_file(ma->cookie, ma->file.path);
+    return (void *)magic_file_wrapper(ma->cookie, ma->data.file.path, ma->flags);
 }
 
 static inline void*
 nogvl_magic_descriptor(void *data)
 {
     magic_arguments_t *ma = data;
-    return (void *)magic_descriptor(ma->cookie, ma->file.fd);
+    return (void *)magic_descriptor_wrapper(ma->cookie, ma->data.file.fd, ma->flags);
 }
 
 static inline VALUE
@@ -578,6 +586,13 @@ static inline VALUE
 magic_file_internal(void *data)
 {
     return (VALUE)NOGVL(nogvl_magic_file, data);
+}
+
+static inline VALUE
+magic_buffer_internal(void *data)
+{
+    magic_arguments_t *ma = data;
+    return (VALUE)magic_buffer_wrapper(ma->cookie, ma->data.buffer.buffer, ma->data.buffer.size, ma->flags);
 }
 
 static inline VALUE

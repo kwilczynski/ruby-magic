@@ -175,6 +175,48 @@ magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags)
     return rv;
 }
 
+inline const char*
+magic_file_wrapper(struct magic_set *ms, const char* filename, int flags)
+{
+    const char *cstring;
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_file(ms, filename);
+    }
+
+    SUPPRESS_ERROR_OUTPUT(magic_file, cstring, ms, filename);
+
+    return cstring;
+}
+
+inline const char*
+magic_buffer_wrapper(struct magic_set *ms, const char *buffer, size_t size, int flags)
+{
+    const char *cstring;
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_buffer(ms, buffer, size);
+    }
+
+    SUPPRESS_ERROR_OUTPUT(magic_buffer, cstring, ms, buffer, size);
+
+    return cstring;
+}
+
+inline const char*
+magic_descriptor_wrapper(struct magic_set *ms, int fd, int flags)
+{
+    const char *cstring;
+
+    if (flags & MAGIC_DEBUG) {
+        return magic_descriptor(ms, fd);
+    }
+
+    SUPPRESS_ERROR_OUTPUT(magic_descriptor, cstring, ms, fd);
+
+    return cstring;
+}
+
 inline int
 magic_version_wrapper(void)
 {

@@ -123,23 +123,36 @@ enum error {
     E_FLAG_NOT_IMPLEMENTED
 };
 
+union file {
+    int fd;
+    const char *path;
+};
+
+struct buffer {
+    size_t size;
+    const char *buffer;
+};
+
+typedef union file file_t;
+typedef struct buffer buffer_t;
+
+struct magic_arguments {
+    int flags;
+    magic_t cookie;
+    union {
+        file_t file;
+        buffer_t buffer;
+    } data;
+};
+
 struct magic_exception {
     int magic_errno;
     const char *magic_error;
     VALUE klass;
 };
 
-struct magic_arguments {
-    int flags;
-    magic_t cookie;
-    union {
-        int fd;
-        const char *path;
-    } file;
-};
-
-typedef struct magic_exception magic_exception_t;
 typedef struct magic_arguments magic_arguments_t;
+typedef struct magic_exception magic_exception_t;
 
 static const char *errors[] = {
     "unknown error",
