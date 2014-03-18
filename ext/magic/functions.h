@@ -34,7 +34,7 @@ extern "C" {
         __##s = suppress_error_output(&(__s_##s));  \
         x = s(__VA_ARGS__);                         \
         if (!(__##s)) {                             \
-            restore_error_output(&__s_##s);         \
+            restore_error_output(&(__s_##s));       \
         }                                           \
     } while(0)
 
