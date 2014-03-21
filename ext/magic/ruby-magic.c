@@ -428,14 +428,13 @@ rb_mgc_file(VALUE object, VALUE value)
 VALUE
 rb_mgc_buffer(VALUE object, VALUE value)
 {
-    magic_t cookie;
     magic_arguments_t ma;
     const char *cstring = NULL;
 
     Check_Type(value, T_STRING);
 
     CHECK_MAGIC_OPEN(object);
-    MAGIC_COOKIE(cookie);
+    MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
 
@@ -444,7 +443,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
     if (!cstring) {
-        MAGIC_LIBRARY_ERROR(cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
     return CSTR2RVAL(cstring);
