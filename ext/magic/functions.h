@@ -45,11 +45,11 @@ extern "C" {
         _l_##f = override_current_locale(&(__l_##f)); \
         _e_##f = suppress_error_output(&(__e_##f));   \
         r = f(__VA_ARGS__);                           \
-        if (!(_l_##f)) {                              \
-            restore_current_locale(&(__l_##f));       \
-        }                                             \
         if (!(_e_##f))  {                             \
             restore_error_output(&(__e_##f));         \
+        }                                             \
+        if (!(_l_##f)) {                              \
+            restore_current_locale(&(__l_##f));       \
         }                                             \
     } while(0)
 
