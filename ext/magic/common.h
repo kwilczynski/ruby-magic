@@ -39,6 +39,7 @@ extern "C" {
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <locale.h>
 #include <magic.h>
 #include <ruby.h>
 

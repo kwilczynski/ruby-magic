@@ -23,6 +23,9 @@
 int suppress_error_output(void *data);
 int restore_error_output(void *data);
 
+int override_current_locale(void *data);
+int restore_current_locale(void *data);
+
 int
 suppress_error_output(void *data)
 {
@@ -31,38 +34,38 @@ suppress_error_output(void *data)
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
-    s->old_fd = -1;
-    s->new_fd = -1;
+    s->data.file.old_fd = -1;
+    s->data.file.new_fd = -1;
     s->status = -1;
 
     fflush(stderr);
-    fgetpos(stderr, &s->position);
+    fgetpos(stderr, &s->data.file.position);
 
-    s->old_fd = dup(fileno(stderr));
-    if (s->old_fd < 0) {
+    s->data.file.old_fd = dup(fileno(stderr));
+    if (s->data.file.old_fd < 0) {
         local_errno = errno;
         goto out;
     }
 
-    s->new_fd = open("/dev/null", O_WRONLY);
-    if (s->new_fd < 0) {
+    s->data.file.new_fd = open("/dev/null", O_WRONLY);
+    if (s->data.file.new_fd < 0) {
         local_errno = errno;
 
-        if (dup2(s->old_fd, fileno(stderr)) < 0) {
+        if (dup2(s->data.file.old_fd, fileno(stderr)) < 0) {
             local_errno = errno;
             goto out;
         }
 
-        close(s->old_fd);
+        close(s->data.file.old_fd);
         goto out;
     }
 
-    if (dup2(s->new_fd, fileno(stderr)) < 0) {
+    if (dup2(s->data.file.new_fd, fileno(stderr)) < 0) {
         local_errno = errno;
         goto out;
     }
 
-    close(s->new_fd);
+    close(s->data.file.new_fd);
     return 0;
 
 out:
@@ -80,20 +83,20 @@ restore_error_output(void *data)
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
-    if (s->old_fd < 0 && s->status != 0) {
+    if (s->data.file.old_fd < 0 && s->status != 0) {
         return -1;
     }
 
     fflush(stderr);
 
-    if (dup2(s->old_fd, fileno(stderr)) < 0) {
+    if (dup2(s->data.file.old_fd, fileno(stderr)) < 0) {
         local_errno = errno;
         goto out;
     }
 
-    close(s->old_fd);
+    close(s->data.file.old_fd);
     clearerr(stderr);
-    fsetpos(stderr, &s->position);
+    fsetpos(stderr, &s->data.file.position);
 
     if (setvbuf(stderr, NULL, _IONBF, 0) != 0) {
         local_errno = errno;
@@ -105,6 +108,64 @@ restore_error_output(void *data)
 out:
     s->status = local_errno;
     errno = s->status;
+
+    return -1;
+}
+
+int
+override_current_locale(void *data)
+{
+    char *current_locale = NULL;
+
+    save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    s->status = -1;
+    s->data.locale = NULL;
+
+    current_locale = setlocale(LC_ALL, NULL);
+    if (!current_locale) {
+        goto out;
+    }
+
+    s->data.locale = strndup(current_locale, strlen(current_locale));
+    if (!s->data.locale) {
+        goto out;
+    }
+
+    if (!setlocale(LC_ALL, "C")) {
+        goto out;
+    }
+
+    assert(s->data.locale != NULL && "Must be a valid pointer to `char' type");
+    s->status = 0;
+
+out:
+    return s->status;
+}
+
+int
+restore_current_locale(void *data)
+{
+    save_t *s = data;
+    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    if (!s->data.locale && s->status != 0) {
+        return -1;
+    }
+
+    if (!setlocale(LC_ALL, s->data.locale)) {
+        goto out;
+    }
+
+    assert(s->data.locale != NULL && "Must be a valid pointer to `char' type");
+    free(s->data.locale);
+
+    return 0;
+
+out:
+    s->data.locale = NULL;
+    s->status = -1;
 
     return -1;
 }
@@ -138,11 +199,7 @@ magic_load_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_load(ms, magicfile);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_load, rv, ms, magicfile);
+    MAGIC_FUNCTION(magic_load, rv, flags, ms, magicfile);
 
     return rv;
 }
@@ -152,11 +209,7 @@ magic_compile_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_compile(ms, magicfile);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_compile, rv, ms, magicfile);
+    MAGIC_FUNCTION(magic_compile, rv, flags, ms, magicfile);
 
     return rv;
 }
@@ -166,11 +219,7 @@ magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags)
 {
     int rv;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_check(ms, magicfile);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_check, rv, ms, magicfile);
+    MAGIC_FUNCTION(magic_check, rv, flags, ms, magicfile);
 
     return rv;
 }
@@ -180,11 +229,7 @@ magic_file_wrapper(struct magic_set *ms, const char* filename, int flags)
 {
     const char *cstring;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_file(ms, filename);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_file, cstring, ms, filename);
+    MAGIC_FUNCTION(magic_file, cstring, flags, ms, filename);
 
     return cstring;
 }
@@ -194,11 +239,7 @@ magic_buffer_wrapper(struct magic_set *ms, const char *buffer, size_t size, int 
 {
     const char *cstring;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_buffer(ms, buffer, size);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_buffer, cstring, ms, buffer, size);
+    MAGIC_FUNCTION(magic_buffer, cstring, flags, ms, buffer, size);
 
     return cstring;
 }
@@ -208,11 +249,7 @@ magic_descriptor_wrapper(struct magic_set *ms, int fd, int flags)
 {
     const char *cstring;
 
-    if (flags & MAGIC_DEBUG) {
-        return magic_descriptor(ms, fd);
-    }
-
-    SUPPRESS_ERROR_OUTPUT(magic_descriptor, cstring, ms, fd);
+    MAGIC_FUNCTION(magic_descriptor, cstring, flags, ms, fd);
 
     return cstring;
 }

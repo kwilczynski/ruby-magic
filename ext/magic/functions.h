@@ -27,22 +27,56 @@ extern "C" {
 
 #include "common.h"
 
-#define SUPPRESS_ERROR_OUTPUT(s, x, ...)            \
-    do {                                            \
-        int __##s;                                  \
-        save_t __s_##s;                             \
-        __##s = suppress_error_output(&(__s_##s));  \
-        x = s(__VA_ARGS__);                         \
-        if (!(__##s)) {                             \
-            restore_error_output(&(__s_##s));       \
-        }                                           \
+#define SUPPRESS_LOCALE(f, r, ...)                    \
+    do {                                              \
+        int __##f;                                    \
+        save_t __l_##f;                               \
+        __##f = override_current_locale(&(__l_##f));  \
+        r = f(__VA_ARGS__);                           \
+        if (!(__##f)) {                               \
+            restore_current_locale(&(__l_##f));       \
+        }                                             \
     } while(0)
 
-struct save {
+#define SUPPRESS_EVERYTHING(f, r, ...)                \
+    do {                                              \
+        int _l_##f, _e_##f;                           \
+        save_t __l_##f, __e_##f;                      \
+        _l_##f = override_current_locale(&(__l_##f)); \
+        _e_##f = suppress_error_output(&(__e_##f));   \
+        r = f(__VA_ARGS__);                           \
+        if (!(_l_##f)) {                              \
+            restore_current_locale(&(__l_##f));       \
+        }                                             \
+        if (!(_e_##f))  {                             \
+            restore_error_output(&(__e_##f));         \
+        }                                             \
+    } while(0)
+
+#define MAGIC_FUNCTION(f, r, x, ...)                \
+     do {                                           \
+        if ((x) & MAGIC_ERROR) {                    \
+            SUPPRESS_LOCALE(f, r, __VA_ARGS__);     \
+        }                                           \
+        else {                                      \
+            SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
+         }                                          \
+     } while(0)
+
+struct file_data {
     int old_fd;
     int new_fd;
-    int status;
     fpos_t position;
+};
+
+typedef struct file_data file_data_t;
+
+struct save {
+    int status;
+    union {
+        file_data_t file;
+        char *locale;
+    } data;
 };
 
 typedef struct save save_t;
