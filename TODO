@@ -1,0 +1,15 @@
+ruby-magic (0.0.3)
+
+  * Add some examples;
+  * Move to YARD from RDoc (as RDoc is very bad, really);
+  * Improve documentation i.e. source code commenting, README file, etc.
+
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Fri, 21 Mar 2014 16:49:26 +0000
+
+ruby-magic (0.0.2)
+
+  * Add implementation for the included "binary";
+  * Add Doxygen style comments for other functions in the source code;
+  * Add RDoc and improve documentation i.e. source code commenting.
+
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Fri, 21 Mar 2014 16:49:26 +0000
