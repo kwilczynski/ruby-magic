@@ -46,18 +46,20 @@ class Magic
   # Example:
   #
   def flags_to_a(names = false)
+    raise LibraryError, "Magic library is not open" if closed?
+
     n, i = 0, @flags
 
     flags = []
 
     return flags if @flags.zero?
 
-    @flags_map ||= flags_as_map if names
+    @@flags_map ||= flags_as_map if names
 
     while i > 0
       n = 2 ** (Math.log(i) / Math.log(2)).to_i
       i = i - n
-      flags.insert(0, names ? @flags_map[n] : n)
+      flags.insert(0, names ? @@flags_map[n] : n)
     end
 
     flags
