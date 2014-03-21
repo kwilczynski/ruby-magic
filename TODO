@@ -1,3 +1,9 @@
+ruby-magic (0.0.4)
+
+  * Vendor libmagic source code?
+
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Fri, 21 Mar 2014 18:06:21 +0000
+
 ruby-magic (0.0.3)
 
   * Add some examples;
