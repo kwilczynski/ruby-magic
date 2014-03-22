@@ -59,6 +59,8 @@ static VALUE magic_generic_error(VALUE klass, int magic_errno,
 static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS), void *data);
 static VALUE magic_unlock(VALUE object);
 
+static VALUE magic_return(VALUE value, void *data);
+
 /* :startdoc: */
 
 /*
@@ -412,7 +414,7 @@ rb_mgc_file(VALUE object, VALUE value)
     assert(strncmp(cstring, empty, strlen(empty)) != 0 && \
             "Empty or invalid result");
 
-    return CSTR2RVAL(cstring);
+    return magic_return(CSTR2RVAL(cstring), &ma);
 }
 
 /*
@@ -446,7 +448,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
-    return CSTR2RVAL(cstring);
+    return magic_return(CSTR2RVAL(cstring), &ma);
 }
 
 /*
@@ -478,7 +480,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
-    return CSTR2RVAL(cstring);
+    return magic_return(CSTR2RVAL(cstring), &ma);
 }
 
 /*
@@ -591,7 +593,8 @@ static inline VALUE
 magic_buffer_internal(void *data)
 {
     magic_arguments_t *ma = data;
-    return (VALUE)magic_buffer_wrapper(ma->cookie, ma->data.buffer.buffer, ma->data.buffer.size, ma->flags);
+    return (VALUE)magic_buffer_wrapper(ma->cookie, ma->data.buffer.buffer,
+            ma->data.buffer.size, ma->flags);
 }
 
 static inline VALUE
@@ -705,6 +708,20 @@ magic_unlock(VALUE object)
     VALUE mutex = rb_ivar_get(object, id_at_mutex);
     rb_funcall(mutex, rb_intern("unlock"), 0);
     return Qnil;
+}
+
+static VALUE
+magic_return(VALUE value, void *data)
+{
+    magic_arguments_t *ma = data;
+    VALUE array = Qnil;
+
+    if (ma->flags & MAGIC_CONTINUE) {
+        array = magic_split(value, CSTR2RVAL("\\012\055\040"));
+        return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+    }
+
+    return value;
 }
 
 void

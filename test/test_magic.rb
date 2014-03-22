@@ -129,10 +129,19 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_file
   end
 
+  def test_magic_file_with_MAGIC_CONTINUE_flag
+  end
+
   def test_magic_buffer
   end
 
+  def test_magic_buffer_with_MAGIC_CONTINUE_flag
+  end
+
   def test_magic_descriptor
+  end
+
+  def test_magic_descriptor_with_MAGIC_CONTINUE_flag
   end
 
   def test_magic_load

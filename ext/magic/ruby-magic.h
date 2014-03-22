@@ -165,6 +165,26 @@ static const char *errors[] = {
 };
 
 inline static VALUE
+magic_size(VALUE v)
+{
+    if (ARRAY_P(v) || STRING_P(v)) {
+        return rb_funcall(v, rb_intern("size"), 0, NULL);
+    }
+
+    return Qnil;
+}
+
+inline static VALUE
+magic_shift(VALUE v)
+{
+    if (ARRAY_P(v)) {
+        return rb_funcall(v, rb_intern("shift"), 0, NULL);
+    }
+
+    return Qnil;
+}
+
+inline static VALUE
 magic_split(VALUE a, VALUE b)
 {
     if (STRING_P(a) && STRING_P(b)) {
