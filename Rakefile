@@ -43,7 +43,7 @@ gem = eval File.read('ruby-magic.gemspec')
 RDoc::Task.new do |d|
   files = %w(AUTHORS CHANGES.rdoc COPYRIGHT LICENSE README.rdoc TODO)
 
-  d.title = 'Simple interface to libmagic for Ruby Programming Language'
+  d.title = 'File Magic in Ruby'
   d.main  = 'README.rdoc'
 
   d.rdoc_dir = 'doc/rdoc'

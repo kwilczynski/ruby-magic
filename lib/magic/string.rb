@@ -28,10 +28,13 @@
 class String
   #
   # call-seq:
+  #    string.magic -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: String#mime and String#type
   #
   def magic(flags = Magic::NONE)
     Magic.open(flags) {|mgc| mgc.buffer(self) }
@@ -40,10 +43,13 @@ class String
 
   #
   # call-seq:
+  #    string.mime -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: String#magic and String#type
   #
   def mime
     magic(Magic::MIME)
@@ -51,10 +57,13 @@ class String
 
   #
   # call-seq:
+  #    string.type -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: String#magic and String#mime
   #
   def type
     magic(Magic::MIME_TYPE)

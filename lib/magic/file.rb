@@ -29,10 +29,13 @@ class File
   class << self
     #
     # call-seq:
+    #    File.magic( path ) -> string, array or nil
+    #
+    # Returns
     #
     # Example:
     #
-    # See also:
+    # See also: File::mime and File::type
     #
     def magic(path, flags = Magic::NONE)
       path   = path.path    if path.respond_to?(:path)
@@ -45,10 +48,13 @@ class File
 
     #
     # call-seq:
+    #    File.mime( path ) -> string, array or nil
+    #
+    # Returns
     #
     # Example:
     #
-    # See also:
+    # See also: File::magic and File::type
     #
     def mime(path)
       magic(path, Magic::MIME)
@@ -56,10 +62,13 @@ class File
 
     #
     # call-seq:
+    #    File.type( path ) -> string, array or nil
+    #
+    # Returns
     #
     # Example:
     #
-    # See also:
+    # See also: File::magic and File::mime
     #
     def type(path)
       magic(path, Magic::MIME_TYPE)
@@ -68,10 +77,13 @@ class File
 
   #
   # call-seq:
+  #    File.magic( path ) -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: File#mime and File#type
   #
   def magic
     self.class.magic(self)
@@ -79,10 +91,13 @@ class File
 
   #
   # call-seq:
+  #    File.mime( path ) -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: File#magic and File#type
   #
   def mime
     self.class.mime(self)
@@ -90,10 +105,13 @@ class File
 
   #
   # call-seq:
+  #    File.type( path ) -> string, array or nil
+  #
+  # Returns
   #
   # Example:
   #
-  # See also:
+  # See also: File#magic and File#mime
   #
   def type
     self.class.type(self)

@@ -28,13 +28,21 @@ require 'magic/version'
 # :startdoc:
 
 #
+# File _Magic_ in Ruby.
 #
+# Simple interface to _libmagic_ for Ruby Programming Language.
 #
 class Magic
   #
   # call-seq:
+  #    magic.inspect -> string
+  #
+  # Returns
   #
   # Example:
+  #
+  #    magic = Magic.new   #=> #<Magic:0x007fd5258a1108>
+  #    magic.inspect       #=> "#<Magic:0x007fd5258a1108 @flags=0, @path=[\"/etc/magic\", \"/usr/share/misc/magic\"]>"
   #
   def inspect
     super.insert(-2, self.closed? ? ' (closed)' : '')
@@ -42,8 +50,15 @@ class Magic
 
   #
   # call-seq:
+  #    magic.flags_to_a( names ) -> array
+  #
+  # Returns an +array+
   #
   # Example:
+  #
+  # Will raise <i>Magic::LibraryError</i> exception if, or
+  #
+  # See also: Magic#flags
   #
   def flags_to_a(names = false)
     raise LibraryError, "Magic library is not open" if closed?
@@ -68,8 +83,10 @@ class Magic
   class << self
     #
     # call-seq:
-    #    Magic.open( flags )                  ->
-    #    Magic.open( flags ) {|magic| block } ->
+    #    Magic.open( flags )                  -> self
+    #    Magic.open( flags ) {|magic| block } -> string or array
+    #
+    # Returns
     #
     # Example:
     #
@@ -92,8 +109,10 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.mime                  ->
-    #    Magic.mime {|magic| block } ->
+    #    Magic.mime                  -> self
+    #    Magic.mime {|magic| block } -> string or array
+    #
+    # Returns
     #
     # Example:
     #
@@ -105,8 +124,10 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.type                  ->
-    #    Magic.type {|magic| block } ->
+    #    Magic.type                  -> self
+    #    Magic.type {|magic| block } -> string or array
+    #
+    # Returns
     #
     # Example:
     #
@@ -118,8 +139,10 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.encoding                  ->
-    #    Magic.encoding {|magic| block } ->
+    #    Magic.encoding                  -> self
+    #    Magic.encoding {|magic| block } -> string or array
+    #
+    # Returns
     #
     # Example:
     #
@@ -131,8 +154,10 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.compile( path, ... ) ->
-    #    Magic.compile( array )     ->
+    #    Magic.compile( path, ... ) -> true
+    #    Magic.compile( array )     -> true
+    #
+    # Returns
     #
     # Example:
     #
@@ -144,8 +169,10 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.check( path, ... ) ->
-    #    Magic.check( array )     ->
+    #    Magic.check( path, ... ) -> true or false
+    #    Magic.check( array )     -> true or false
+    #
+    # Returns
     #
     # Example:
     #

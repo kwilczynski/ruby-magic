@@ -26,7 +26,9 @@ Gem::Specification.new do |s|
   s.name = 'ruby-magic'
 
   s.description = <<-EOS
-Simple interface to libmagic for Ruby Programming Language
+File Magic in Ruby.
+
+Simple interface to libmagic for Ruby Programming Language.
   EOS
 
   s.platform = Gem::Platform::RUBY
@@ -40,7 +42,7 @@ Simple interface to libmagic for Ruby Programming Language
   s.rubygems_version  = '~> 2.2.0'
   s.has_rdoc          = true
 
-  s.summary = 'Simple interface to libmagic for Ruby Programming Language'
+  s.summary = 'File Magic in Ruby'
 
   s.files = Dir['ext/**/*.{c,h,rb}'] +
             Dir['lib/**/*.rb']       +
