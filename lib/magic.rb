@@ -67,7 +67,7 @@ class Magic
 
     flags = []
 
-    return flags if @flags.zero?
+    return [names ? 'NONE' : 0] if @flags.zero?
 
     @@flags_map ||= flags_as_map if names
 
