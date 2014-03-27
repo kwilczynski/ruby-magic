@@ -9,14 +9,20 @@ _obj
 _test
 _testmain.go
 
+__pycache__/
+
 *.o
 *.a
+*.ko
+*.obj
+*.elf
+*.dylib
 *.[as]o
 *.[568ao]
 *.bundle
 *.un~
 *.rbc
-*.pyc
+*.py[cod]
 *.exe
 *.gem
 *.log
@@ -30,10 +36,18 @@ _testmain.go
 *.cgo*.c
 .*.sw[a-z]
 .nfs.*
+*.egg-info/
+*.egg
+.installed.cfg
+*.mo
 
 .git
 .svn
 .cvs
+
+.Python
+pip-log.txt
+pip-*-directory.txt
 
 .bundle
 .config
