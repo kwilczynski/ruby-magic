@@ -27,36 +27,33 @@ extern "C" {
 
 #include "common.h"
 
-#define SUPPRESS_LOCALE(f, r, ...)                    \
-    do {                                              \
-        int __##f;                                    \
-        save_t __l_##f;                               \
-        __##f = override_current_locale(&(__l_##f));  \
-        r = f(__VA_ARGS__);                           \
-        if (!(__##f)) {                               \
-            restore_current_locale(&(__l_##f));       \
-        }                                             \
+#if defined(HAVE_BROKEN_MAGIC)
+# define OVERRIDE_LOCALE(f, r, ...)           \
+    do {                                      \
+        save_t __l_##f;                       \
+        override_current_locale(&(__l_##f));  \
+        r = f(__VA_ARGS__);                   \
+        restore_current_locale(&(__l_##f));   \
     } while(0)
+#else
+# define OVERRIDE_LOCALE(f, r, ...) \
+    do {                            \
+        r = f(__VA_ARGS__);         \
+    } while(0)
+#endif
 
-#define SUPPRESS_EVERYTHING(f, r, ...)                \
-    do {                                              \
-        int _l_##f, _e_##f;                           \
-        save_t __l_##f, __e_##f;                      \
-        _l_##f = override_current_locale(&(__l_##f)); \
-        _e_##f = suppress_error_output(&(__e_##f));   \
-        r = f(__VA_ARGS__);                           \
-        if (!(_e_##f))  {                             \
-            restore_error_output(&(__e_##f));         \
-        }                                             \
-        if (!(_l_##f)) {                              \
-            restore_current_locale(&(__l_##f));       \
-        }                                             \
+#define SUPPRESS_EVERYTHING(f, r, ...)      \
+    do {                                    \
+        save_t __e_##f;                     \
+        suppress_error_output(&(__e_##f));  \
+        OVERRIDE_LOCALE(f, r, __VA_ARGS__); \
+        restore_error_output(&(__e_##f));   \
     } while(0)
 
 #define MAGIC_FUNCTION(f, r, x, ...)                \
      do {                                           \
         if ((x) & MAGIC_ERROR) {                    \
-            SUPPRESS_LOCALE(f, r, __VA_ARGS__);     \
+            OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
         }                                           \
         else {                                      \
             SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \

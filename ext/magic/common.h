@@ -73,6 +73,10 @@ extern "C" {
 
 #define UNUSED(x) (void)(x)
 
+#if defined(HAVE_MAGIC_VERSION) && MAGIC_VERSION < 517
+# define HAVE_BROKEN_MAGIC 0
+#endif
+
 extern int errno;
 
 #if defined(__cplusplus)
