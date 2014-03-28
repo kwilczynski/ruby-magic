@@ -57,7 +57,7 @@ extern "C" {
         }                                           \
         else {                                      \
             SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
-         }                                          \
+        }                                           \
      } while(0)
 
 struct file_data {
