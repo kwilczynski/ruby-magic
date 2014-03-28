@@ -40,6 +40,7 @@ extern "C" {
 #include <errno.h>
 #include <assert.h>
 #include <locale.h>
+#include <sys/stat.h>
 #include <magic.h>
 #include <ruby.h>
 

@@ -30,6 +30,7 @@ int
 suppress_error_output(void *data)
 {
     int local_errno;
+    mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
@@ -47,7 +48,7 @@ suppress_error_output(void *data)
         goto out;
     }
 
-    s->data.file.new_fd = open("/dev/null", O_WRONLY);
+    s->data.file.new_fd = open("/dev/null", O_WRONLY | O_APPEND, mode);
     if (s->data.file.new_fd < 0) {
         local_errno = errno;
 
