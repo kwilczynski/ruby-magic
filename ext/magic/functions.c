@@ -236,7 +236,7 @@ magic_file_wrapper(struct magic_set *ms, const char* filename, int flags)
 }
 
 inline const char*
-magic_buffer_wrapper(struct magic_set *ms, const char *buffer, size_t size, int flags)
+magic_buffer_wrapper(struct magic_set *ms, const void *buffer, size_t size, int flags)
 {
     const char *cstring;
 

@@ -86,7 +86,7 @@ extern int magic_compile_wrapper(struct magic_set *ms, const char *magicfile, in
 extern int magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags);
 
 extern const char* magic_file_wrapper(struct magic_set *ms, const char *filename, int flags);
-extern const char* magic_buffer_wrapper(struct magic_set *ms, const char *buffer, size_t size, int flags);
+extern const char* magic_buffer_wrapper(struct magic_set *ms, const void *buffer, size_t size, int flags);
 extern const char* magic_descriptor_wrapper(struct magic_set *ms, int fd, int flags);
 
 extern int magic_version_wrapper(void);

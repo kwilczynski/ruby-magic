@@ -35,6 +35,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -74,8 +75,8 @@ extern "C" {
 
 #define UNUSED(x) (void)(x)
 
-#if defined(HAVE_MAGIC_VERSION) && MAGIC_VERSION < 517
-# define HAVE_BROKEN_MAGIC 0
+#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 517
+# define HAVE_BROKEN_MAGIC 1
 #endif
 
 extern int errno;
