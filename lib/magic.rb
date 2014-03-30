@@ -21,9 +21,9 @@
 #
 
 require 'magic/magic'
-require 'magic/file'
-require 'magic/string'
 require 'magic/version'
+require 'magic/core/file'
+require 'magic/core/string'
 
 # :startdoc:
 

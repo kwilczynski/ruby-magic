@@ -3,7 +3,7 @@
 # :stopdoc:
 
 #
-# string.rb
+# core/string.rb
 #
 # Copyright 2013-2014 Krzysztof Wilczynski
 #

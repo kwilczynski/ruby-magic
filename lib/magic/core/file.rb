@@ -3,7 +3,7 @@
 # :stopdoc:
 
 #
-# file.rb
+# core/file.rb
 #
 # Copyright 2013-2014 Krzysztof Wilczynski
 #
