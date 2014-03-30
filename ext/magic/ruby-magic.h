@@ -58,6 +58,7 @@ extern "C" {
 
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
+#define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : RARRAY_PTR(a)[0])
 
 #define NOGVL_FUNCTION (VALUE (*)(void *))
 

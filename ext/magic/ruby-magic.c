@@ -83,7 +83,7 @@ static VALUE magic_return(VALUE value, void *data);
 VALUE
 rb_mgc_initialize(VALUE object, VALUE arguments)
 {
-    VALUE mutex;
+    VALUE mutex = Qnil;
 
     magic_arguments_t ma;
     const char *klass = NULL;
@@ -300,7 +300,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    if (!RARRAY_EMPTY_P(arguments)) {
+    if (!RARRAY_EMPTY_P(arguments) && !NIL_P(RARRAY_FIRST(arguments))) {
         value = magic_join(arguments, CSTR2RVAL(":"));
         ma.data.file.path = RVAL2CSTR(value);
     }
