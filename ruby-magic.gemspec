@@ -23,7 +23,8 @@
 signing_key = File.expand_path('~/.gem/kwilczynski-private.pem')
 
 Gem::Specification.new do |s|
-  s.name = 'ruby-magic'
+  s.name    = 'ruby-magic'
+  s.summary = 'File Magic in Ruby'
 
   s.description = <<-EOS
 File Magic in Ruby.
@@ -37,12 +38,10 @@ Simple interface to libmagic for Ruby Programming Language.
   s.author   = 'Krzysztof Wilczynski'
   s.email    = 'krzysztof.wilczynski@linux.com'
   s.homepage = 'http://about.me/kwilczynski'
+  s.has_rdoc = true
 
-  s.rubyforge_project = 'ruby-magic'
-  s.rubygems_version  = '~> 2.2.0'
-  s.has_rdoc          = true
-
-  s.summary = 'File Magic in Ruby'
+  s.required_ruby_version = '>= 1.9.2'
+  s.rubygems_version      = '~> 2.2.0'
 
   s.files = Dir['ext/**/*.{c,h,rb}'] +
             Dir['lib/**/*.rb']       +
