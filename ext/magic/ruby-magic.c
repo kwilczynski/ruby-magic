@@ -761,7 +761,7 @@ magic_return(VALUE value, void *data)
     VALUE array = Qnil;
 
     if (ma->flags & MAGIC_CONTINUE) {
-        array = magic_split(value, CSTR2RVAL("\\012\055\040"));
+        array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
         return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
