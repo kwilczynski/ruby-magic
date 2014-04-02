@@ -75,7 +75,7 @@ extern "C" {
 
 #define UNUSED(x) (void)(x)
 
-#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 517
+#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
