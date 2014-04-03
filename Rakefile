@@ -70,6 +70,7 @@ Rake::ExtensionTask.new('magic', gem) do |e|
   e.lib_dir = 'lib/magic'
 end
 
+Rake::Task[:test].prerequisites << :clobber
 Rake::Task[:test].prerequisites << :compile
 
 task :default => :test

@@ -55,11 +55,6 @@ Simple interface to libmagic for Ruby Programming Language.
   s.require_paths << 'lib'
   s.extensions    << 'ext/magic/extconf.rb'
 
-  s.add_development_dependency 'rake', '~> 10.1', '>= 10.1.1'
-  s.add_development_dependency 'rdoc', '~> 4.1', '>= 4.1.1'
-  s.add_development_dependency 'test-unit', '~> 2.5', '>= 2.5.5'
-  s.add_development_dependency 'rake-compiler', '~> 0.9', '>= 0.9.2'
-
   s.signing_key = signing_key if File.exists?(signing_key)
 end
 
