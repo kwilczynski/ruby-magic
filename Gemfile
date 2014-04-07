@@ -1,6 +1,12 @@
 source 'https://rubygems.org'
 gemspec
 
+platforms :rbx do
+  gem 'racc'
+  gem 'rubysl', '~> 2.0'
+  gem 'psych'
+end
+
 gem 'rake', '~> 10.1', '>= 10.1.1'
 gem 'rdoc', '~> 4.1', '>= 4.1.1'
 gem 'rake-compiler', '~> 0.9', '>= 0.9.2'
