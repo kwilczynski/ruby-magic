@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "functions.h"
 
 int suppress_error_output(void *data);
@@ -270,5 +274,9 @@ magic_version_wrapper(void)
     return -ENOSYS;
 #endif
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 /* vim: set ts=8 sw=4 sts=2 et : */

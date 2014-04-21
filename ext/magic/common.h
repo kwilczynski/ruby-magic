@@ -79,8 +79,6 @@ extern "C" {
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
-extern int errno;
-
 #if defined(__cplusplus)
 }
 #endif

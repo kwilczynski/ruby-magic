@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "ruby-magic.h"
 
 ID id_at_flags, id_at_path, id_at_mutex;
@@ -969,5 +973,9 @@ Init_magic(void)
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TROFF", INT2NUM(MAGIC_NO_CHECK_TROFF));
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 /* vim: set ts=8 sw=4 sts=2 et : */
