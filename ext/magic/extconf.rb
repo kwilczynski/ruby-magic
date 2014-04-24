@@ -22,12 +22,19 @@
 
 require 'mkmf'
 
-RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
+RbConfig::CONFIG['CC'] = ENV['CC'] if ENV['CC']
+
+$CFLAGS << ' -std=c99 -g -Wall -Wextra -pedantic'
+
+unless RbConfig::CONFIG['host_os'][/darwin/]
+  $LDFLAGS << ' -Wl,--as-needed -Wl,--no-undefined'
+end
 
 $LDFLAGS << " %s" % ENV['LDFLAGS'] if ENV['LDFLAGS']
 
-$CFLAGS << " %s" % ENV['CFLAGS'] if ENV['CFLAGS']
-$CFLAGS << ' -std=c99 -g -Wall -Wextra -pedantic'
+%w(CFLAGS CXXFLAGS CPPFLAGS).each do |variable|
+  $CFLAGS << " %s" % ENV[variable] if ENV[variable]
+end
 
 unless have_header('ruby.h')
   abort <<-EOS
