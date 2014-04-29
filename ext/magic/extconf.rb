@@ -22,7 +22,7 @@
 
 require 'mkmf'
 
-RbConfig::CONFIG['CC'] = ENV['CC'] if ENV['CC']
+RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 
 $CFLAGS << ' -std=c99 -g -Wall -Wextra -pedantic'
 
