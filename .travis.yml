@@ -4,11 +4,9 @@ cache:
   - bundler
 bundler_args: --jobs 4 --retry 4 --without development --path vendor/bundle
 rvm:
-  - 1.9.2
   - 1.9.3
   - 2.0.0
-  - 2.1.0
-  - 2.1.1
+  - 2.1.2
   - ruby-head
   - rbx
 env:
@@ -23,7 +21,6 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx
-    - rvm: 2.1.0 # Temporary work-around to fix issue with Travis CI.
 branches:
   only:
     - master
