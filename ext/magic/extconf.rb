@@ -27,7 +27,7 @@ RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 $CFLAGS << ' -std=c99 -g -Wall -Wextra -pedantic'
 
 unless RbConfig::CONFIG['host_os'][/darwin/]
-  $LDFLAGS << ' -Wl,--as-needed -Wl,--no-undefined'
+  $LDFLAGS << ' -Wl,--as-needed'
 end
 
 $LDFLAGS << " %s" % ENV['LDFLAGS'] if ENV['LDFLAGS']
