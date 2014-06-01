@@ -34,8 +34,10 @@ require 'magic'
 
 class MagicConstantsTest < Test::Unit::TestCase
   def setup
-    @version = Magic.version
-  rescue Magic::NotImplementedError
+    @version = begin
+      Magic.version
+    rescue Magic::NotImplementedError
+    end
   end
 
   def test_constants

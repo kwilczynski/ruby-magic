@@ -67,8 +67,10 @@ DEFAULT_INTEGRATION_METHODS = [
 class MagicTest < Test::Unit::TestCase
   def setup
     @magic = Magic.new
-    @version = Magic.version
-  rescue Magic::NotImplementedError
+    @version = begin
+      Magic.version
+    rescue Magic::NotImplementedError
+    end
   end
 
   def test_magic_alias
