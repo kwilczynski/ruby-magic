@@ -32,65 +32,60 @@ gem 'test-unit', '>= 2.5.2'
 require 'test/unit'
 require 'magic'
 
-DEFAULT_SINGLETON_METHODS = [
-  :open,
-  :mime,
-  :type,
-  :encoding,
-  :compile,
-  :check,
-  :version,
-  :version_to_a,
-  :version_to_s
-]
-
-DEFAULT_INSTANCE_METHODS = [
-  :close,
-  :closed?,
-  :path,
-  :flags,
-  :flags_array,
-  :file,
-  :buffer,
-  :descriptor,
-  :load,
-  :compile,
-  :check
-]
-
-DEFAULT_INTEGRATION_METHODS = [
-  :magic,
-  :mime,
-  :type
-]
-
 class MagicTest < Test::Unit::TestCase
   def setup
     @magic = Magic.new
     @version = begin
       Magic.version
     rescue Magic::NotImplementedError
+      # Do not care.
     end
   end
 
   def test_magic_alias
-    assert(FileMagic == Magic)
+    assert_same(FileMagic, Magic)
   end
 
   def test_magic_singleton_methods
-    assert_block do
-      DEFAULT_SINGLETON_METHODS.all? {|i| Magic.respond_to?(i) }
-    end
+    [
+      :open,
+      :mime,
+      :type,
+      :encoding,
+      :compile,
+      :check,
+      :version,
+      :version_to_a,
+      :version_to_s
+    ].each {|i| assert_respond_to(Magic, i) }
+  end
+
+  def test_magic_instance_methods
+    [
+      :close,
+      :closed?,
+      :path,
+      :flags,
+      :flags_array,
+      :file,
+      :buffer,
+      :descriptor,
+      :load,
+      :compile,
+      :check
+    ].each {|i| assert_respond_to(@magic, i) }
+  end
+
+  def test_magic_core_integration_methods
+    [String, File].product([
+      :magic,
+      :mime,
+      :type
+    ]).each {|klass, i| assert_respond_to(klass.allocate, i) }
   end
 
   def test_magic_new_instance
     assert(@magic.class == Magic)
-  end
-
-  def test_magic_instance_methods
-    assert_block do
-      DEFAULT_INSTANCE_METHODS.all? {|i| @magic.respond_to?(i) }
-    end
   end
 
   def test_magic_close
@@ -101,13 +96,13 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_close_error
     assert_raise Magic::LibraryError do
       @magic.close
-      @magic.file('') # Should raise Magic::LibraryError.
+      @magic.flags
     end
   end
 
   def test_magic_close_error_message
     @magic.close
-    @magic.file('') # Should raise Magic::LibraryError.
+    @magic.flags
   rescue Magic::LibraryError => error
     assert_equal(error.message, 'Magic library is not open')
   end
@@ -118,10 +113,13 @@ class MagicTest < Test::Unit::TestCase
     assert_true(@magic.closed?)
   end
 
-  def test_magic_inspect
-    assert(@magic.inspect.match(%r{^#<Magic:0x.+>$}))
+  def test_magic_inspect_when_magic_open
+    assert_match(%r{^#<Magic:0x.+>$}, @magic.inspect)
+  end
+
+  def test_magic_inspect_when_magic_closed
     @magic.close
-    assert(@magic.inspect.match(%r{^#<Magic:0x.+ \(closed\)>$}))
+    assert_match(%r{^#<Magic:0x.+ \(closed\)>$}, @magic.inspect)
   end
 
   def test_magic_path
@@ -131,86 +129,99 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_flags
-    [
-      {
-        :given    => 0x000000, # Flag: NONE
-        :expected => Magic::NONE,
-      },
-      {
-        :given    => 0x000010, # Flag: MIME_TYPE
-        :expected => Magic::MIME_TYPE,
-      },
-      {
-        :given    => 0x000400, # Flag: MIME_ENCODING
-        :expected => Magic::MIME_ENCODING,
-      },
-      {
-        :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
-        :expected => Magic::MIME,
-      },
-    ].each do |t|
+    [{
+      :given    => 0x000000, # Flag: NONE
+      :expected => Magic::NONE,
+     },
+     {
+       :given    => 0x000010, # Flag: MIME_TYPE
+       :expected => Magic::MIME_TYPE,
+     },
+     {
+       :given    => 0x000400, # Flag: MIME_ENCODING
+       :expected => Magic::MIME_ENCODING,
+     },
+     {
+       :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
+       :expected => Magic::MIME,
+     }].each do |t|
         @magic.flags = t[:given]
-        obtained = @magic.flags
-        assert_equal(obtained, t[:expected])
+        assert_equal(@magic.flags, t[:expected])
     end
   end
 
+  def test_magic_flags_alias
+    assert_alias_method(@magic, :flags_array, :flags_to_a)
+  end
+
   def test_magic_flags_to_a
-    [
-      {
-        :given    => 0x000000, # Flag: NONE
-        :expected => [Magic::NONE],
-      },
-      {
-        :given    => 0x000001, # Flag: DEBUG
-        :expected => [Magic::DEBUG],
-      },
-      {
-        :given    => 0x000201, # Flag: DEBUG, ERROR
-        :expected => [Magic::DEBUG, Magic::ERROR],
-      },
-      {
-        :given    => 0x000022, # Flag: SYMLINK, CONTINUE
-        :expected => [Magic::SYMLINK, Magic::CONTINUE],
-      },
-      {
-        :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
-        :expected => [Magic::MIME_TYPE, Magic::MIME_ENCODING],
-      },
-    ].each do |t|
+    [{
+       :given    => 0x000000, # Flag: NONE
+       :expected => [Magic::NONE],
+     },
+     {
+       :given    => 0x000001, # Flag: DEBUG
+       :expected => [Magic::DEBUG],
+     },
+     {
+       :given    => 0x000201, # Flag: DEBUG, ERROR
+       :expected => [Magic::DEBUG, Magic::ERROR],
+     },
+     {
+       :given    => 0x000022, # Flag: SYMLINK, CONTINUE
+       :expected => [Magic::SYMLINK, Magic::CONTINUE],
+     },
+     {
+       :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
+       :expected => [Magic::MIME_TYPE, Magic::MIME_ENCODING],
+     }].each do |t|
         @magic.flags = t[:given]
-        obtained = @magic.flags_to_a
-        assert_equal(obtained, t[:expected])
+        assert_equal(@magic.flags_to_a, t[:expected])
     end
   end
 
   def test_magic_flags_to_a_with_boolean_argument_true
-    [
-      {
-        :given    => 0x000000, # Flag: NONE
-        :expected => ['NONE'],
-      },
-      {
-        :given    => 0x000001, # Flag: DEBUG
-        :expected => ['DEBUG'],
-      },
-      {
-        :given    => 0x000201, # Flag: DEBUG, ERROR
-        :expected => ['DEBUG', 'ERROR'],
-      },
-      {
-        :given    => 0x000022, # Flag: SYMLINK, CONTINUE
-        :expected => ['SYMLINK', 'CONTINUE'],
-      },
-      {
-        :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
-        :expected => ['MIME_TYPE', 'MIME_ENCODING'],
-      },
-    ].each do |t|
+    [{
+       :given    => 0x000000, # Flag: NONE
+       :expected => ['NONE'],
+     },
+     {
+       :given    => 0x000001, # Flag: DEBUG
+       :expected => ['DEBUG'],
+     },
+     {
+       :given    => 0x000201, # Flag: DEBUG, ERROR
+       :expected => ['DEBUG', 'ERROR'],
+     },
+     {
+       :given    => 0x000022, # Flag: SYMLINK, CONTINUE
+       :expected => ['SYMLINK', 'CONTINUE'],
+     },
+     {
+       :given    => 0x000410, # Flag: MIME_TYPE, MIME_ENCODING
+       :expected => ['MIME_TYPE', 'MIME_ENCODING'],
+     }].each do |t|
         @magic.flags = t[:given]
-        obtained = @magic.flags_to_a(true)
-        assert_equal(obtained, t[:expected])
+        assert_equal(@magic.flags_to_a(true), t[:expected])
     end
+  end
+
+  def test_magic_flags_error
+    # Test lower boundary limit.
+    assert_raise Magic::FlagsError do
+      @magic.flags = -0xffffff
+    end
+
+    # Test upper boundary limit.
+    assert_raise Magic::FlagsError do
+      @magic.flags = 0xffffff
+    end
+  end
+
+  def test_magic_flags_error_message
+    @magic.flags = 0xffffff
+  rescue Magic::FlagsError => error
+    assert_equal(error.message, 'unknown or invalid flag specified')
   end
 
   def test_magic_file
@@ -240,38 +251,22 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_check
   end
 
-  def test_magic_valid?
+  def test_magic_check_alias
+    assert_alias_method(@magic, :valid?, :check)
   end
 
   def test_magic_compile
   end
 
   def test_magic_version
-    omit_unless(@version, 'Older version of libmagic present. Nothing to do.')
+    omit_unless(@version, 'Older version of libmagic present.')
 
-    obtained = Magic.version
-    assert(obtained.class == Fixnum)
-    assert(obtained > 0)
-  end
-
-  def test_magic_version_to_a
-    omit_unless(@version, 'Older version of libmagic present. Nothing to do.')
-
-    obtained = Magic.version_to_a
-    expected = [Magic.version / 100, Magic.version % 100]
-    assert_equal(obtained, expected)
-  end
-
-  def test_magic_version_to_s
-    omit_unless(@version, 'Older version of libmagic present. Nothing to do.')
-
-    obtained = Magic.version_to_s
-    expected = '%d.%02d' % [Magic.version / 100, Magic.version % 100]
-    assert_equal(obtained, expected)
+    assert_kind_of(Fixnum, Magic.version)
+    assert(Magic.version > 0)
   end
 
   def test_magic_version_error
-    omit_if(@version, 'Up to date version of libmagic present. Nothing to do.')
+    omit_if(@version, 'Up to date version of libmagic present.')
 
     assert_raise Magic::NotImplementedError do
       Magic.version
@@ -279,11 +274,33 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_version_error_message
-    omit_if(@version, 'Up to date version of libmagic present. Nothing to do.')
+    omit_if(@version, 'Up to date version of libmagic present.')
 
     Magic.version
   rescue Magic::NotImplementedError => error
     assert_equal(error.message, 'function is not implemented')
+  end
+
+  def test_magic_version_to_a
+    omit_unless(@version, 'Older version of libmagic present.')
+
+    expected = [Magic.version / 100, Magic.version % 100]
+    assert_equal(Magic.version_to_a, expected)
+  end
+
+  def test_magic_version_to_a_alias
+    assert_alias_method(Magic, :version_array, :version_to_a)
+  end
+
+  def test_magic_version_to_s
+    omit_unless(@version, 'Older version of libmagic present.')
+
+    expected = '%d.%02d' % Magic.version_to_a
+    assert_equal(Magic.version_to_s, expected)
+  end
+
+  def test_magic_version_to_s_alias
+    assert_alias_method(Magic, :version_string, :version_to_s)
   end
 
   def test_magic_singleton_open
@@ -322,25 +339,20 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_singleton_check
   end
 
-  def test_magic_flags_error
-    # Test lower boundary limit.
-    assert_raise Magic::FlagsError do
-      @magic.flags = -0xffffff
-    end
-
-    # Test upper boundary limit.
-    assert_raise Magic::FlagsError do
-      @magic.flags = 0xffffff
-    end
-  end
-
-  def test_magic_flags_error_message
-    @magic.flags = 0xffffff
-  rescue Magic::FlagsError => error
-    assert_equal(error.message, 'unknown or invalid flag specified')
+  def test_magic_error_attribute_errno
+    @magic.flags = 0xffffff # Should raise Magic::FlagsError.
+  rescue Magic::Error => error
+    assert_kind_of(Magic::FlagsError, error)
+    assert_equal(error.errno, Errno::EINVAL::Errno)
   end
 
   def test_magic_magic_error
+    message = 'The quick brown fox jumps over the lazy dog'
+    error = Magic::Error.new(message)
+
+    assert_respond_to(error, :errno)
+    assert_equal(error.message, message)
+    assert_nil(error.errno)
   end
 
   def test_magic_library_error
