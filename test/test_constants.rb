@@ -34,20 +34,12 @@ require 'magic'
 
 class MagicConstantsTest < Test::Unit::TestCase
   def setup
-    @version = begin
-      Magic.version
-    rescue Magic::NotImplementedError
-      # Do not care.
-    end
+    @version = Magic.version rescue nil
   end
 
-
   def test_constants_defiend
-    # Sorted in an ascending order by value.
     [
       :NONE,
-      :NO_CHECK_FORTRAN,
-      :NO_CHECK_TROFF,
       :DEBUG,
       :SYMLINK,
       :COMPRESS,
@@ -67,15 +59,21 @@ class MagicConstantsTest < Test::Unit::TestCase
       :NO_CHECK_APPTYPE,
       :NO_CHECK_ELF,
       :NO_CHECK_TEXT,
-      :NO_CHECK_ASCII,
       :NO_CHECK_CDF,
       :NO_CHECK_TOKENS,
       :NO_CHECK_ENCODING,
-      :NO_CHECK_BUILTIN
+      :NO_CHECK_BUILTIN,
+      :NO_CHECK_ASCII,
+      :NO_CHECK_FORTRAN,
+      :NO_CHECK_TROFF,
     ].each {|i| assert_const_defined(Magic, i) }
   end
 
-  def test_constants_values
+  def test_MIME_constant
+    assert_equal(Magic::MIME, Magic::MIME_TYPE | Magic::MIME_ENCODING)
+  end
+
+  def test_NO_CHECK_BUILTIN_constat
     # Any recent version of libmagic will have 0x37b000 by default.
     custom_NO_CHECK_BUILTIN = Magic::NO_CHECK_COMPRESS | Magic::NO_CHECK_TAR |
       Magic::NO_CHECK_APPTYPE | Magic::NO_CHECK_ELF | Magic::NO_CHECK_TEXT |
@@ -86,19 +84,11 @@ class MagicConstantsTest < Test::Unit::TestCase
       custom_NO_CHECK_BUILTIN ^= 0x080000 # 0x37b000 ^ 0x080000 is 0x3fb000
     end
 
-    # Check if underlaying constants coming from libmagic are sane.
-    [{
-       :given    => Magic::MIME,
-       :expected => Magic::MIME_TYPE | Magic::MIME_ENCODING,
-     },
-     {
-       :given    => Magic::NO_CHECK_BUILTIN,
-       :expected => custom_NO_CHECK_BUILTIN,
-     },
-     {
-       :given    => Magic::NO_CHECK_ASCII,
-       :expected => Magic::NO_CHECK_TEXT,
-     }].each {|t| assert_equal(t[:given], t[:expected]) }
+    assert_equal(Magic::NO_CHECK_BUILTIN, custom_NO_CHECK_BUILTIN)
+  end
+
+  def check_NO_CHECK_ASCII_constant
+    assert_equal(Magic::NO_CHECK_ASCII, Magic::NO_CHECK_TEXT)
   end
 end
 
