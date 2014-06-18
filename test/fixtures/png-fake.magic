@@ -1,7 +1,7 @@
 0	string		\x89PNG\x0d\x0a\x1a\x0a		Ruby image
 !:mime	image/x-go-gopher
->16	belong		x		\b, %ld x
->20	belong		x		%ld,
+>16	belong		x		\b, %d x
+>20	belong		x		%d,
 >24	byte		x		%d-bit
 >25	byte		0		grayscale,
 >25	byte		2		\b/color RGB,
