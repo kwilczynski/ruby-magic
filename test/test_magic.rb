@@ -33,7 +33,11 @@ require 'test/unit'
 require "mocha/test_unit"
 require 'magic'
 
+require_relative 'helpers/magic_test_helper'
+
 class MagicTest < Test::Unit::TestCase
+  include MagicTestHelpers
+
   def setup
     @magic = Magic.new
     @version = Magic.version rescue nil
@@ -77,7 +81,18 @@ class MagicTest < Test::Unit::TestCase
     assert(@magic.class == Magic)
   end
 
-  def test_magic_new_instance_with_DEBUG_flag
+  def test_magic_new_instance_default_flags
+    assert_equal(@magic.flags, 0)
+  end
+
+  def test_magic_new_with_block
+    magic, output = capture_stderr do
+      Magic.new {}
+    end
+
+    expected = "warning: Magic::new() does not take block; use Magic::open() instead\n"
+    assert_kind_of(Magic, magic)
+    assert_equal(output.split(/\.rb:\d+\:\s+?/).pop, expected)
   end
 
   def test_magic_instance_methods
@@ -104,7 +119,15 @@ class MagicTest < Test::Unit::TestCase
     ].each {|i| assert_respond_to(String.allocate, i) }
   end
 
-  def test_magic_file_integration_methods
+  def test_magic_file_integration_singleton_methods
+    [
+      :magic,
+      :mime,
+      :type
+    ].each {|i| assert_respond_to(File, i) }
+  end
+
+  def test_magic_file_integration_instance_methods
     [
       :magic,
       :mime,
@@ -115,6 +138,13 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_close
     @magic.close
     assert_true(@magic.closed?)
+  end
+
+  def test_magic_close_twice
+    assert_nothing_raised do
+      @magic.close
+      @magic.close
+    end
   end
 
   def test_magic_close_error
@@ -147,9 +177,13 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_path
+    assert_kind_of(Array, @magic.path)
+    assert_not_equal(@magic.path.size, 0)
   end
 
   def test_magic_path_with_MAGIC_environment_variable
+    # XXX(krzysztof): How to override "MAGIC" environment
+    # variable so that the C extension will pick it up?
   end
 
   def test_magic_flags_with_NONE_flag
@@ -380,13 +414,7 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(error.errno, Errno::EINVAL::Errno)
   end
 
-  def test_magic_library_error
-  end
-
   def test_magic_new_instance_with_arguments
-  end
-
-  def test_file_integration
   end
 
   def test_file_integration_magic
@@ -411,9 +439,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_file_integration_singleton_type
-  end
-
-  def test_string_integration
   end
 
   def test_string_integration_magic
