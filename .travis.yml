@@ -28,7 +28,7 @@ branches:
     - master
 before_script:
   - export CC=$COMPILER
-  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/05f70f6fd0a180d3e5a5b4d5f2c0fc41f875ba4e/libmagic.sh"
+  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/646166a978e8009bfd08a4964dbea7e4b4614b3e/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
   - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER bash libmagic.sh
 script: bundle exec rake test
