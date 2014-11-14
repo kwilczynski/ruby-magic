@@ -40,10 +40,17 @@ extern "C" {
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-#include <locale.h>
 #include <sys/stat.h>
 #include <magic.h>
 #include <ruby.h>
+
+#if defined(HAVE_LOCALE_H)
+# include <locale.h>
+#endif
+
+#if defined(HAVE_XLOCALE_H)
+# include <xlocale.h>
+#endif
 
 #if !defined(EPERM)
 # define EPERM 1
@@ -77,6 +84,10 @@ extern "C" {
 
 #if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
 # define HAVE_BROKEN_MAGIC 1
+#endif
+
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
+# define HAVE_SAFE_LOCALE 1
 #endif
 
 #if defined(__cplusplus)

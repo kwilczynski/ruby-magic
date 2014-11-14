@@ -72,7 +72,11 @@ struct save {
     int status;
     union {
         file_data_t file;
+#if defined(HAVE_SAFE_LOCALE)
+        locale_t locale;
+#else
         char *locale;
+#endif
     } data;
 };
 

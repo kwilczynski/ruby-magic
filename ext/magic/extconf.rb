@@ -36,7 +36,23 @@ $LDFLAGS << " %s" % ENV['LDFLAGS'] if ENV['LDFLAGS']
   $CFLAGS << " %s" % ENV[variable] if ENV[variable]
 end
 
-unless have_header('ruby.h')
+have_header('locale.h')
+have_header('xlocale.h')
+have_header('utime.h')
+have_header('sys/types.h')
+have_header('sys/time.h')
+
+have_ruby_h = have_header('ruby.h')
+have_magic_h = have_header('magic.h')
+
+have_func('newlocale', ['locale.h', 'xlocale.h'])
+have_func('uselocale', ['locale.h', 'xlocale.h'])
+have_func('freelocale', ['locale.h', 'xlocale.h'])
+
+have_func('utime', ['utime.h', 'sys/types.h'])
+have_func('utimes', 'sys/time.h')
+
+unless have_ruby_h
   abort <<-EOS
 
   You appear to be missing Ruby development libraries and/or header
@@ -62,7 +78,10 @@ unless have_header('ruby.h')
   EOS
 end
 
-unless have_header('magic.h')
+have_func('rb_thread_call_without_gvl')
+have_func('rb_thread_blocking_region')
+
+unless have_magic_h
   abort <<-EOS
 
   You appear to be missing libmagic(3) library and/or necessary header
@@ -106,12 +125,6 @@ unless have_library('magic', 'magic_getpath')
 end
 
 have_func('magic_version', 'magic.h')
-
-have_func('utime', ['utime.h', 'sys/types.h'])
-have_func('utimes', 'sys/time.h')
-
-have_func('rb_thread_call_without_gvl')
-have_func('rb_thread_blocking_region')
 
 dir_config('magic')
 
