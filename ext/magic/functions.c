@@ -123,12 +123,16 @@ override_current_locale(void *data)
     save_t *s = data;
     assert(s != NULL && "Must be a valid pointer to `save_t' type");
 
+#if defined(HAVE_SAFE_LOCALE)
+    locale_t locale = NULL;
+#else
+    char *current_locale = NULL;
+#endif
+
     s->status = -1;
     s->data.locale = NULL;
 
 #if defined(HAVE_SAFE_LOCALE)
-    locale_t locale;
-
     locale = newlocale(LC_ALL_MASK, "C", NULL);
     if (locale == (locale_t)0) {
         goto out;
@@ -141,8 +145,6 @@ override_current_locale(void *data)
 
     assert(s->data.locale != NULL && "Must be a valid pointer to `locale_t' type");
 #else
-    char *current_locale = NULL;
-
     current_locale = setlocale(LC_ALL, NULL);
     if (!current_locale) {
         goto out;
