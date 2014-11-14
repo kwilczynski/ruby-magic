@@ -90,9 +90,9 @@ class MagicTest < Test::Unit::TestCase
       Magic.new {}
     end
 
-    expected = "warning: Magic::new() does not take block; use Magic::open() instead\n"
+    expected = "Magic::new() does not take block; use Magic::open() instead\n"
     assert_kind_of(Magic, magic)
-    assert_equal(output.split(/\.rb:\d+\:\s+?/).pop, expected)
+    assert_equal(output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop, expected)
   end
 
   def test_magic_instance_methods
