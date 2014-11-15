@@ -26,9 +26,10 @@ matrix:
 branches:
   only:
     - master
-before_script:
+before_install:
   - sudo service resolvconf stop 2>&1 >/dev/null
   - echo -e "8.8.4.4\n8.8.8.8" | awk '{ print "nameserver",$0 }' | sudo tee /etc/resolv.conf 1>/dev/null
+before_script:
   - export CC=$COMPILER
   - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/646166a978e8009bfd08a4964dbea7e4b4614b3e/libmagic.sh"
   - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
