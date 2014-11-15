@@ -211,13 +211,13 @@ restore_current_locale(void *data)
     return 0;
 
 out:
+    s->status = -1;
 #if defined(HAVE_SAFE_LOCALE)
     s->data.locale.old_locale = NULL;
     s->data.locale.new_locale = NULL;
 #else
     s->data.locale.old_locale = NULL;
 #endif
-    s->status = -1;
 
     return -1;
 }
