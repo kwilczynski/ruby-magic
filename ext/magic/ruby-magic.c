@@ -245,7 +245,7 @@ rb_mgc_get_flags(VALUE object)
  *    magic.flags = Magic::MIME_TYPE   #=> 16
  *
  * Will raise <i>Magic::FlagsError</i> exception if, or
- * <i>Magic::LibraryError</i> exception if, or 
+ * <i>Magic::LibraryError</i> exception if, or
  * <i>Magic::NotImplementedError</i> exception if, or
  */
 VALUE
@@ -293,7 +293,7 @@ rb_mgc_set_flags(VALUE object, VALUE value)
  *    magic.load("/usr/share/misc/magic", "/etc/magic")   #=> ["/usr/share/misc/magic", "/etc/magic"]
  *    magic.load                                          #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
- * Will raise <i>Magic::LibraryError</i> exception if, or 
+ * Will raise <i>Magic::LibraryError</i> exception if, or
  */
 VALUE
 rb_mgc_load(VALUE object, VALUE arguments)
@@ -375,7 +375,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
  *
  * See also: Magic#compile, Magic::compile and Magic::check
  *
- * Will raise <i>Magic::LibraryError</i> exception if, or 
+ * Will raise <i>Magic::LibraryError</i> exception if, or
  */
 VALUE
 rb_mgc_check(VALUE object, VALUE arguments)
@@ -413,7 +413,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
  *
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
- * Will raise <i>Magic::LibraryError</i> exception if, or 
+ * Will raise <i>Magic::LibraryError</i> exception if, or
  *
  * See also: Magic#buffer and Magic#descriptor
  */
@@ -463,7 +463,7 @@ rb_mgc_file(VALUE object, VALUE value)
  *
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
- * Will raise <i>Magic::LibraryError</i> exception if, or 
+ * Will raise <i>Magic::LibraryError</i> exception if, or
  *
  * See also: Magic#file and Magic#descriptor
  */
@@ -501,7 +501,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
  *
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
- * Will raise <i>Magic::LibraryError</i> exception if, or 
+ * Will raise <i>Magic::LibraryError</i> exception if, or
  *
  * See also: Magic#file and Magic#buffer
  */
@@ -658,7 +658,7 @@ magic_allocate(VALUE klass)
 
     cookie = magic_open(MAGIC_NONE);
     if (!cookie) {
-        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EPERM,
+        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
                 error(E_MAGIC_LIBRARY_INITIALIZE));
     }
 

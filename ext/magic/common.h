@@ -52,8 +52,8 @@ extern "C" {
 # include <xlocale.h>
 #endif
 
-#if !defined(EPERM)
-# define EPERM 1
+#if !defined(ENOMEM)
+# define ENOMEM 12
 #endif
 
 #if !defined(EFAULT)
