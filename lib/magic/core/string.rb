@@ -28,7 +28,7 @@
 class String
   #
   # call-seq:
-  #    string.magic -> string, array or nil
+  #    string.magic -> string or array
   #
   # Returns
   #
@@ -38,12 +38,11 @@ class String
   #
   def magic(flags = Magic::NONE)
     Magic.open(flags) {|mgc| mgc.buffer(self) }
-  rescue Magic::Error
   end
 
   #
   # call-seq:
-  #    string.mime -> string, array or nil
+  #    string.mime -> string or array
   #
   # Returns
   #
@@ -57,7 +56,7 @@ class String
 
   #
   # call-seq:
-  #    string.type -> string, array or nil
+  #    string.type -> string or array
   #
   # Returns
   #
