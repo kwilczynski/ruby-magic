@@ -29,7 +29,7 @@ class File
   class << self
     #
     # call-seq:
-    #    File.magic( path ) -> string, array or nil
+    #    File.magic( path ) -> string or array
     #
     # Returns
     #
@@ -42,13 +42,12 @@ class File
       path ||= path.to_path if path.respond_to?(:to_path)
       path ||= path.to_s
 
-      Magic.open(flags) {|mgc| mgc.file(path) }
-    rescue Magic::Error
+      Magic.open(flags | Magic::ERROR) {|mgc| mgc.file(path) }
     end
 
     #
     # call-seq:
-    #    File.mime( path ) -> string, array or nil
+    #    File.mime( path ) -> string or array
     #
     # Returns
     #
@@ -62,7 +61,7 @@ class File
 
     #
     # call-seq:
-    #    File.type( path ) -> string, array or nil
+    #    File.type( path ) -> string or array
     #
     # Returns
     #
@@ -77,7 +76,7 @@ class File
 
   #
   # call-seq:
-  #    File.magic( path ) -> string, array or nil
+  #    File.magic( path ) -> string or array
   #
   # Returns
   #
@@ -91,7 +90,7 @@ class File
 
   #
   # call-seq:
-  #    File.mime( path ) -> string, array or nil
+  #    File.mime( path ) -> string or array
   #
   # Returns
   #
@@ -105,7 +104,7 @@ class File
 
   #
   # call-seq:
-  #    File.type( path ) -> string, array or nil
+  #    File.type( path ) -> string or array
   #
   # Returns
   #
