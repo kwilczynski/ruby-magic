@@ -61,13 +61,11 @@ class Magic
   # See also: Magic#flags
   #
   def flags_to_a(names = false)
-    raise LibraryError, "Magic library is not open" if closed?
+    raise LibraryError, 'Magic library is not open' if closed?
+    return [names ? 'NONE' : 0] if @flags.zero?
 
     n, i = 0, @flags
-
     flags = []
-
-    return [names ? 'NONE' : 0] if @flags.zero?
 
     @@flags_map ||= flags_as_map if names
 
@@ -189,7 +187,7 @@ class Magic
 
   def flags_as_map
     self.class.constants.inject({}) do |flags,constant|
-      value        = self.class.const_get(constant)
+      value = self.class.const_get(constant)
       flags[value] = constant.to_s if value.is_a?(Fixnum)
       flags
     end
