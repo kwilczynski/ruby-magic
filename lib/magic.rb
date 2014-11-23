@@ -20,10 +20,10 @@
 # limitations under the License.
 #
 
-require 'magic/magic'
-require 'magic/version'
-require 'magic/core/file'
-require 'magic/core/string'
+require_relative 'magic/magic'
+require_relative 'magic/version'
+require_relative 'magic/core/file'
+require_relative 'magic/core/string'
 
 # :startdoc:
 
