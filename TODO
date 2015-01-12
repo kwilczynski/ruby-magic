@@ -14,9 +14,11 @@ ruby-magic (0.3.0)
 
 ruby-magic (0.2.0)
 
+  * Improve test coverage (if possible to 100%);
   * Add implementation for the included "binary";
   * Add Doxygen style comments for other functions in the source code;
-  * Add RDoc and improve documentation i.e. source code commenting.
-  * Add support for magic_load_buffers(magic_t, void **, size_t *, size_t).
+  * Add RDoc and improve documentation i.e. source code commenting;
+  * Add support for magic_load_buffers(magic_t, void **, size_t *, size_t);
+  * Add support for Windows (if possible).
 
 -- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Mon, 12 Jan 2015 01:33:48 +0000
