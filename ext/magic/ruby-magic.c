@@ -560,7 +560,7 @@ rb_mgc_version(VALUE object)
     return INT2NUM(rv);
 }
 
-/* :enddoc: */
+/* :stopdoc: */
 
 static inline void*
 nogvl_magic_load(void *data)
@@ -772,6 +772,8 @@ magic_return(VALUE value, void *data)
     return value;
 }
 
+/* :startdoc: */
+
 void
 Init_magic(void)
 {
@@ -973,6 +975,8 @@ Init_magic(void)
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TROFF", INT2NUM(MAGIC_NO_CHECK_TROFF));
 }
+
+/* :enddoc: */
 
 #if defined(__cplusplus)
 }
