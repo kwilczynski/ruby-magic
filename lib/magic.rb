@@ -88,6 +88,8 @@ class Magic
     #
     # Example:
     #
+    # Will raise <i></i>
+    #
     # See also: Magic::mime, Magic::type, Magic::encoding, Magic::compile and Magic::check
     #
     def open(flags = Magic::NONE)
@@ -114,6 +116,8 @@ class Magic
     #
     # Example:
     #
+    # Will raise <i></i>
+    #
     # See also: Magic::open, Magic::type, Magic::encoding, Magic::compile and Magic::check
     #
     def mime(&block)
@@ -128,6 +132,8 @@ class Magic
     # Returns
     #
     # Example:
+    #
+    # Will raise <i></i>
     #
     # See also: Magic::open, Magic::mime, Magic::encoding, Magic::compile and Magic::check
     #
@@ -144,6 +150,8 @@ class Magic
     #
     # Example:
     #
+    # Will raise <i></i>
+    #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::compile and Magic::check
     #
     def encoding(&block)
@@ -159,6 +167,8 @@ class Magic
     #
     # Example:
     #
+    # Will raise <i></i>
+    #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, and Magic::check
     #
     def compile(path)
@@ -173,6 +183,8 @@ class Magic
     # Returns
     #
     # Example:
+    #
+    # Will raise <i></i>
     #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding and Magic::compile
     #

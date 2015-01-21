@@ -80,7 +80,7 @@ static VALUE magic_return(VALUE value, void *data);
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
  * Will raise <i>Magic::LibraryError</i> exception if, or
- * <i>Magic::MagicError</i> exception if, or
+ * <i>Magic::MagicError</i> exception if
  *
  * See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, Magic::compile and Magic::check
  */
@@ -294,6 +294,8 @@ rb_mgc_set_flags(VALUE object, VALUE value)
  *    magic.load                                          #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
  * Will raise <i>Magic::LibraryError</i> exception if, or
+ *
+ * See also: Magic#check, Magic#compile, Magic::check and Magic::compile
  */
 VALUE
 rb_mgc_load(VALUE object, VALUE arguments)
@@ -333,9 +335,9 @@ rb_mgc_load(VALUE object, VALUE arguments)
  *
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
- * See also: Magic#check, Magic::check and Magic::compile
- *
  * Will raise <i>Magic::LibraryError</i> exception if, or
+ *
+ * See also: Magic#check, Magic::check and Magic::compile
  */
 VALUE
 rb_mgc_compile(VALUE object, VALUE arguments)
@@ -373,9 +375,9 @@ rb_mgc_compile(VALUE object, VALUE arguments)
  *
  *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
  *
- * See also: Magic#compile, Magic::compile and Magic::check
- *
  * Will raise <i>Magic::LibraryError</i> exception if, or
+ *
+ * See also: Magic#compile, Magic::compile and Magic::check
  */
 VALUE
 rb_mgc_check(VALUE object, VALUE arguments)
