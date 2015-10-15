@@ -6,8 +6,8 @@ bundler_args: --jobs 1 --retry 4 --without development --path vendor/bundle
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.5
-  - 2.2.0
+  - 2.1.7
+  - 2.2.3
   - ruby-head
   - rbx-2
 env:
