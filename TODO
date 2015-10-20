@@ -2,7 +2,7 @@ ruby-magic (0.5.0)
 
   * Vendor libmagic source code?
 
--- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Wed, 25 Mar 2015 23:27:00 +0000
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Tue, 20 Oct 2015 19:58:00 +0000
 
 ruby-magic (0.4.0)
 
@@ -10,7 +10,7 @@ ruby-magic (0.4.0)
   * Move to YARD from RDoc (as RDoc is very bad, really);
   * Improve documentation i.e. source code commenting, README file, etc.
 
--- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Wed, 25 Mar 2015 23:27:00 +0000
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Tue, 20 Oct 2015 19:58:00 +0000
 
 ruby-magic (0.3.0)
 
@@ -19,6 +19,6 @@ ruby-magic (0.3.0)
   * Add Doxygen style comments for other functions in the source code;
   * Add RDoc and improve documentation i.e. source code commenting;
   * Add support for magic_load_buffers(magic_t, void **, size_t *, size_t);
-  * Add support for Windows (if possible).
+  * Add support for Windows and *BSD family (if possible).
 
--- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Wed, 25 Mar 2015 23:27:00 +0000
+-- Krzysztof Wilczynski <krzysztof.wilczynski@linux.com>  Tue, 20 Oct 2015 19:58:00 +0000
