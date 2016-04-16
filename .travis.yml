@@ -1,15 +1,20 @@
 language: ruby
+
 cache:
   - apt
   - bundler
-bundler_args: --jobs 1 --retry 4 --without development --path vendor/bundle
+
+bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
+
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.7
-  - 2.2.3
+  - 2.1.9
+  - 2.2.4
+  - 2.3.0
   - ruby-head
   - rbx-2
+
 env:
   - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
   - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=clang
@@ -17,25 +22,27 @@ env:
   - VERSION=5.14 SHA1=064c8f17a5f7ae1e336a9285131e046d3b2d04d7 COMPILER=clang
   - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=gcc
   - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=clang
-  - VERSION=5.19 SHA1=0dff09eb44fde1998be79e8d312e9be4456d31ee COMPILER=gcc
-  - VERSION=5.19 SHA1=0dff09eb44fde1998be79e8d312e9be4456d31ee COMPILER=clang
-  - VERSION=5.21 SHA1=9836603b75dde99664364b0e7a8b5492461ac0fe COMPILER=gcc
-  - VERSION=5.21 SHA1=9836603b75dde99664364b0e7a8b5492461ac0fe COMPILER=clang
-  - VERSION=5.22 SHA1=20fa06592291555f2b478ea2fb70b53e9e8d1f7c COMPILER=gcc
-  - VERSION=5.22 SHA1=20fa06592291555f2b478ea2fb70b53e9e8d1f7c COMPILER=clang
   - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=gcc
   - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=clang
+
 matrix:
   fast_finish: true
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx-2
+
 branches:
   only:
     - master
+
+before_install:
+  - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/2a4946c0b745b2bfdd124a14c1290d1290ebf64c/libmagic.sh"
+  - travis_retry curl -L -s $URL > libmagic.sh
+  - export VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH
+  - travis_retry sudo -E bash libmagic.sh
+
 before_script:
-  - export CC=$COMPILER
-  - export SCRIPT_URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/ba0e5a8b00f8897d4bf47c1e670137f34df009b3/libmagic.sh"
-  - travis_retry curl -L -s $SCRIPT_URL > libmagic.sh
-  - travis_retry sudo VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH bash libmagic.sh
-script: bundle exec rake test
+  - bundle exec rake clean
+
+script:
+  - bundle exec rake test
