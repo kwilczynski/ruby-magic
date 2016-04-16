@@ -7,8 +7,6 @@ cache:
 bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
 
 rvm:
-  - 1.9.3
-  - 2.0.0
   - 2.1.8
   - 2.2.4
   - 2.3.0
@@ -47,7 +45,6 @@ before_install:
   - sudo -H -E VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH bash libmagic.sh
 
 before_script:
-  - gem update bundler
   - bundle exec rake clean clobber
 
 script:
