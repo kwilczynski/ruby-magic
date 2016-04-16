@@ -41,13 +41,13 @@ notifications:
     on_failure: change
 
 before_install:
+  - export CC=$(which $COMPILER)
   - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/2a4946c0b745b2bfdd124a14c1290d1290ebf64c/libmagic.sh"
-  - export VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH
-  - travis_retry curl -L -s $URL > libmagic.sh
-  - travis_retry sudo -E bash libmagic.sh
-  - travis_retry gem update bundler
+  - curl -L -s $URL > libmagic.sh
+  - sudo -H -E VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH bash libmagic.sh
 
 before_script:
+  - gem update bundler
   - bundle exec rake clean clobber
 
 script:
