@@ -35,14 +35,20 @@ branches:
   only:
     - master
 
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
 before_install:
   - export URL="https://gist.githubusercontent.com/kwilczynski/9270161/raw/2a4946c0b745b2bfdd124a14c1290d1290ebf64c/libmagic.sh"
-  - travis_retry curl -L -s $URL > libmagic.sh
   - export VERSION=$VERSION SHA1=$SHA1 CC=$COMPILER PATH=$PATH
+  - travis_retry curl -L -s $URL > libmagic.sh
   - travis_retry sudo -E bash libmagic.sh
+  - travis_retry gem update bundler
 
 before_script:
-  - bundle exec rake clean
+  - bundle exec rake clean clobber
 
 script:
   - bundle exec rake test
