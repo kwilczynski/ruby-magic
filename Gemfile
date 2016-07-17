@@ -7,9 +7,9 @@ platforms :rbx do
   gem 'psych'
 end
 
-gem 'rake', '~> 10.1', '>= 10.1.1'
+gem 'rake', '~> 11.2', '>= 11.2.2'
 gem 'rdoc', '~> 4.1', '>= 4.1.1'
-gem 'rake-compiler', '~> 0.9', '>= 0.9.2'
+gem 'rake-compiler', '~> 1.0', '>= 1.0.1'
 
 group :test do
   gem 'mocha', '~> 1.1', '>= 1.1.0'
