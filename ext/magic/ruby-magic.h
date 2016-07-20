@@ -222,8 +222,8 @@ RUBY_EXTERN VALUE rb_mgc_closed(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_get_path(VALUE object);
 
-RUBY_EXTERN VALUE rb_mgc_get_flags(VALUE object);
-RUBY_EXTERN VALUE rb_mgc_set_flags(VALUE object, VALUE value);
+RUBY_EXTERN VALUE rb_mgc_getflags(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_setflags(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_load(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_compile(VALUE object, VALUE arguments);

@@ -36,6 +36,7 @@ VALUE rb_mgc_eNotImplementedError = Qnil;
 
 void Init_magic(void);
 
+static VALUE magic_setflags_internal(void *data);
 static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
 static VALUE magic_compile_internal(void *data);
@@ -228,7 +229,7 @@ rb_mgc_get_path(VALUE object)
  * See also: Magic#flags_to_a
  */
 VALUE
-rb_mgc_get_flags(VALUE object)
+rb_mgc_getflags(VALUE object)
 {
     CHECK_MAGIC_OPEN(object);
     return rb_ivar_get(object, id_at_flags);
@@ -249,17 +250,19 @@ rb_mgc_get_flags(VALUE object)
  * <i>Magic::NotImplementedError</i> exception if, or
  */
 VALUE
-rb_mgc_set_flags(VALUE object, VALUE value)
+rb_mgc_setflags(VALUE object, VALUE value)
 {
     int local_errno;
-    magic_t cookie;
+    magic_arguments_t ma;
 
     Check_Type(value, T_FIXNUM);
 
     CHECK_MAGIC_OPEN(object);
-    MAGIC_COOKIE(cookie);
+    MAGIC_COOKIE(ma.cookie);
 
-    if (magic_setflags_wrapper(cookie, NUM2INT(value)) < 0) {
+    ma.flags = NUM2INT(value);
+
+    if (!MAGIC_SYNCHRONIZED(magic_setflags_internal, &ma)) {
         local_errno = errno;
 
         switch (local_errno) {
@@ -272,7 +275,7 @@ rb_mgc_set_flags(VALUE object, VALUE value)
                         error(E_FLAG_NOT_IMPLEMENTED));
                 break;
             default:
-                MAGIC_LIBRARY_ERROR(cookie);
+                MAGIC_LIBRARY_ERROR(ma.cookie);
                 break;
         }
     }
@@ -314,7 +317,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
         ma.data.file.path = magic_getpath_wrapper();
     }
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
 
     if (!MAGIC_SYNCHRONIZED(magic_load_internal, &ma)) {
         MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -355,7 +358,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
         value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
     }
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_compile_internal, &ma)) {
@@ -395,7 +398,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
         value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
     }
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     if (!MAGIC_SYNCHRONIZED(magic_check_internal, &ma)) {
@@ -432,7 +435,7 @@ rb_mgc_file(VALUE object, VALUE value)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
@@ -480,7 +483,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
 
     ma.data.buffer.size = RSTRING_LEN(value);
     ma.data.buffer.buffer = RVAL2CSTR(value);
@@ -518,7 +521,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
     CHECK_MAGIC_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    ma.flags = NUM2INT(rb_mgc_get_flags(object));
+    ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.fd = NUM2INT(value);
 
     cstring = (const char *)MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
@@ -606,6 +609,16 @@ nogvl_magic_descriptor(void *data)
 {
     magic_arguments_t *ma = data;
     return (void *)magic_descriptor_wrapper(ma->cookie, ma->data.file.fd, ma->flags);
+}
+
+static inline VALUE
+magic_setflags_internal(void *data)
+{
+    int rv;
+    magic_arguments_t *ma = data;
+
+    rv = magic_setflags_wrapper(ma->cookie, ma->flags);
+    return (VALUE)(rv < 0 ? NULL : data);
 }
 
 static inline VALUE
@@ -822,8 +835,8 @@ Init_magic(void)
     rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_closed), 0);
 
     rb_define_method(rb_cMagic, "path", RUBY_METHOD_FUNC(rb_mgc_get_path), 0);
-    rb_define_method(rb_cMagic, "flags", RUBY_METHOD_FUNC(rb_mgc_get_flags), 0);
-    rb_define_method(rb_cMagic, "flags=", RUBY_METHOD_FUNC(rb_mgc_set_flags), 1);
+    rb_define_method(rb_cMagic, "flags", RUBY_METHOD_FUNC(rb_mgc_getflags), 0);
+    rb_define_method(rb_cMagic, "flags=", RUBY_METHOD_FUNC(rb_mgc_setflags), 1);
 
     rb_define_method(rb_cMagic, "file", RUBY_METHOD_FUNC(rb_mgc_file), 1);
     rb_define_method(rb_cMagic, "buffer", RUBY_METHOD_FUNC(rb_mgc_buffer), 1);
