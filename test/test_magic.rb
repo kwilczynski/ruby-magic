@@ -98,6 +98,7 @@ class MagicTest < Test::Unit::TestCase
       :file,
       :buffer,
       :descriptor,
+      :fd,
       :load,
       :compile,
       :check
@@ -288,6 +289,12 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_descriptor_with_MAGIC_CONTINUE_flag
+  end
+
+  def test_magic_fd_with_integer
+  end
+
+  def test_magic_fd_with_object
   end
 
   def test_magic_load

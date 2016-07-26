@@ -50,6 +50,23 @@ class Magic
 
   #
   # call-seq:
+  #    magic.fd( object )  -> string
+  #    magic.fd( integer ) -> string
+  #
+  # Returns
+  #
+  # Example:
+  #
+  # Will raise <i>Magic::LibraryError</i> exception if, or
+  #
+  # See also: Magic#descriptor, Magic#buffer and Magic#file
+  #
+  def fd(fd)
+    descriptor(fd.respond_to?(:fileno) ? fd.fileno : fd)
+  end
+
+  #
+  # call-seq:
   #    magic.flags_to_a( names ) -> array
   #
   # Returns an +array+
