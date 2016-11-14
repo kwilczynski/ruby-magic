@@ -20,13 +20,6 @@
 # limitations under the License.
 #
 
-begin
-  require 'coveralls'
-  Coveralls.wear!
-rescue LoadError
-  STDERR.puts 'The Coveralls gem is not installed, skipping ...'
-end
-
 gem 'test-unit', '>= 3.0.0'
 
 require 'test/unit'
