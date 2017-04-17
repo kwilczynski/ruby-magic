@@ -229,7 +229,7 @@ magic_getpath_wrapper(void)
 }
 
 inline int
-magic_setflags_wrapper(struct magic_set *ms, int flags)
+magic_setflags_wrapper(magic_t magic, int flags)
 {
     if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
         errno = EINVAL;
@@ -243,65 +243,65 @@ magic_setflags_wrapper(struct magic_set *ms, int flags)
     }
 #endif
 
-    return magic_setflags(ms, flags);
+    return magic_setflags(magic, flags);
 }
 
 inline int
-magic_load_wrapper(struct magic_set *ms, const char *magicfile, int flags)
+magic_load_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
 
-    MAGIC_FUNCTION(magic_load, rv, flags, ms, magicfile);
+    MAGIC_FUNCTION(magic_load, rv, flags, magic, magicfile);
 
     return rv;
 }
 
 inline int
-magic_compile_wrapper(struct magic_set *ms, const char *magicfile, int flags)
+magic_compile_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
 
-    MAGIC_FUNCTION(magic_compile, rv, flags, ms, magicfile);
+    MAGIC_FUNCTION(magic_compile, rv, flags, magic, magicfile);
 
     return rv;
 }
 
 inline int
-magic_check_wrapper(struct magic_set *ms, const char *magicfile, int flags)
+magic_check_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
 
-    MAGIC_FUNCTION(magic_check, rv, flags, ms, magicfile);
+    MAGIC_FUNCTION(magic_check, rv, flags, magic, magicfile);
 
     return rv;
 }
 
 inline const char*
-magic_file_wrapper(struct magic_set *ms, const char* filename, int flags)
+magic_file_wrapper(magic_t magic, const char* filename, int flags)
 {
     const char *cstring;
 
-    MAGIC_FUNCTION(magic_file, cstring, flags, ms, filename);
+    MAGIC_FUNCTION(magic_file, cstring, flags, magic, filename);
 
     return cstring;
 }
 
 inline const char*
-magic_buffer_wrapper(struct magic_set *ms, const void *buffer, size_t size, int flags)
+magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags)
 {
     const char *cstring;
 
-    MAGIC_FUNCTION(magic_buffer, cstring, flags, ms, buffer, size);
+    MAGIC_FUNCTION(magic_buffer, cstring, flags, magic, buffer, size);
 
     return cstring;
 }
 
 inline const char*
-magic_descriptor_wrapper(struct magic_set *ms, int fd, int flags)
+magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
     const char *cstring;
 
-    MAGIC_FUNCTION(magic_descriptor, cstring, flags, ms, fd);
+    MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
 
     return cstring;
 }
