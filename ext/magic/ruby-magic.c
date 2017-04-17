@@ -88,10 +88,9 @@ static VALUE magic_return(VALUE value, void *data);
 VALUE
 rb_mgc_initialize(VALUE object, VALUE arguments)
 {
-    VALUE mutex = Qnil;
-
     magic_arguments_t ma;
     const char *klass = NULL;
+    VALUE mutex = Qnil;
 
     if (rb_block_given_p()) {
         klass = "Magic";
@@ -197,8 +196,8 @@ rb_mgc_closed(VALUE object)
 VALUE
 rb_mgc_get_path(VALUE object)
 {
-    VALUE value = Qnil;
     const char *cstring = NULL;
+    VALUE value = Qnil;
 
     CHECK_MAGIC_OPEN(object);
 
@@ -210,6 +209,7 @@ rb_mgc_get_path(VALUE object)
     cstring = magic_getpath_wrapper();
     value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
 
+    RB_GC_GUARD(value);
     return rb_ivar_set(object, id_at_path, value);
 }
 
@@ -325,6 +325,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
     value = magic_split(CSTR2RVAL(ma.data.file.path), CSTR2RVAL(":"));
 
+    RB_GC_GUARD(value);
     return rb_ivar_set(object, id_at_path, value);
 }
 
@@ -365,6 +366,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
+    RB_GC_GUARD(value);
     return Qtrue;
 }
 
@@ -405,6 +407,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
         return Qfalse;
     }
 
+    RB_GC_GUARD(value);
     return Qtrue;
 }
 
@@ -716,6 +719,7 @@ magic_exception(void *data)
 
     rb_iv_set(object, "@errno", INT2NUM(e->magic_errno));
 
+    RB_GC_GUARD(object);
     return object;
 }
 
@@ -781,6 +785,8 @@ magic_return(VALUE value, void *data)
 
     if (ma->flags & MAGIC_CONTINUE) {
         array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
+
+        RB_GC_GUARD(array);
         return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
