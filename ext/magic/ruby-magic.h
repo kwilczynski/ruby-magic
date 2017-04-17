@@ -28,9 +28,18 @@ extern "C" {
 #include "common.h"
 #include "functions.h"
 
-#define DATA_P(x)   (TYPE(x) == T_DATA)
-#define STRING_P(x) (TYPE(x) == T_STRING)
-#define ARRAY_P(x)  (TYPE(x) == T_ARRAY)
+#define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
+#define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
+#define STRING_P(x)  (RB_TYPE_P((x), T_STRING))
+#define ARRAY_P(x)   (RB_TYPE_P((x), T_ARRAY))
+
+#if !defined(RVAL2CBOOL)
+# define RVAL2CBOOL(x) (RTEST(x))
+#endif
+
+#if !defined(CBOOL2RVAL)
+# define CBOOL2RVAL(x) ((x) ? Qtrue : Qfalse)
+#endif
 
 #if !defined(STR2CSTR)
 # define STR2CSTR(x) StringValuePtr(x)
@@ -58,7 +67,7 @@ extern "C" {
 
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
-#define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : RARRAY_PTR(a)[0])
+#define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : rb_ary_entry((a), 0))
 
 #define NOGVL_FUNCTION (VALUE (*)(void *))
 
