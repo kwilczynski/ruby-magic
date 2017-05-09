@@ -94,6 +94,7 @@ class MagicTest < Test::Unit::TestCase
       :closed?,
       :path,
       :flags,
+      :flags=,
       :flags_array,
       :file,
       :buffer,
