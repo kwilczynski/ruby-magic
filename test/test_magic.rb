@@ -183,25 +183,25 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_flags_with_NONE_flag
     @magic.flags = 0x000000 # Flag: NONE
-    assert_kind_of(Fixnum, @magic.flags)
+    assert_kind_of(Integer, @magic.flags)
     assert_equal(@magic.flags, Magic::NONE)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
     @magic.flags = 0x000010 # Flag: MIME_TYPE
-    assert_kind_of(Fixnum, @magic.flags)
+    assert_kind_of(Integer, @magic.flags)
     assert_equal(@magic.flags, Magic::MIME_TYPE)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
     @magic.flags = 0x000400 # Flag: MIME_ENCODING
-    assert_kind_of(Fixnum, @magic.flags)
+    assert_kind_of(Integer, @magic.flags)
     assert_equal(@magic.flags, Magic::MIME_ENCODING)
   end
 
   def test_magic_flags_with_MIME_flag
     @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
-    assert_kind_of(Fixnum, @magic.flags)
+    assert_kind_of(Integer, @magic.flags)
     assert_equal(@magic.flags, Magic::MIME)
   end
 
@@ -321,7 +321,7 @@ class MagicTest < Test::Unit::TestCase
       Magic.stubs(:version).returns(518)
     end
 
-    assert_kind_of(Fixnum, Magic.version)
+    assert_kind_of(Integer, Magic.version)
     assert(Magic.version > 0)
   end
 
