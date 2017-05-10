@@ -199,7 +199,7 @@ rb_mgc_get_path(VALUE object)
     const char *cstring = NULL;
     VALUE value = Qnil;
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
 
     value = rb_ivar_get(object, id_at_path);
     if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC")) {
@@ -231,7 +231,7 @@ rb_mgc_get_path(VALUE object)
 VALUE
 rb_mgc_getflags(VALUE object)
 {
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     return rb_ivar_get(object, id_at_flags);
 }
 
@@ -257,7 +257,7 @@ rb_mgc_setflags(VALUE object, VALUE value)
 
     Check_Type(value, T_FIXNUM);
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(value);
@@ -306,7 +306,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
     magic_arguments_t ma;
     VALUE value = Qnil;
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments) && !NIL_P(RARRAY_FIRST(arguments))) {
@@ -349,7 +349,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     magic_arguments_t ma;
     VALUE value = Qnil;
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments)) {
@@ -390,7 +390,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
     magic_arguments_t ma;
     VALUE value = Qnil;
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments)) {
@@ -435,7 +435,7 @@ rb_mgc_file(VALUE object, VALUE value)
 
     Check_Type(value, T_STRING);
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
@@ -483,7 +483,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     Check_Type(value, T_STRING);
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
@@ -521,7 +521,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 
     Check_Type(value, T_FIXNUM);
 
-    CHECK_MAGIC_OPEN(object);
+    MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));

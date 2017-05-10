@@ -114,7 +114,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
         rb_exc_raise(__e_library);                                          \
     } while(0)
 
-#define CHECK_MAGIC_OPEN(o)                                         \
+#define MAGIC_CHECK_OPEN(o)                                         \
     do {                                                            \
         if (MAGIC_CLOSED_P(o)) {                                    \
             MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,       \
