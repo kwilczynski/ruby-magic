@@ -215,10 +215,9 @@ class Magic
   private
 
   def flags_as_map
-    self.class.constants.inject({}) do |flags,constant|
+    self.class.constants.each_with_object({}) do |constant, flags|
       value = self.class.const_get(constant)
-      flags[value] = constant.to_s if value.is_a?(Fixnum)
-      flags
+      flags[value] = constant.to_s if value.is_a?(Integer)
     end
   end
 end
