@@ -32,8 +32,9 @@ class MagicTest < Test::Unit::TestCase
   include MagicTestHelpers
 
   def setup
-    @magic = Magic.new
+    @flags_limit = 0xfffffff
     @version = Magic.version rescue nil
+    @magic = Magic.new
   end
 
   def test_magic_alias
@@ -255,18 +256,18 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_flags_error_lower_boundary
     assert_raise Magic::FlagsError do
-      @magic.flags = -0xffffff
+      @magic.flags = -@flags_limit
     end
   end
 
   def test_magic_flags_error_upper_boundary
     assert_raise Magic::FlagsError do
-      @magic.flags = 0xffffff
+      @magic.flags = @flags_limit + 1
     end
   end
 
   def test_magic_flags_error_message
-    @magic.flags = 0xffffff
+    @magic.flags = @flags_limit + 1
   rescue Magic::FlagsError => error
     assert_equal(error.message, 'unknown or invalid flag specified')
   end
@@ -278,6 +279,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_file_with_MAGIC_CONTINUE_flag
+  end
+
+  def test_magic_file_with_EXTENSION_flag
   end
 
   def test_magic_buffer
@@ -409,7 +413,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_error_attribute_errno
-    @magic.flags = 0xffffff # Should raise Magic::FlagsError.
+    @magic.flags = @flags_limit + 1 # Should raise Magic::FlagsError.
   rescue Magic::Error => error
     assert_kind_of(Magic::FlagsError, error)
     assert_equal(error.errno, Errno::EINVAL::Errno)

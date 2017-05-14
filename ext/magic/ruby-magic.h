@@ -165,7 +165,7 @@ typedef struct magic_arguments magic_arguments_t;
 typedef struct magic_exception magic_exception_t;
 
 static const char *errors[] = {
-    "unknown error",
+    "an unknown error has occurred",
     "function is not implemented",
     "failed to initialize Magic library",
     "Magic library is not open",

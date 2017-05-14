@@ -448,9 +448,14 @@ rb_mgc_file(VALUE object, VALUE value)
         if (ma.flags & MAGIC_ERROR) {
             MAGIC_LIBRARY_ERROR(ma.cookie);
         }
-        else if (rv < 515) {
+        else if (rv < 515 || ma.flags & MAGIC_EXTENSION || ma.flags & MAGIC_NODESC) {
             (void)magic_errno(ma.cookie);
             cstring = magic_error(ma.cookie);
+
+            if (!cstring) {
+                MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL,
+                        error(E_UNKNOWN));
+            }
         }
     }
 
@@ -905,7 +910,7 @@ Init_magic(void)
     rb_define_const(rb_cMagic, "PRESERVE_ATIME", INT2NUM(MAGIC_PRESERVE_ATIME));
 
     /*
-     * Do not translate unprintable characters to an octal representation.
+     * Do not convert unprintable characters to an octal representation.
      */
     rb_define_const(rb_cMagic, "RAW", INT2NUM(MAGIC_RAW));
 
@@ -995,6 +1000,21 @@ Init_magic(void)
      * Do not look for troff sequences inside ASCII files.
      */
     rb_define_const(rb_cMagic, "NO_CHECK_TROFF", INT2NUM(MAGIC_NO_CHECK_TROFF));
+
+    /*
+     * Return a slash-separated list of extensions for this file type.
+     */
+    rb_define_const(rb_cMagic, "EXTENSION", INT2NUM(MAGIC_EXTENSION));
+
+    /*
+     * Do not report on compression, only report about the uncompressed data.
+     */
+    rb_define_const(rb_cMagic, "COMPRESS_TRANSP", INT2NUM(MAGIC_COMPRESS_TRANSP));
+
+    /*
+     * Unknown.
+     */
+    rb_define_const(rb_cMagic, "NODESC", INT2NUM(MAGIC_NODESC));
 }
 
 /* :enddoc: */

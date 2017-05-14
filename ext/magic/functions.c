@@ -231,7 +231,7 @@ magic_getpath_wrapper(void)
 inline int
 magic_setflags_wrapper(magic_t magic, int flags)
 {
-    if (flags < MAGIC_NONE || flags > MAGIC_NO_CHECK_BUILTIN) {
+    if (flags < 0 || flags > 0xfffffff) {
         errno = EINVAL;
         return -EINVAL;
     }
