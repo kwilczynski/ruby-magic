@@ -114,13 +114,13 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
         rb_exc_raise(__e_library);                                          \
     } while(0)
 
-#define MAGIC_CHECK_OPEN(o)                                         \
-    do {                                                            \
-        if (MAGIC_CLOSED_P(o)) {                                    \
-            MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,       \
-                                    error(E_MAGIC_LIBRARY_CLOSED)); \
-        }                                                           \
-    } while(0)                                                      \
+#define MAGIC_CHECK_OPEN(o)                                     \
+    do {                                                        \
+        if (MAGIC_CLOSED_P(o)) {                                \
+            MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,   \
+                                error(E_MAGIC_LIBRARY_CLOSED)); \
+        }                                                       \
+    } while(0)                                                  \
 
 #define error(t) errors[(t)]
 
@@ -153,6 +153,8 @@ struct magic_arguments {
         file_t file;
         buffer_t buffer;
     } data;
+    int status;
+    const char *result;
 };
 
 struct magic_exception {

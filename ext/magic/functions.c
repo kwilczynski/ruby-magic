@@ -37,7 +37,9 @@ suppress_error_output(void *data)
     mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
 
     save_t *s = data;
-    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    assert(s != NULL && \
+           "Must be a valid pointer to `save_t' type");
 
     s->data.file.old_fd = -1;
     s->data.file.new_fd = -1;
@@ -86,7 +88,9 @@ restore_error_output(void *data)
     int local_errno;
 
     save_t *s = data;
-    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    assert(s != NULL && \
+           "Must be a valid pointer to `save_t' type");
 
     if (s->data.file.old_fd < 0 && s->status != 0) {
         return -1;
@@ -125,7 +129,9 @@ override_current_locale(void *data)
 #endif
 
     save_t *s = data;
-    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    assert(s != NULL && \
+           "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
 
@@ -147,7 +153,7 @@ override_current_locale(void *data)
     }
 
     assert(s->data.locale.old_locale != NULL && \
-            "Must be a valid pointer to `locale_t' type");
+           "Must be a valid pointer to `locale_t' type");
 #else
     s->data.locale.old_locale = NULL;
 
@@ -166,7 +172,7 @@ override_current_locale(void *data)
     }
 
     assert(s->data.locale.old_locale != NULL && \
-            "Must be a valid pointer to `char' type");
+           "Must be a valid pointer to `char' type");
 #endif
     s->status = 0;
 
@@ -178,7 +184,9 @@ int
 restore_current_locale(void *data)
 {
     save_t *s = data;
-    assert(s != NULL && "Must be a valid pointer to `save_t' type");
+
+    assert(s != NULL && \
+           "Must be a valid pointer to `save_t' type");
 
 #if defined(HAVE_SAFE_LOCALE)
     if (!s->data.locale.new_locale && !s->data.locale.old_locale && s->status != 0) {
@@ -190,7 +198,7 @@ restore_current_locale(void *data)
     }
 
     assert(s->data.locale.new_locale != NULL && \
-            "Must be a valid pointer to `locale_t' type");
+           "Must be a valid pointer to `locale_t' type");
 
     freelocale(s->data.locale.new_locale);
 #else
@@ -203,7 +211,7 @@ restore_current_locale(void *data)
     }
 
     assert(s->data.locale.old_locale != NULL && \
-            "Must be a valid pointer to `char' type");
+           "Must be a valid pointer to `char' type");
 
     free(s->data.locale.old_locale);
 #endif
@@ -250,9 +258,7 @@ inline int
 magic_load_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
-
     MAGIC_FUNCTION(magic_load, rv, flags, magic, magicfile);
-
     return rv;
 }
 
@@ -260,9 +266,7 @@ inline int
 magic_compile_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
-
     MAGIC_FUNCTION(magic_compile, rv, flags, magic, magicfile);
-
     return rv;
 }
 
@@ -270,9 +274,7 @@ inline int
 magic_check_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
-
     MAGIC_FUNCTION(magic_check, rv, flags, magic, magicfile);
-
     return rv;
 }
 
@@ -280,9 +282,7 @@ inline const char*
 magic_file_wrapper(magic_t magic, const char* filename, int flags)
 {
     const char *cstring;
-
     MAGIC_FUNCTION(magic_file, cstring, flags, magic, filename);
-
     return cstring;
 }
 
@@ -290,9 +290,7 @@ inline const char*
 magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags)
 {
     const char *cstring;
-
     MAGIC_FUNCTION(magic_buffer, cstring, flags, magic, buffer, size);
-
     return cstring;
 }
 
@@ -300,9 +298,7 @@ inline const char*
 magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
     const char *cstring;
-
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
-
     return cstring;
 }
 
