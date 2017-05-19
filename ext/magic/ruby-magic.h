@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 #if !defined(STR2CSTR)
-# define STR2CSTR(x) StringValuePtr(x)
+# define STR2CSTR(x) StringValueCStr(x)
 #endif
 
 #if !defined(RVAL2CSTR)

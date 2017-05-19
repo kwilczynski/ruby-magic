@@ -497,8 +497,10 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
 
+    StringValue(value);
+
     ma.data.buffer.size = RSTRING_LEN(value);
-    ma.data.buffer.buffer = RVAL2CSTR(value);
+    ma.data.buffer.buffer = RSTRING_PTR(value);
 
     MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
     if (!ma.result) {
