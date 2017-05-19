@@ -213,7 +213,7 @@ restore_current_locale(void *data)
     assert(s->data.locale.old_locale != NULL && \
            "Must be a valid pointer to `char' type");
 
-    free(s->data.locale.old_locale);
+    xfree(s->data.locale.old_locale);
 #endif
 
     return 0;
