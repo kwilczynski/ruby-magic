@@ -275,6 +275,12 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_file
   end
 
+  def test_magic_file_argument_with_NULL
+    assert_raise ArgumentError do
+      @magic.file "string\0value"
+    end
+  end
+
   def test_magic_file_with_ERROR_flag
   end
 
@@ -285,6 +291,12 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_buffer
+  end
+
+  def test_magic_buffer_argument_with_NULL
+    assert_nothing_raised do
+      @magic.buffer "string\0value"
+    end
   end
 
   def test_magic_buffer_with_MAGIC_CONTINUE_flag
