@@ -213,13 +213,7 @@ magic_getflags_wrapper(magic_t magic)
 #if defined(HAVE_MAGIC_GETFLAGS)
     return magic_getflags(magic);
 #else
-# if defined(HAVE_WARNING)
-#  warning "function `int magic_getflags(struct magic_set *)' not implemented"
-# else
-#  pragma message("function `int magic_getflags(struct magic_set *)' not implemented")
-# endif
     UNUSED(magic);
-
     errno = ENOSYS;
     return -ENOSYS;
 #endif
@@ -302,11 +296,6 @@ magic_version_wrapper(void)
 #if defined(HAVE_MAGIC_VERSION)
     return magic_version();
 #else
-# if defined(HAVE_WARNING)
-#  warning "function `int magic_version(void)' not implemented"
-# else
-#  pragma message("function `int magic_version(void)' not implemented")
-# endif
     errno = ENOSYS;
     return -ENOSYS;
 #endif

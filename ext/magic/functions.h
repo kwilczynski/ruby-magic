@@ -70,29 +70,18 @@ extern const char* magic_getpath_wrapper(void);
 extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
 
-extern int magic_load_wrapper(magic_t magic,
-			      const char *magicfile,
+extern int magic_load_wrapper(magic_t magic, const char *magicfile,
 			      int flags);
-
-extern int magic_compile_wrapper(magic_t magic,
-				 const char *magicfile,
+extern int magic_compile_wrapper(magic_t magic, const char *magicfile,
 				 int flags);
-
-extern int magic_check_wrapper(magic_t magic,
-			       const char *magicfile,
+extern int magic_check_wrapper(magic_t magic, const char *magicfile,
 			       int flags);
 
-extern const char* magic_file_wrapper(magic_t magic,
-				      const char *filename,
+extern const char* magic_file_wrapper(magic_t magic, const char *filename,
 				      int flags);
-
-extern const char* magic_buffer_wrapper(magic_t magic,
-					const void *buffer,
-					size_t size,
-					int flags);
-
-extern const char* magic_descriptor_wrapper(magic_t magic, int fd,
-					    int flags);
+extern const char* magic_buffer_wrapper(magic_t magic, const void *buffer,
+					size_t size, int flags);
+extern const char* magic_descriptor_wrapper(magic_t magic, int fd, int flags);
 
 extern int magic_version_wrapper(void);
 

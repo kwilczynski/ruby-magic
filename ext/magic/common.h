@@ -79,20 +79,10 @@ extern "C" {
 
 #if !defined(MAGIC_EXTENSION)
 # define MAGIC_EXTENSION -1
-# if defined(HAVE_WARNING)
-#  warning "constant `MAGIC_EXTENSION' not implemented"
-# else
-#  pragma message("constant `MAGIC_EXTENSION' not implemented")
-# endif
 #endif
 
 #if !defined(MAGIC_COMPRESS_TRANSP)
 # define MAGIC_COMPRESS_TRANSP -1
-# if defined(HAVE_WARNING)
-#  warning "constant `MAGIC_COMPRESS_TRANSP' not implemented"
-# else
-#  pragma message("constant `MAGIC_COMPRESS_TRANSP' not implemented")
-# endif
 #endif
 
 #if defined(__cplusplus)
