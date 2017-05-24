@@ -1,23 +1,3 @@
-/* :enddoc: */
-
-/*
- * functions.h
- *
- * Copyright 2013-2015 Krzysztof Wilczynski
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #if !defined(_FUNCTIONS_H)
 #define _FUNCTIONS_H 1
 
@@ -37,9 +17,7 @@ extern "C" {
     } while(0)
 #else
 # define OVERRIDE_LOCALE(f, r, ...) \
-    do {                            \
-        r = f(__VA_ARGS__);         \
-    } while(0)
+	 r = f(__VA_ARGS__)
 #endif
 
 #define SUPPRESS_EVERYTHING(f, r, ...)      \
@@ -52,12 +30,10 @@ extern "C" {
 
 #define MAGIC_FUNCTION(f, r, x, ...)                \
      do {                                           \
-        if ((x) & MAGIC_ERROR) {                    \
+        if ((x) & MAGIC_ERROR)                      \
             OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
-        }                                           \
-        else {                                      \
+        else                                        \
             SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
-        }                                           \
      } while(0)
 
 struct file_data {
@@ -91,20 +67,32 @@ typedef struct save save_t;
 
 extern const char* magic_getpath_wrapper(void);
 
+extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
-extern int magic_load_wrapper(magic_t magic, const char *magicfile,
-                              int flags);
-extern int magic_compile_wrapper(magic_t magic, const char *magicfile,
-                                 int flags);
-extern int magic_check_wrapper(magic_t magic, const char *magicfile,
-                               int flags);
 
-extern const char* magic_file_wrapper(magic_t magic, const char *filename,
-                                      int flags);
-extern const char* magic_buffer_wrapper(magic_t magic, const void *buffer,
-                                        size_t size, int flags);
+extern int magic_load_wrapper(magic_t magic,
+			      const char *magicfile,
+			      int flags);
+
+extern int magic_compile_wrapper(magic_t magic,
+				 const char *magicfile,
+				 int flags);
+
+extern int magic_check_wrapper(magic_t magic,
+			       const char *magicfile,
+			       int flags);
+
+extern const char* magic_file_wrapper(magic_t magic,
+				      const char *filename,
+				      int flags);
+
+extern const char* magic_buffer_wrapper(magic_t magic,
+					const void *buffer,
+					size_t size,
+					int flags);
+
 extern const char* magic_descriptor_wrapper(magic_t magic, int fd,
-                                            int flags);
+					    int flags);
 
 extern int magic_version_wrapper(void);
 
@@ -113,5 +101,3 @@ extern int magic_version_wrapper(void);
 #endif
 
 #endif /* _FUNCTIONS_H */
-
-/* vim: set ts=8 sw=4 sts=2 et : */

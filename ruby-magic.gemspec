@@ -1,35 +1,13 @@
-# -*- encoding: utf-8 -*-
-
-# :enddoc:
-
-#
-# ruby-magic.gemspec
-#
-# Copyright 2013-2015 Krzysztof Wilczynski
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 signing_key = File.expand_path('~/.gem/kwilczynski-private.pem')
 
 Gem::Specification.new do |s|
   s.name    = 'ruby-magic'
   s.summary = 'File Magic in Ruby'
 
-  s.description = <<-EOS
-File Magic in Ruby.
+  s.description = (<<-EOS).gsub(/^[ ]+/, '')
+    File Magic in Ruby.
 
-Simple interface to libmagic for Ruby Programming Language.
+    Simple interface to libmagic for Ruby Programming Language.
   EOS
 
   s.platform = Gem::Platform::RUBY
@@ -47,9 +25,11 @@ Simple interface to libmagic for Ruby Programming Language.
             Dir['lib/**/*.rb']       +
             Dir['benchmark/**/*.rb'] +
             Dir['test/**/*.rb']      +
-            %w(Rakefile ruby-magic.gemspec AUTHORS
-               CHANGES CHANGES.rdoc COPYRIGHT LICENSE
-               README README.rdoc TODO VERSION)
+            %w(Rakefile Gemfile Guardfile Vagrantfile
+               AUTHORS CHANGES CHANGES.rdoc COPYRIGHT
+               LICENSE README README.rdoc TODO VERSION
+               ruby-magic.gemspec kwilczynski.asc
+               kwilczynski-public.pem)
 
   s.executables   << 'magic'
   s.require_paths << 'lib'
@@ -57,6 +37,3 @@ Simple interface to libmagic for Ruby Programming Language.
 
   s.signing_key = signing_key if File.exist?(signing_key)
 end
-
-# vim: set ts=2 sw=2 sts=2 et :
-# encoding: utf-8

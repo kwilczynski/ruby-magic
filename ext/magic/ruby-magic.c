@@ -1,23 +1,3 @@
-/* :stopdoc: */
-
-/*
- * ruby-magic.c
- *
- * Copyright 2013-2015 Krzysztof Wilczynski
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -59,15 +39,15 @@ static VALUE magic_exception(void *data);
 
 static VALUE magic_library_error(VALUE klass, void *data);
 static VALUE magic_generic_error(VALUE klass, int magic_errno,
-                                 const char *magic_error);
+				 const char *magic_error);
 
-static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
-                        void *data);
+static VALUE magic_lock(VALUE object,
+			VALUE (*function)(ANYARGS),
+			void *data);
+
 static VALUE magic_unlock(VALUE object);
 
 static VALUE magic_return(void *data);
-
-/* :startdoc: */
 
 /*
  * call-seq:
@@ -96,9 +76,8 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     if (rb_block_given_p()) {
         klass = "Magic";
 
-        if (!NIL_P(object)) {
+        if (!NIL_P(object))
             klass = rb_class2name(CLASS_OF(object));
-        }
 
         rb_warn("%s::new() does not take block; use %s::open() instead",
                 klass, klass);
@@ -142,9 +121,8 @@ rb_mgc_close(VALUE object)
     if (cookie) {
         MAGIC_SYNCHRONIZED(magic_close_internal, cookie);
 
-        if (DATA_P(object)) {
+        if (DATA_P(object))
             DATA_PTR(object) = NULL;
-        }
     }
 
     return Qnil;
@@ -173,9 +151,8 @@ rb_mgc_closed(VALUE object)
 
     MAGIC_COOKIE(cookie);
 
-    if (DATA_P(object) && DATA_PTR(object) && cookie) {
+    if (DATA_P(object) && DATA_PTR(object) && cookie)
         return Qfalse;
-    }
 
     return Qtrue;
 }
@@ -202,9 +179,8 @@ rb_mgc_get_path(VALUE object)
     MAGIC_CHECK_OPEN(object);
 
     value = rb_ivar_get(object, id_at_path);
-    if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC")) {
+    if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC"))
         return value;
-    }
 
     cstring = magic_getpath_wrapper();
     value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
@@ -263,21 +239,22 @@ rb_mgc_setflags(VALUE object, VALUE value)
     ma.flags = NUM2INT(value);
 
     MAGIC_SYNCHRONIZED(magic_setflags_internal, &ma);
+
     if (ma.status < 0)  {
         local_errno = errno;
 
         switch (local_errno) {
-            case EINVAL:
-                MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
-                                    error(E_FLAG_INVALID_VALUE));
-                break;
-            case ENOSYS:
-                MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
-                                    error(E_FLAG_NOT_IMPLEMENTED));
-                break;
-            default:
-                MAGIC_LIBRARY_ERROR(ma.cookie);
-                break;
+        case EINVAL:
+            MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
+                                error(E_FLAG_INVALID_VALUE));
+            break;
+        case ENOSYS:
+            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+                                error(E_FLAG_NOT_IMPLEMENTED));
+            break;
+        default:
+            MAGIC_LIBRARY_ERROR(ma.cookie);
+            break;
         }
     }
 
@@ -314,16 +291,15 @@ rb_mgc_load(VALUE object, VALUE arguments)
         value = magic_join(arguments, CSTR2RVAL(":"));
         ma.data.file.path = RVAL2CSTR(value);
     }
-    else {
+    else
         ma.data.file.path = magic_getpath_wrapper();
-    }
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
 
     MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
-    if (ma.status < 0) {
+
+    if (ma.status < 0)
         MAGIC_LIBRARY_ERROR(ma.cookie);
-    }
 
     value = magic_split(CSTR2RVAL(ma.data.file.path), CSTR2RVAL(":"));
 
@@ -354,20 +330,17 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    if (!RARRAY_EMPTY_P(arguments)) {
+    if (!RARRAY_EMPTY_P(arguments))
         value = magic_join(arguments, CSTR2RVAL(":"));
-    }
-    else {
+    else
         value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
-    }
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
-    if (ma.status < 0) {
+    if (ma.status < 0)
         MAGIC_LIBRARY_ERROR(ma.cookie);
-    }
 
     RB_GC_GUARD(value);
     return Qtrue;
@@ -396,20 +369,17 @@ rb_mgc_check(VALUE object, VALUE arguments)
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    if (!RARRAY_EMPTY_P(arguments)) {
+    if (!RARRAY_EMPTY_P(arguments))
         value = magic_join(arguments, CSTR2RVAL(":"));
-    }
-    else {
+    else
         value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
-    }
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
-    if (ma.status < 0) {
+    if (ma.status < 0)
         return Qfalse;
-    }
 
     RB_GC_GUARD(value);
     return Qtrue;
@@ -448,17 +418,15 @@ rb_mgc_file(VALUE object, VALUE value)
     if (!ma.result) {
         rv = magic_version_wrapper();
 
-        if (ma.flags & MAGIC_ERROR) {
+        if (ma.flags & MAGIC_ERROR)
             MAGIC_LIBRARY_ERROR(ma.cookie);
-        }
-        else if (rv < 515 || ma.flags & MAGIC_EXTENSION || ma.flags & MAGIC_NODESC) {
+        else if (rv < 515 || ma.flags & MAGIC_EXTENSION) {
             (void)magic_errno(ma.cookie);
             ma.result = magic_error(ma.cookie);
 
-            if (!ma.result) {
+            if (!ma.result)
                 MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL,
                                     error(E_UNKNOWN));
-            }
         }
     }
 
@@ -503,9 +471,8 @@ rb_mgc_buffer(VALUE object, VALUE value)
     ma.data.buffer.buffer = RSTRING_PTR(value);
 
     MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
-    if (!ma.result) {
+    if (!ma.result)
         MAGIC_LIBRARY_ERROR(ma.cookie);
-    }
 
     return magic_return(&ma);
 }
@@ -538,9 +505,8 @@ rb_mgc_descriptor(VALUE object, VALUE value)
     ma.data.file.fd = NUM2INT(value);
 
     MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
-    if (!ma.result) {
+    if (!ma.result)
         MAGIC_LIBRARY_ERROR(ma.cookie);
-    }
 
     return magic_return(&ma);
 }
@@ -560,25 +526,20 @@ rb_mgc_descriptor(VALUE object, VALUE value)
  * See also: Magic::version_to_a and Magic::version_to_s
  */
 VALUE
-rb_mgc_version(VALUE object)
+rb_mgc_version(RB_UNUSED_VAR(VALUE object))
 {
     int rv;
     int local_errno;
 
-    UNUSED(object);
-
     rv = magic_version_wrapper();
     local_errno = errno;
 
-    if (rv < 0 && local_errno == ENOSYS) {
+    if (rv < 0 && local_errno == ENOSYS)
         MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
                             error(E_NOT_IMPLEMENTED));
-    }
 
     return INT2NUM(rv);
 }
-
-/* :stopdoc: */
 
 static inline void*
 nogvl_magic_load(void *data)
@@ -685,10 +646,9 @@ magic_allocate(VALUE klass)
     magic_t cookie;
 
     cookie = magic_open(MAGIC_NONE);
-    if (!cookie) {
+    if (!cookie)
         MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
                             error(E_MAGIC_LIBRARY_INITIALIZE));
-    }
 
     return Data_Wrap_Struct(klass, NULL, magic_free, cookie);
 }
@@ -727,9 +687,8 @@ magic_exception(void *data)
 
     object = rb_protect(magic_exception_wrapper, (VALUE)e, &exception);
 
-    if (exception) {
+    if (exception)
         rb_jump_tag(exception);
-    }
 
     rb_iv_set(object, "@errno", INT2NUM(e->magic_errno));
 
@@ -813,8 +772,6 @@ magic_return(void *data)
     return value;
 }
 
-/* :startdoc: */
-
 void
 Init_magic(void)
 {
@@ -828,7 +785,8 @@ Init_magic(void)
     /*
      * Raised when _Magic_ encounters an error.
      */
-    rb_mgc_eError = rb_define_class_under(rb_cMagic, "Error", rb_eStandardError);
+    rb_mgc_eError = rb_define_class_under(rb_cMagic, "Error",
+					  rb_eStandardError);
 
     /*
      * Stores current value of +errno+
@@ -838,22 +796,27 @@ Init_magic(void)
     /*
      * Raised when
      */
-    rb_mgc_eMagicError = rb_define_class_under(rb_cMagic, "MagicError", rb_mgc_eError);
+    rb_mgc_eMagicError = rb_define_class_under(rb_cMagic, "MagicError",
+					       rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError", rb_mgc_eError);
+    rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError",
+						 rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError", rb_mgc_eError);
+    rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError",
+					       rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eNotImplementedError = rb_define_class_under(rb_cMagic, "NotImplementedError", rb_mgc_eError);
+    rb_mgc_eNotImplementedError = rb_define_class_under(rb_cMagic,
+							"NotImplementedError",
+							rb_mgc_eError);
 
     rb_define_method(rb_cMagic, "initialize", RUBY_METHOD_FUNC(rb_mgc_initialize), -2);
 
@@ -866,7 +829,9 @@ Init_magic(void)
 
     rb_define_method(rb_cMagic, "file", RUBY_METHOD_FUNC(rb_mgc_file), 1);
     rb_define_method(rb_cMagic, "buffer", RUBY_METHOD_FUNC(rb_mgc_buffer), 1);
-    rb_define_method(rb_cMagic, "descriptor", RUBY_METHOD_FUNC(rb_mgc_descriptor), 1);
+
+    rb_define_method(rb_cMagic, "descriptor",
+		     RUBY_METHOD_FUNC(rb_mgc_descriptor), 1);
 
     rb_define_method(rb_cMagic, "load", RUBY_METHOD_FUNC(rb_mgc_load), -2);
     rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), -2);
@@ -874,168 +839,160 @@ Init_magic(void)
 
     rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 
-    rb_define_singleton_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
+    rb_define_singleton_method(rb_cMagic, "version",
+			       RUBY_METHOD_FUNC(rb_mgc_version), 0);
 
     /*
      * No special handling and/or flags specified. Default behaviour.
      */
-    rb_define_const(rb_cMagic, "NONE", INT2NUM(MAGIC_NONE));
+    MAGIC_DEFINE_CONSTANT(NONE);
 
     /*
      * Print debugging messages to standard error output.
      */
-    rb_define_const(rb_cMagic, "DEBUG", INT2NUM(MAGIC_DEBUG));
+    MAGIC_DEFINE_CONSTANT(DEBUG);
 
     /*
      * If the file queried is a symbolic link, follow it.
      */
-    rb_define_const(rb_cMagic, "SYMLINK", INT2NUM(MAGIC_SYMLINK));
+    MAGIC_DEFINE_CONSTANT(SYMLINK);
 
     /*
      * If the file is compressed, unpack it and look at the contents.
      */
-    rb_define_const(rb_cMagic, "COMPRESS", INT2NUM(MAGIC_COMPRESS));
+    MAGIC_DEFINE_CONSTANT(COMPRESS);
 
     /*
      * If the file is a block or character special device, then open
      * the device and try to look at the contents.
      */
-    rb_define_const(rb_cMagic, "DEVICES", INT2NUM(MAGIC_DEVICES));
+    MAGIC_DEFINE_CONSTANT(DEVICES);
 
     /*
      * Return a MIME type string, instead of a textual description.
      */
-    rb_define_const(rb_cMagic, "MIME_TYPE", INT2NUM(MAGIC_MIME_TYPE));
+    MAGIC_DEFINE_CONSTANT(MIME_TYPE);
 
     /*
      * Return all matches, not just the first.
      */
-    rb_define_const(rb_cMagic, "CONTINUE", INT2NUM(MAGIC_CONTINUE));
+    MAGIC_DEFINE_CONSTANT(CONTINUE);
 
     /*
      * Check the Magic database for consistency and print warnings to
      * standard error output.
      */
-    rb_define_const(rb_cMagic, "CHECK", INT2NUM(MAGIC_CHECK));
+    MAGIC_DEFINE_CONSTANT(CHECK);
 
     /*
      * Attempt to preserve access time (atime, utime or utimes) of the
      * file queried on systems that support such system calls.
      */
-    rb_define_const(rb_cMagic, "PRESERVE_ATIME", INT2NUM(MAGIC_PRESERVE_ATIME));
+    MAGIC_DEFINE_CONSTANT(PRESERVE_ATIME);
 
     /*
      * Do not convert unprintable characters to an octal representation.
      */
-    rb_define_const(rb_cMagic, "RAW", INT2NUM(MAGIC_RAW));
+    MAGIC_DEFINE_CONSTANT(RAW);
 
     /*
      * Treat operating system errors while trying to open files and follow
      * symbolic links as first class errors, instead of storing them in the
      * Magic library error buffer for retrieval later.
      */
-    rb_define_const(rb_cMagic, "ERROR", INT2NUM(MAGIC_ERROR));
+    MAGIC_DEFINE_CONSTANT(ERROR);
 
     /*
      * Return a MIME encoding, instead of a textual description.
      */
-    rb_define_const(rb_cMagic, "MIME_ENCODING", INT2NUM(MAGIC_MIME_ENCODING));
+    MAGIC_DEFINE_CONSTANT(MIME_ENCODING);
 
     /*
      * A shorthand for using MIME_TYPE and MIME_ENCODING flags together.
      */
-    rb_define_const(rb_cMagic, "MIME", INT2NUM(MAGIC_MIME));
+    MAGIC_DEFINE_CONSTANT(MIME);
 
     /*
      * Return the Apple creator and type.
      */
-    rb_define_const(rb_cMagic, "APPLE", INT2NUM(MAGIC_APPLE));
+    MAGIC_DEFINE_CONSTANT(APPLE);
 
     /*
      * Do not look for, or inside compressed files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_COMPRESS", INT2NUM(MAGIC_NO_CHECK_COMPRESS));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_COMPRESS);
 
     /*
      * Do not look for, or inside tar archive files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_TAR", INT2NUM(MAGIC_NO_CHECK_TAR));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_TAR);
 
     /*
      * Do not consult Magic files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_SOFT", INT2NUM(MAGIC_NO_CHECK_SOFT));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_SOFT);
 
     /*
      * Check for EMX application type (only supported on EMX).
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_APPTYPE", INT2NUM(MAGIC_NO_CHECK_APPTYPE));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_APPTYPE);
 
     /*
      * Do not check for ELF files (do not examine ELF file details).
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_ELF", INT2NUM(MAGIC_NO_CHECK_ELF));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_ELF);
 
     /*
      * Do not check for various types of text files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_TEXT", INT2NUM(MAGIC_NO_CHECK_TEXT));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_TEXT);
 
     /*
      * Do not check for CDF files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_CDF", INT2NUM(MAGIC_NO_CHECK_CDF));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_CDF);
 
     /*
      * Do not look for known tokens inside ASCII files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_TOKENS", INT2NUM(MAGIC_NO_CHECK_TOKENS));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_TOKENS);
 
     /*
      * Return a MIME encoding, instead of a textual description.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_ENCODING", INT2NUM(MAGIC_NO_CHECK_ENCODING));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_ENCODING);
 
     /*
      * Do not use built-in tests; only consult the Magic file.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_BUILTIN", INT2NUM(MAGIC_NO_CHECK_BUILTIN));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_BUILTIN);
 
     /*
      * Do not check for various types of text files, same as NO_CHECK_TEXT.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_ASCII", INT2NUM(MAGIC_NO_CHECK_ASCII));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_ASCII);
 
     /*
      * Do not look for Fortran sequences inside ASCII files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_FORTRAN", INT2NUM(MAGIC_NO_CHECK_FORTRAN));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_FORTRAN);
 
     /*
      * Do not look for troff sequences inside ASCII files.
      */
-    rb_define_const(rb_cMagic, "NO_CHECK_TROFF", INT2NUM(MAGIC_NO_CHECK_TROFF));
+    MAGIC_DEFINE_CONSTANT(NO_CHECK_TROFF);
 
     /*
      * Return a slash-separated list of extensions for this file type.
      */
-    rb_define_const(rb_cMagic, "EXTENSION", INT2NUM(MAGIC_EXTENSION));
+    MAGIC_DEFINE_CONSTANT(EXTENSION);
 
     /*
      * Do not report on compression, only report about the uncompressed data.
      */
-    rb_define_const(rb_cMagic, "COMPRESS_TRANSP", INT2NUM(MAGIC_COMPRESS_TRANSP));
-
-    /*
-     * Unknown.
-     */
-    rb_define_const(rb_cMagic, "NODESC", INT2NUM(MAGIC_NODESC));
+    MAGIC_DEFINE_CONSTANT(COMPRESS_TRANSP);
 }
-
-/* :enddoc: */
 
 #if defined(__cplusplus)
 }
 #endif
-
-/* vim: set ts=8 sw=4 sts=2 et : */

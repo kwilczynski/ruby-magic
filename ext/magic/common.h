@@ -1,23 +1,3 @@
-/* :enddoc: */
-
-/*
- * common.h
- *
- * Copyright 2013-2015 Krzysztof Wilczynski
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #if !defined(_COMMON_H)
 #define _COMMON_H 1
 
@@ -76,17 +56,24 @@ extern "C" {
 # endif
 #endif
 
-#if defined(UNUSED)
-# undef(UNUSED)
+#if !defined(RB_UNUSED_VAR)
+# if defined(__GNUC__)
+#  define RB_UNUSED_VAR(x) (x) __attribute__ ((unused))
+# else
+#  define RB_UNUSED_VAR(x) (x)
+# endif
 #endif
 
-#define UNUSED(x) (void)(x)
+#if !defined(UNUSED)
+# define UNUSED(x) (void)(x)
+#endif
 
 #if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
-#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && \
+    defined(HAVE_FREELOCALE)
 # define HAVE_SAFE_LOCALE 1
 #endif
 
@@ -99,7 +86,6 @@ extern "C" {
 # endif
 #endif
 
-
 #if !defined(MAGIC_COMPRESS_TRANSP)
 # define MAGIC_COMPRESS_TRANSP -1
 # if defined(HAVE_WARNING)
@@ -109,19 +95,8 @@ extern "C" {
 # endif
 #endif
 
-#if !defined(MAGIC_NODESC)
-# define MAGIC_NODESC -1
-# if defined(HAVE_WARNING)
-#  warning "constant `MAGIC_NODESC' not implemented"
-# else
-#  pragma message("constant `MAGIC_NODESC' not implemented")
-# endif
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* _COMMON_H */
-
-/* vim: set ts=8 sw=4 sts=2 et : */

@@ -1,23 +1,3 @@
-/* :enddoc: */
-
-/*
- * ruby-magic.h
- *
- * Copyright 2013-2015 Krzysztof Wilczynski
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #if !defined(_RUBY_MAGIC_H)
 #define _RUBY_MAGIC_H 1
 
@@ -72,13 +52,13 @@ extern "C" {
 #define NOGVL_FUNCTION (VALUE (*)(void *))
 
 #if defined(HAVE_RB_THREAD_CALL_WITHOUT_GVL) && \
-     defined(HAVE_RUBY_THREAD_H) && HAVE_RUBY_THREAD_H
+    defined(HAVE_RUBY_THREAD_H) && HAVE_RUBY_THREAD_H
 # include <ruby/thread.h>
 # define NOGVL(f, d) \
-   rb_thread_call_without_gvl((f), (d), RUBY_UBF_IO, NULL)
+	 rb_thread_call_without_gvl((f), (d), RUBY_UBF_IO, NULL)
 #elif defined(HAVE_RB_THREAD_BLOCKING_REGION)
 # define NOGVL(f, d) \
-   rb_thread_blocking_region(NOGVL_FUNCTION(f), (d), RUBY_UBF_IO, NULL)
+	 rb_thread_blocking_region(NOGVL_FUNCTION(f), (d), RUBY_UBF_IO, NULL)
 #else
 # include <rubysig.h>
 static inline VALUE
@@ -92,35 +72,32 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
   return rv;
 }
-# define NOGVL(f, d) fake_blocking_region(NOGVL_FUNCTION(f), (d))
+# define NOGVL(f, d) \
+	 fake_blocking_region(NOGVL_FUNCTION(f), (d))
 #endif
 
 #define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
 #define MAGIC_COOKIE(c) \
-    Data_Get_Struct(object, struct magic_set, (c))
+	Data_Get_Struct(object, struct magic_set, (c))
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
-#define MAGIC_GENERIC_ERROR(k, e, m)                        \
-    do {                                                    \
-        VALUE __e_##k = magic_generic_error((k), (e), (m)); \
-        rb_exc_raise(__e_##k);                              \
-    } while(0)
+#define MAGIC_GENERIC_ERROR(k, e, m) \
+        rb_exc_raise(magic_generic_error((k), (e), (m)))
 
-#define MAGIC_LIBRARY_ERROR(c)                                              \
-    do {                                                                    \
-        VALUE __e_library = magic_library_error(rb_mgc_eMagicError, (c));   \
-        rb_exc_raise(__e_library);                                          \
-    } while(0)
+#define MAGIC_LIBRARY_ERROR(c) \
+        rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
 
 #define MAGIC_CHECK_OPEN(o)                                     \
     do {                                                        \
-        if (MAGIC_CLOSED_P(o)) {                                \
+        if (MAGIC_CLOSED_P(o))                                  \
             MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,   \
                                 error(E_MAGIC_LIBRARY_CLOSED)); \
-        }                                                       \
     } while(0)                                                  \
+
+#define MAGIC_DEFINE_CONSTANT(c) \
+	rb_define_const(rb_cMagic, #c, INT2NUM(MAGIC_##c));
 
 #define error(t) errors[(t)]
 
@@ -138,12 +115,13 @@ union file {
     const char *path;
 };
 
+typedef union file file_t;
+
 struct buffer {
     size_t size;
     const char *buffer;
 };
 
-typedef union file file_t;
 typedef struct buffer buffer_t;
 
 struct magic_arguments {
@@ -157,13 +135,14 @@ struct magic_arguments {
     const char *result;
 };
 
+typedef struct magic_arguments magic_arguments_t;
+
 struct magic_exception {
     int magic_errno;
     const char *magic_error;
     VALUE klass;
 };
 
-typedef struct magic_arguments magic_arguments_t;
 typedef struct magic_exception magic_exception_t;
 
 static const char *errors[] = {
@@ -179,9 +158,8 @@ static const char *errors[] = {
 inline static VALUE
 magic_size(VALUE v)
 {
-    if (ARRAY_P(v) || STRING_P(v)) {
+    if (ARRAY_P(v) || STRING_P(v))
         return rb_funcall(v, rb_intern("size"), 0, NULL);
-    }
 
     return Qnil;
 }
@@ -189,9 +167,8 @@ magic_size(VALUE v)
 inline static VALUE
 magic_shift(VALUE v)
 {
-    if (ARRAY_P(v)) {
+    if (ARRAY_P(v))
         return rb_funcall(v, rb_intern("shift"), 0, NULL);
-    }
 
     return Qnil;
 }
@@ -199,9 +176,8 @@ magic_shift(VALUE v)
 inline static VALUE
 magic_split(VALUE a, VALUE b)
 {
-    if (STRING_P(a) && STRING_P(b)) {
+    if (STRING_P(a) && STRING_P(b))
         return rb_funcall(a, rb_intern("split"), 1, b);
-    }
 
     return Qnil;
 }
@@ -209,9 +185,8 @@ magic_split(VALUE a, VALUE b)
 inline static VALUE
 magic_join(VALUE a, VALUE b)
 {
-    if (ARRAY_P(a) && STRING_P(b)) {
+    if (ARRAY_P(a) && STRING_P(b))
         return rb_funcall(a, rb_intern("join"), 1, b);
-    }
 
     return Qnil;
 }
@@ -251,5 +226,3 @@ RUBY_EXTERN VALUE rb_mgc_version(VALUE object);
 #endif
 
 #endif /* _RUBY_MAGIC_H */
-
-/* vim: set ts=8 sw=4 sts=2 et : */
