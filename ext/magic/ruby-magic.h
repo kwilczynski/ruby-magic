@@ -110,21 +110,17 @@ enum error {
     E_FLAG_NOT_IMPLEMENTED
 };
 
-union file {
+typedef union file {
     int fd;
     const char *path;
-};
+} file_t;
 
-typedef union file file_t;
-
-struct buffer {
+typedef struct buffer {
     size_t size;
     const char *buffer;
-};
+} buffer_t;
 
-typedef struct buffer buffer_t;
-
-struct magic_arguments {
+typedef struct magic_arguments {
     int flags;
     magic_t cookie;
     union {
@@ -133,17 +129,13 @@ struct magic_arguments {
     } data;
     int status;
     const char *result;
-};
+} magic_arguments_t;
 
-typedef struct magic_arguments magic_arguments_t;
-
-struct magic_exception {
+typedef struct magic_exception {
     int magic_errno;
     const char *magic_error;
     VALUE klass;
-};
-
-typedef struct magic_exception magic_exception_t;
+} magic_exception_t;
 
 static const char *errors[] = {
     "an unknown error has occurred",
@@ -155,7 +147,7 @@ static const char *errors[] = {
     NULL
 };
 
-inline static VALUE
+static VALUE
 magic_size(VALUE v)
 {
     if (ARRAY_P(v) || STRING_P(v))
@@ -164,7 +156,7 @@ magic_size(VALUE v)
     return Qnil;
 }
 
-inline static VALUE
+static VALUE
 magic_shift(VALUE v)
 {
     if (ARRAY_P(v))
@@ -173,7 +165,7 @@ magic_shift(VALUE v)
     return Qnil;
 }
 
-inline static VALUE
+static VALUE
 magic_split(VALUE a, VALUE b)
 {
     if (STRING_P(a) && STRING_P(b))
@@ -182,7 +174,7 @@ magic_split(VALUE a, VALUE b)
     return Qnil;
 }
 
-inline static VALUE
+static VALUE
 magic_join(VALUE a, VALUE b)
 {
     if (ARRAY_P(a) && STRING_P(b))

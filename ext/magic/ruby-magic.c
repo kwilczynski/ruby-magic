@@ -467,7 +467,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     StringValue(value);
 
-    ma.data.buffer.size = RSTRING_LEN(value);
+    ma.data.buffer.size = (size_t)RSTRING_LEN(value);
     ma.data.buffer.buffer = RSTRING_PTR(value);
 
     MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
