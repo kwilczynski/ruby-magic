@@ -4,6 +4,11 @@ RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 
 $CFLAGS << ' -std=c99 -Wall -Wextra -pedantic'
 
+if RbConfig::MAKEFILE_CONFIG['CC'] =~ /gcc/
+  $CFLAGS << ' -O3' unless $CFLAGS =~ /-O\d/
+  $CFLAGS << ' -Wcast-qual -Wwrite-strings -Wconversion -Wmissing-noreturn -Winline'
+end
+
 unless RbConfig::CONFIG['host_os'] =~ /darwin/
   $LDFLAGS << ' -Wl,--as-needed'
 end
