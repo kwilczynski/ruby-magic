@@ -72,8 +72,7 @@ extern "C" {
 # define HAVE_BROKEN_MAGIC 1
 #endif
 
-#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && \
-    defined(HAVE_FREELOCALE)
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
 # define HAVE_SAFE_LOCALE 1
 #endif
 

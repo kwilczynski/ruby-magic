@@ -137,7 +137,6 @@ override_current_locale(void *data)
 
     s->data.locale.old_locale = strndup(current_locale,
 				        strlen(current_locale));
-
     if (!s->data.locale.old_locale)
         goto out;
 
@@ -274,8 +273,7 @@ magic_file_wrapper(magic_t magic, const char* filename, int flags)
 }
 
 inline const char*
-magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size,
-		     int flags)
+magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags)
 {
     const char *cstring;
     MAGIC_FUNCTION(magic_buffer, cstring, flags, magic, buffer, size);

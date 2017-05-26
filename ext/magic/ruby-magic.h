@@ -96,7 +96,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
                                 error(E_MAGIC_LIBRARY_CLOSED)); \
     } while(0)                                                  \
 
-#define MAGIC_DEFINE_CONSTANT(c) \
+#define MAGIC_DEFINE_FLAG(c) \
 	rb_define_const(rb_cMagic, #c, INT2NUM(MAGIC_##c));
 
 #define error(t) errors[(t)]
@@ -150,37 +150,33 @@ static const char *errors[] = {
 static VALUE
 magic_size(VALUE v)
 {
-    if (ARRAY_P(v) || STRING_P(v))
-        return rb_funcall(v, rb_intern("size"), 0, NULL);
-
-    return Qnil;
+    return (ARRAY_P(v) || STRING_P(v)) ?	       \
+	   rb_funcall(v, rb_intern("size"), 0, NULL) : \
+	   Qnil;
 }
 
 static VALUE
 magic_shift(VALUE v)
 {
-    if (ARRAY_P(v))
-        return rb_funcall(v, rb_intern("shift"), 0, NULL);
-
-    return Qnil;
+    return ARRAY_P(v) ?					\
+	   rb_funcall(v, rb_intern("shift"), 0, NULL) : \
+	   Qnil;
 }
 
 static VALUE
 magic_split(VALUE a, VALUE b)
 {
-    if (STRING_P(a) && STRING_P(b))
-        return rb_funcall(a, rb_intern("split"), 1, b);
-
-    return Qnil;
+    return (STRING_P(a) && STRING_P(b)) ?	     \
+	   rb_funcall(a, rb_intern("split"), 1, b) : \
+	   Qnil;
 }
 
 static VALUE
 magic_join(VALUE a, VALUE b)
 {
-    if (ARRAY_P(a) && STRING_P(b))
-        return rb_funcall(a, rb_intern("join"), 1, b);
-
-    return Qnil;
+    return (ARRAY_P(a) && STRING_P(b)) ?	    \
+	   rb_funcall(a, rb_intern("join"), 1, b) : \
+	   Qnil;
 }
 
 RUBY_EXTERN ID id_at_flags, id_at_path, id_at_mutex;

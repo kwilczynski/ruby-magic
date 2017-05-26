@@ -38,13 +38,9 @@ static VALUE magic_exception_wrapper(VALUE value);
 static VALUE magic_exception(void *data);
 
 static VALUE magic_library_error(VALUE klass, void *data);
-static VALUE magic_generic_error(VALUE klass, int magic_errno,
-				 const char *magic_error);
+static VALUE magic_generic_error(VALUE klass, int magic_errno, const char *magic_error);
 
-static VALUE magic_lock(VALUE object,
-			VALUE (*function)(ANYARGS),
-			void *data);
-
+static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS), void *data);
 static VALUE magic_unlock(VALUE object);
 
 static VALUE magic_return(void *data);
@@ -85,14 +81,13 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
     mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
                                   rb_intern("Mutex")));
-
     rb_ivar_set(object, id_at_mutex, mutex);
 
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = MAGIC_NONE;
-
     rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
+
     rb_mgc_load(object, arguments);
 
     return object;
@@ -239,7 +234,6 @@ rb_mgc_setflags(VALUE object, VALUE value)
     ma.flags = NUM2INT(value);
 
     MAGIC_SYNCHRONIZED(magic_setflags_internal, &ma);
-
     if (ma.status < 0)  {
         local_errno = errno;
 
@@ -247,14 +241,11 @@ rb_mgc_setflags(VALUE object, VALUE value)
         case EINVAL:
             MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
                                 error(E_FLAG_INVALID_VALUE));
-            break;
         case ENOSYS:
             MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
                                 error(E_FLAG_NOT_IMPLEMENTED));
-            break;
         default:
             MAGIC_LIBRARY_ERROR(ma.cookie);
-            break;
         }
     }
 
@@ -297,7 +288,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
     ma.flags = NUM2INT(rb_mgc_getflags(object));
 
     MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
-
     if (ma.status < 0)
         MAGIC_LIBRARY_ERROR(ma.cookie);
 
@@ -545,8 +535,7 @@ static inline void*
 nogvl_magic_load(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_load_wrapper(ma->cookie, ma->data.file.path,
-                                    ma->flags);
+    ma->status = magic_load_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return ma;
 }
 
@@ -554,8 +543,7 @@ static inline void*
 nogvl_magic_compile(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_compile_wrapper(ma->cookie, ma->data.file.path,
-                                       ma->flags);
+    ma->status = magic_compile_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return ma;
 }
 
@@ -563,8 +551,7 @@ static inline void*
 nogvl_magic_check(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_check_wrapper(ma->cookie, ma->data.file.path,
-                                     ma->flags);
+    ma->status = magic_check_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return ma;
 }
 
@@ -572,8 +559,7 @@ static inline void*
 nogvl_magic_file(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->result = magic_file_wrapper(ma->cookie, ma->data.file.path,
-                                    ma->flags);
+    ma->result = magic_file_wrapper(ma->cookie, ma->data.file.path, ma->flags);
     return ma;
 }
 
@@ -581,8 +567,7 @@ static inline void*
 nogvl_magic_descriptor(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->result = magic_descriptor_wrapper(ma->cookie, ma->data.file.fd,
-                                          ma->flags);
+    ma->result = magic_descriptor_wrapper(ma->cookie, ma->data.file.fd, ma->flags);
     return ma;
 }
 
@@ -785,8 +770,7 @@ Init_magic(void)
     /*
      * Raised when _Magic_ encounters an error.
      */
-    rb_mgc_eError = rb_define_class_under(rb_cMagic, "Error",
-					  rb_eStandardError);
+    rb_mgc_eError = rb_define_class_under(rb_cMagic, "Error", rb_eStandardError);
 
     /*
      * Stores current value of +errno+
@@ -796,27 +780,22 @@ Init_magic(void)
     /*
      * Raised when
      */
-    rb_mgc_eMagicError = rb_define_class_under(rb_cMagic, "MagicError",
-					       rb_mgc_eError);
+    rb_mgc_eMagicError = rb_define_class_under(rb_cMagic, "MagicError", rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError",
-						 rb_mgc_eError);
+    rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError", rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError",
-					       rb_mgc_eError);
+    rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError", rb_mgc_eError);
 
     /*
      * Raised when
      */
-    rb_mgc_eNotImplementedError = rb_define_class_under(rb_cMagic,
-							"NotImplementedError",
-							rb_mgc_eError);
+    rb_mgc_eNotImplementedError = rb_define_class_under(rb_cMagic, "NotImplementedError", rb_mgc_eError);
 
     rb_define_method(rb_cMagic, "initialize", RUBY_METHOD_FUNC(rb_mgc_initialize), -2);
 
@@ -829,9 +808,7 @@ Init_magic(void)
 
     rb_define_method(rb_cMagic, "file", RUBY_METHOD_FUNC(rb_mgc_file), 1);
     rb_define_method(rb_cMagic, "buffer", RUBY_METHOD_FUNC(rb_mgc_buffer), 1);
-
-    rb_define_method(rb_cMagic, "descriptor",
-		     RUBY_METHOD_FUNC(rb_mgc_descriptor), 1);
+    rb_define_method(rb_cMagic, "descriptor", RUBY_METHOD_FUNC(rb_mgc_descriptor), 1);
 
     rb_define_method(rb_cMagic, "load", RUBY_METHOD_FUNC(rb_mgc_load), -2);
     rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), -2);
@@ -839,158 +816,157 @@ Init_magic(void)
 
     rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 
-    rb_define_singleton_method(rb_cMagic, "version",
-			       RUBY_METHOD_FUNC(rb_mgc_version), 0);
+    rb_define_singleton_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
 
     /*
      * No special handling and/or flags specified. Default behaviour.
      */
-    MAGIC_DEFINE_CONSTANT(NONE);
+    MAGIC_DEFINE_FLAG(NONE);
 
     /*
      * Print debugging messages to standard error output.
      */
-    MAGIC_DEFINE_CONSTANT(DEBUG);
+    MAGIC_DEFINE_FLAG(DEBUG);
 
     /*
      * If the file queried is a symbolic link, follow it.
      */
-    MAGIC_DEFINE_CONSTANT(SYMLINK);
+    MAGIC_DEFINE_FLAG(SYMLINK);
 
     /*
      * If the file is compressed, unpack it and look at the contents.
      */
-    MAGIC_DEFINE_CONSTANT(COMPRESS);
+    MAGIC_DEFINE_FLAG(COMPRESS);
 
     /*
      * If the file is a block or character special device, then open
      * the device and try to look at the contents.
      */
-    MAGIC_DEFINE_CONSTANT(DEVICES);
+    MAGIC_DEFINE_FLAG(DEVICES);
 
     /*
      * Return a MIME type string, instead of a textual description.
      */
-    MAGIC_DEFINE_CONSTANT(MIME_TYPE);
+    MAGIC_DEFINE_FLAG(MIME_TYPE);
 
     /*
      * Return all matches, not just the first.
      */
-    MAGIC_DEFINE_CONSTANT(CONTINUE);
+    MAGIC_DEFINE_FLAG(CONTINUE);
 
     /*
      * Check the Magic database for consistency and print warnings to
      * standard error output.
      */
-    MAGIC_DEFINE_CONSTANT(CHECK);
+    MAGIC_DEFINE_FLAG(CHECK);
 
     /*
      * Attempt to preserve access time (atime, utime or utimes) of the
      * file queried on systems that support such system calls.
      */
-    MAGIC_DEFINE_CONSTANT(PRESERVE_ATIME);
+    MAGIC_DEFINE_FLAG(PRESERVE_ATIME);
 
     /*
      * Do not convert unprintable characters to an octal representation.
      */
-    MAGIC_DEFINE_CONSTANT(RAW);
+    MAGIC_DEFINE_FLAG(RAW);
 
     /*
      * Treat operating system errors while trying to open files and follow
      * symbolic links as first class errors, instead of storing them in the
      * Magic library error buffer for retrieval later.
      */
-    MAGIC_DEFINE_CONSTANT(ERROR);
+    MAGIC_DEFINE_FLAG(ERROR);
 
     /*
      * Return a MIME encoding, instead of a textual description.
      */
-    MAGIC_DEFINE_CONSTANT(MIME_ENCODING);
+    MAGIC_DEFINE_FLAG(MIME_ENCODING);
 
     /*
      * A shorthand for using MIME_TYPE and MIME_ENCODING flags together.
      */
-    MAGIC_DEFINE_CONSTANT(MIME);
+    MAGIC_DEFINE_FLAG(MIME);
 
     /*
      * Return the Apple creator and type.
      */
-    MAGIC_DEFINE_CONSTANT(APPLE);
+    MAGIC_DEFINE_FLAG(APPLE);
 
     /*
      * Do not look for, or inside compressed files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_COMPRESS);
+    MAGIC_DEFINE_FLAG(NO_CHECK_COMPRESS);
 
     /*
      * Do not look for, or inside tar archive files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_TAR);
+    MAGIC_DEFINE_FLAG(NO_CHECK_TAR);
 
     /*
      * Do not consult Magic files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_SOFT);
+    MAGIC_DEFINE_FLAG(NO_CHECK_SOFT);
 
     /*
      * Check for EMX application type (only supported on EMX).
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_APPTYPE);
+    MAGIC_DEFINE_FLAG(NO_CHECK_APPTYPE);
 
     /*
      * Do not check for ELF files (do not examine ELF file details).
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_ELF);
+    MAGIC_DEFINE_FLAG(NO_CHECK_ELF);
 
     /*
      * Do not check for various types of text files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_TEXT);
+    MAGIC_DEFINE_FLAG(NO_CHECK_TEXT);
 
     /*
      * Do not check for CDF files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_CDF);
+    MAGIC_DEFINE_FLAG(NO_CHECK_CDF);
 
     /*
      * Do not look for known tokens inside ASCII files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_TOKENS);
+    MAGIC_DEFINE_FLAG(NO_CHECK_TOKENS);
 
     /*
      * Return a MIME encoding, instead of a textual description.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_ENCODING);
+    MAGIC_DEFINE_FLAG(NO_CHECK_ENCODING);
 
     /*
      * Do not use built-in tests; only consult the Magic file.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_BUILTIN);
+    MAGIC_DEFINE_FLAG(NO_CHECK_BUILTIN);
 
     /*
      * Do not check for various types of text files, same as NO_CHECK_TEXT.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_ASCII);
+    MAGIC_DEFINE_FLAG(NO_CHECK_ASCII);
 
     /*
      * Do not look for Fortran sequences inside ASCII files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_FORTRAN);
+    MAGIC_DEFINE_FLAG(NO_CHECK_FORTRAN);
 
     /*
      * Do not look for troff sequences inside ASCII files.
      */
-    MAGIC_DEFINE_CONSTANT(NO_CHECK_TROFF);
+    MAGIC_DEFINE_FLAG(NO_CHECK_TROFF);
 
     /*
      * Return a slash-separated list of extensions for this file type.
      */
-    MAGIC_DEFINE_CONSTANT(EXTENSION);
+    MAGIC_DEFINE_FLAG(EXTENSION);
 
     /*
      * Do not report on compression, only report about the uncompressed data.
      */
-    MAGIC_DEFINE_CONSTANT(COMPRESS_TRANSP);
+    MAGIC_DEFINE_FLAG(COMPRESS_TRANSP);
 }
 
 #if defined(__cplusplus)
