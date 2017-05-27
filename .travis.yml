@@ -35,6 +35,7 @@ matrix:
 branches:
   only:
     - master
+    - development
 
 notifications:
   email:
