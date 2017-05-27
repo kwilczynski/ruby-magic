@@ -6,9 +6,10 @@ require 'magic'
 class MagicConstantsTest < Test::Unit::TestCase
   def setup
     @version = Magic.version rescue nil
+    @magic_parameters = @version && @version > 520
   end
 
-  def test_constants_defiend
+  def test_flags_constants_defiend
     [
       :NONE,
       :DEBUG,
@@ -40,11 +41,23 @@ class MagicConstantsTest < Test::Unit::TestCase
     ].each {|i| assert_const_defined(Magic, i) }
   end
 
-  def test_MIME_constant
+  def test_parameters_constants_defiend
+    [
+      :PARAM_INDIR_MAX,
+      :PARAM_NAME_MAX,
+      :PARAM_ELF_PHNUM_MAX,
+      :PARAM_ELF_SHNUM_MAX,
+      :PARAM_ELF_NOTES_MAX,
+      :PARAM_REGEX_MAX,
+      :PARAM_BYTES_MAX
+    ].each {|i| assert_const_defined(Magic, i) }
+  end
+
+  def test_MIME_flag_constant
     assert_equal(Magic::MIME, Magic::MIME_TYPE | Magic::MIME_ENCODING)
   end
 
-  def test_NO_CHECK_BUILTIN_constat
+  def test_NO_CHECK_BUILTIN_flag_constat
     # Any recent version of libmagic will have 0x37b000 by default.
     custom_NO_CHECK_BUILTIN = Magic::NO_CHECK_COMPRESS | Magic::NO_CHECK_TAR |
       Magic::NO_CHECK_APPTYPE | Magic::NO_CHECK_ELF | Magic::NO_CHECK_TEXT |
@@ -58,7 +71,23 @@ class MagicConstantsTest < Test::Unit::TestCase
     assert_equal(Magic::NO_CHECK_BUILTIN, custom_NO_CHECK_BUILTIN)
   end
 
-  def check_NO_CHECK_ASCII_constant
+  def check_NO_CHECK_ASCII_flag_constant
     assert_equal(Magic::NO_CHECK_ASCII, Magic::NO_CHECK_TEXT)
+  end
+
+  def check_PARAM_INDIR_MAX_parameter_constant
+    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    assert_equal(Magic::PARAM_INDIR_MAX, 0)
+  end
+
+  def check_PARAM_BYTES_MAX_parameter_constant
+    unless @magic_parameters && Magic::PARAM_BYTES_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    assert_equal(Magic::PARAM_BYTES_MAX, 6)
   end
 end

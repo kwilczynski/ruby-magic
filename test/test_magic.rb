@@ -13,6 +13,8 @@ class MagicTest < Test::Unit::TestCase
     @flags_limit = 0xfffffff
     @version = Magic.version rescue nil
     @magic = Magic.new
+
+    @magic_parameters = @version && @version > 520
   end
 
   def test_magic_alias
@@ -72,6 +74,8 @@ class MagicTest < Test::Unit::TestCase
       :close,
       :closed?,
       :path,
+      :get_parameter,
+      :set_parameter,
       :flags,
       :flags=,
       :flags_array,
@@ -122,16 +126,11 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_close_error
-    @magic.close
-    assert_raise Magic::LibraryError do
+    error = assert_raise Magic::LibraryError do
+      @magic.close
       @magic.flags
     end
-  end
 
-  def test_magic_close_error_message
-    @magic.close
-    @magic.flags
-  rescue Magic::LibraryError => error
     assert_equal(error.message, 'Magic library is not open')
   end
 
@@ -160,6 +159,163 @@ class MagicTest < Test::Unit::TestCase
     # variable so that the C extension will pick it up?
   end
 
+  def test_magic_get_parameter_error
+    if @magic_parameters
+      @magic.stubs(:get_parameter).with(0).raises(Magic::NotImplementedError)
+    end
+
+    assert_raise Magic::NotImplementedError do
+      @magic.get_parameter(0)
+    end
+  end
+
+  def test_magic_get_parameter_error_message
+    if @magic_parameters
+      @magic.stubs(:get_parameter).with(0).raises(Magic::NotImplementedError, 'function is not implemented')
+    end
+
+    error = assert_raise Magic::NotImplementedError do
+      @magic.get_parameter(0)
+    end
+
+    assert_equal(error.message, 'function is not implemented')
+  end
+
+  def test_magic_get_parameter_with_PARAM_INDIR_MAX
+    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    # Older versions of libmagic will have lower value.
+    expected = @version < 526 ? 15 : 50
+    assert_equal(@magic.get_parameter(Magic::PARAM_INDIR_MAX), expected)
+  end
+
+  def test_magic_get_parameter_with_PARAM_BYTES_MAX
+    unless @magic_parameters && Magic::PARAM_BYTES_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    assert_equal(@magic.get_parameter(Magic::PARAM_BYTES_MAX), 1024 * 1024)
+  end
+
+  def test_magic_get_parameter_lower_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    error = assert_raise Magic::ParameterError do
+      @magic.get_parameter(-1)
+    end
+
+    assert_equal(error.message, 'unknown or invalid parameter specified')
+  end
+
+  def test_magic_get_parameter_upper_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    error = assert_raise Magic::ParameterError do
+      @magic.get_parameter(128)
+    end
+
+    assert_equal(error.message, 'unknown or invalid parameter specified')
+  end
+
+  def test_magic_set_parameter_error
+    if @magic_parameters
+      @magic.stubs(:set_parameter).with(0, 0).raises(Magic::NotImplementedError)
+    end
+
+    assert_raise Magic::NotImplementedError do
+      @magic.set_parameter(0, 0)
+    end
+  end
+
+  def test_magic_set_parameter_error_message
+    if @magic_parameters
+      @magic.stubs(:set_parameter).with(0, 0).raises(Magic::NotImplementedError, 'function is not implemented')
+    end
+
+    error = assert_raise Magic::NotImplementedError do
+      @magic.set_parameter(0, 0)
+    end
+
+    assert_equal(error.message, 'function is not implemented')
+  end
+
+  def test_magic_set_parameter_with_PARAM_INDIR_MAX
+    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128)
+    assert_equal(@magic.get_parameter(Magic::PARAM_INDIR_MAX), 128)
+  end
+
+  def test_magic_set_parameter_with_PARAM_BYTES_MAX
+    unless @magic_parameters && Magic::PARAM_BYTES_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    assert_nothing_raised do
+      @magic.set_parameter(Magic::PARAM_BYTES_MAX, 1024 * 1024 * 10)
+    end
+
+    assert_equal(@magic.get_parameter(Magic::PARAM_BYTES_MAX), 1024 * 1024 * 10)
+  end
+
+  def test_magic_set_parameter_lower_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    error = assert_raise Magic::ParameterError do
+      @magic.set_parameter(-1, 0)
+    end
+
+    assert_equal(error.message, 'unknown or invalid parameter specified')
+    assert_equal(error.errno, Errno::EINVAL::Errno)
+  end
+
+  def test_magic_set_parameter_upper_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    error = assert_raise Magic::ParameterError do
+      @magic.set_parameter(128, 0)
+    end
+
+    assert_equal(error.message, 'unknown or invalid parameter specified')
+    assert_equal(error.errno, Errno::EINVAL::Errno)
+  end
+
+  def test_magic_set_parameter_value_lower_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    assert_nothing_raised do
+      @magic.set_parameter(0, 0)
+    end
+  end
+
+  def test_magic_set_parameter_value_upper_boundary
+    omit('Magic library is too old') unless @magic_parameters
+
+    error = assert_raise Magic::ParameterError do
+      @magic.set_parameter(0, -1)
+    end
+
+    assert_equal(error.message, 'invalid parameter value specified')
+    assert_equal(error.errno, Errno::EOVERFLOW::Errno)
+  end
+
+  def test_magic_set_parameter_overflow_with_PARAM_INDIR_MAX
+    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
+      omit('Magic library is too old')
+    end
+
+    error = assert_raise Magic::ParameterError do
+      @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128 * 1024)
+    end
+
+    assert_equal(error.message, 'invalid parameter value specified')
+    assert_equal(error.errno, Errno::EOVERFLOW::Errno)
+  end
+
   def test_magic_flags_with_NONE_flag
     @magic.flags = 0x000000 # Flag: NONE
     assert_kind_of(Integer, @magic.flags)
@@ -185,69 +341,69 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_flags_to_a_with_NONE_flag
-    @magic.flags = 0x000000 # Flag: NONE
+    @magic.flags = Magic::NONE
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a, [Magic::NONE])
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag
-    @magic.flags = 0x000010 # Flag: MIME_TYPE
+    @magic.flags = Magic::MIME_TYPE
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a, [Magic::MIME_TYPE])
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag
-    @magic.flags = 0x000400 # Flag: MIME_ENCODING
+    @magic.flags = Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a, [Magic::MIME_ENCODING])
   end
 
   def test_magic_flags_to_a_with_MIME_flag
-    @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
+    @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a, [Magic::MIME_TYPE, Magic::MIME_ENCODING])
   end
 
   def test_magic_flags_to_a_with_NONE_flag_and_argument_true
-    @magic.flags = 0x000000 # Flag: NONE
+    @magic.flags = Magic::NONE
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a(true), ['NONE'])
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag_and_argument_true
-    @magic.flags = 0x000010 # Flag: MIME_TYPE
+    @magic.flags = Magic::MIME_TYPE
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a(true), ['MIME_TYPE'])
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag_and_argument_true
-    @magic.flags = 0x000400 # Flag: MIME_ENCODING
+    @magic.flags = Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a(true), ['MIME_ENCODING'])
   end
 
   def test_magic_flags_to_a_with_MIME_flag_and_argument_true
-    @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
+    @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
     assert_equal(@magic.flags_to_a(true), ['MIME_TYPE', 'MIME_ENCODING'])
   end
 
   def test_magic_flags_error_lower_boundary
-    assert_raise Magic::FlagsError do
+    error = assert_raise Magic::FlagsError do
       @magic.flags = -@flags_limit
     end
+
+    assert_equal(error.message, 'unknown or invalid flag specified')
+    assert_equal(error.errno, Errno::EINVAL::Errno)
   end
 
   def test_magic_flags_error_upper_boundary
-    assert_raise Magic::FlagsError do
+    error = assert_raise Magic::FlagsError do
       @magic.flags = @flags_limit + 1
     end
-  end
 
-  def test_magic_flags_error_message
-    @magic.flags = @flags_limit + 1
-  rescue Magic::FlagsError => error
     assert_equal(error.message, 'unknown or invalid flag specified')
+    assert_equal(error.errno, Errno::EINVAL::Errno)
   end
 
   def test_magic_file
@@ -283,6 +439,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_descriptor
   end
 
+  def test_magic_descriptor_with_old_descriptor_open
+  end
+
   def test_magic_descriptor_with_MAGIC_CONTINUE_flag
   end
 
@@ -302,6 +461,8 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_MAGIC_environment_variable
+    # XXX(krzysztof): How to override "MAGIC" environment
+    # variable so that the C extension will pick it up?
   end
 
   def test_magic_check
@@ -334,8 +495,10 @@ class MagicTest < Test::Unit::TestCase
       Magic.stubs(:version).raises(Magic::NotImplementedError, 'function is not implemented')
     end
 
-    Magic.version
-  rescue Magic::NotImplementedError => error
+    error = assert_raise Magic::NotImplementedError do
+      Magic.version
+    end
+
     assert_equal(error.message, 'function is not implemented')
   end
 

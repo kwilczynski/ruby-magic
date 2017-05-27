@@ -11,11 +11,14 @@ VALUE rb_cMagic = Qnil;
 VALUE rb_mgc_eError = Qnil;
 VALUE rb_mgc_eMagicError = Qnil;
 VALUE rb_mgc_eLibraryError = Qnil;
+VALUE rb_mgc_eParameterError = Qnil;
 VALUE rb_mgc_eFlagsError = Qnil;
 VALUE rb_mgc_eNotImplementedError = Qnil;
 
 void Init_magic(void);
 
+static VALUE magic_getparam_internal(void *data);
+static VALUE magic_setparam_internal(void *data);
 static VALUE magic_setflags_internal(void *data);
 static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
@@ -55,7 +58,7 @@ static VALUE magic_return(void *data);
  *
  * Example:
  *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
+ *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
  *
  * Will raise <i>Magic::LibraryError</i> exception if, or
  * <i>Magic::MagicError</i> exception if
@@ -70,17 +73,17 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     VALUE mutex = Qnil;
 
     if (rb_block_given_p()) {
-        klass = "Magic";
+	klass = "Magic";
 
-        if (!NIL_P(object))
-            klass = rb_class2name(CLASS_OF(object));
+	if (!NIL_P(object))
+	    klass = rb_class2name(CLASS_OF(object));
 
-        rb_warn("%s::new() does not take block; use %s::open() instead",
-                klass, klass);
+	rb_warn("%s::new() does not take block; use %s::open() instead",
+		klass, klass);
     }
 
     mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
-                                  rb_intern("Mutex")));
+				  rb_intern("Mutex")));
     rb_ivar_set(object, id_at_mutex, mutex);
 
     MAGIC_COOKIE(ma.cookie);
@@ -101,8 +104,8 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
  *
  * Example:
  *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *    magic.close         #=> nil
+ *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
+ *    magic.close          #=> nil
  *
  * See also: Magic#closed?
  */
@@ -114,10 +117,10 @@ rb_mgc_close(VALUE object)
     MAGIC_COOKIE(cookie);
 
     if (cookie) {
-        MAGIC_SYNCHRONIZED(magic_close_internal, cookie);
+	MAGIC_SYNCHRONIZED(magic_close_internal, cookie);
 
-        if (DATA_P(object))
-            DATA_PTR(object) = NULL;
+	if (DATA_P(object))
+	    DATA_PTR(object) = NULL;
     }
 
     return Qnil;
@@ -132,10 +135,10 @@ rb_mgc_close(VALUE object)
  *
  * Example:
  *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *    magic.closed?       #=> false
- *    magic.close         #=> nil
- *    magic.closed?       #=> true
+ *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
+ *    magic.closed?        #=> false
+ *    magic.close          #=> nil
+ *    magic.closed?        #=> true
  *
  * See also: Magic#close
  */
@@ -160,8 +163,8 @@ rb_mgc_closed(VALUE object)
  *
  * Example:
  *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *    magic.path          #=> ["/etc/magic", "/usr/share/misc/magic"]
+ *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
+ *    magic.path           #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
  * Will raise <i>Magic::LibraryError</i> exception if
  */
@@ -175,7 +178,7 @@ rb_mgc_get_path(VALUE object)
 
     value = rb_ivar_get(object, id_at_path);
     if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC"))
-        return value;
+	return value;
 
     cstring = magic_getpath_wrapper();
     value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
@@ -186,16 +189,99 @@ rb_mgc_get_path(VALUE object)
 
 /*
  * call-seq:
+ *
+ * Example:
+ *
+ * See also:
+ */
+VALUE
+rb_mgc_getparam(VALUE object, VALUE tag)
+{
+    int local_errno;
+    magic_arguments_t ma;
+
+    Check_Type(tag, T_FIXNUM);
+
+    MAGIC_CHECK_OPEN(object);
+    MAGIC_COOKIE(ma.cookie);
+
+    ma.data.parameter.tag = NUM2INT(tag);
+
+    MAGIC_SYNCHRONIZED(magic_getparam_internal, &ma);
+    if (ma.status < 0)	{
+	local_errno = errno;
+
+	switch (local_errno) {
+	case EINVAL:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError, EINVAL,
+				error(E_PARAM_INVALID_TYPE));
+	case ENOSYS:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+				error(E_NOT_IMPLEMENTED));
+	default:
+	    MAGIC_LIBRARY_ERROR(ma.cookie);
+	}
+    }
+
+    return SIZET2NUM(ma.data.parameter.value);
+}
+
+/*
+ * call-seq:
+ *
+ * Example:
+ *
+ * See also:
+ */
+VALUE
+rb_mgc_setparam(VALUE object, VALUE tag, VALUE value)
+{
+    int local_errno;
+    magic_arguments_t ma;
+
+    Check_Type(tag, T_FIXNUM);
+    Check_Type(value, T_FIXNUM);
+
+    MAGIC_CHECK_OPEN(object);
+    MAGIC_COOKIE(ma.cookie);
+
+    ma.data.parameter.tag = NUM2INT(tag);
+    ma.data.parameter.value = NUM2SIZET(value);
+
+    MAGIC_SYNCHRONIZED(magic_setparam_internal, &ma);
+    if (ma.status < 0)	{
+	local_errno = errno;
+
+	switch (local_errno) {
+	case EINVAL:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError, EINVAL,
+				error(E_PARAM_INVALID_TYPE));
+	case EOVERFLOW:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError, EOVERFLOW,
+				error(E_PARAM_INVALID_VALUE));
+	case ENOSYS:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+				error(E_NOT_IMPLEMENTED));
+	default:
+	    MAGIC_LIBRARY_ERROR(ma.cookie);
+	}
+    }
+
+    return Qtrue;
+}
+
+/*
+ * call-seq:
  *    magic.flags -> integer
  *
  * Returns
  *
  * Example:
  *
- *    magic = Magic.new           #=> #<Magic:0x007f8fdc012e58>
- *    magic.flags                 #=> 0
- *    magic.flags = Magic::MIME   #=> 1040
- *    magic.flags                 #=> 1040
+ *    magic = Magic.new            #=> #<Magic:0x007f8fdc012e58>
+ *    magic.flags                  #=> 0
+ *    magic.flags = Magic::MIME    #=> 1040
+ *    magic.flags                  #=> 1040
  *
  * See also: Magic#flags_to_a
  */
@@ -212,9 +298,9 @@ rb_mgc_getflags(VALUE object)
  *
  * Example:
  *
- *    magic = Magic.new                #=> #<Magic:0x007f8fdc012e58>
- *    magic.flags = Magic::MIME        #=> 1040
- *    magic.flags = Magic::MIME_TYPE   #=> 16
+ *    magic = Magic.new                 #=> #<Magic:0x007f8fdc012e58>
+ *    magic.flags = Magic::MIME         #=> 1040
+ *    magic.flags = Magic::MIME_TYPE    #=> 16
  *
  * Will raise <i>Magic::FlagsError</i> exception if, or
  * <i>Magic::LibraryError</i> exception if, or
@@ -234,19 +320,19 @@ rb_mgc_setflags(VALUE object, VALUE value)
     ma.flags = NUM2INT(value);
 
     MAGIC_SYNCHRONIZED(magic_setflags_internal, &ma);
-    if (ma.status < 0)  {
-        local_errno = errno;
+    if (ma.status < 0)	{
+	local_errno = errno;
 
-        switch (local_errno) {
-        case EINVAL:
-            MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
-                                error(E_FLAG_INVALID_VALUE));
-        case ENOSYS:
-            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
-                                error(E_FLAG_NOT_IMPLEMENTED));
-        default:
-            MAGIC_LIBRARY_ERROR(ma.cookie);
-        }
+	switch (local_errno) {
+	case EINVAL:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
+				error(E_FLAG_INVALID_VALUE));
+	case ENOSYS:
+	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+				error(E_FLAG_NOT_IMPLEMENTED));
+	default:
+	    MAGIC_LIBRARY_ERROR(ma.cookie);
+	}
     }
 
     return rb_ivar_set(object, id_at_flags, value);
@@ -260,10 +346,10 @@ rb_mgc_setflags(VALUE object, VALUE value)
  *
  * Example:
  *
- *    magic = Magic.new                                   #=> #<Magic:0x007f8fdc012e58>
- *    magic.load                                          #=> ["/etc/magic", "/usr/share/misc/magic"]
- *    magic.load("/usr/share/misc/magic", "/etc/magic")   #=> ["/usr/share/misc/magic", "/etc/magic"]
- *    magic.load                                          #=> ["/etc/magic", "/usr/share/misc/magic"]
+ *    magic = Magic.new                                    #=> #<Magic:0x007f8fdc012e58>
+ *    magic.load                                           #=> ["/etc/magic", "/usr/share/misc/magic"]
+ *    magic.load("/usr/share/misc/magic", "/etc/magic")    #=> ["/usr/share/misc/magic", "/etc/magic"]
+ *    magic.load                                           #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
  * Will raise <i>Magic::LibraryError</i> exception if, or
  *
@@ -279,17 +365,17 @@ rb_mgc_load(VALUE object, VALUE arguments)
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments) && !NIL_P(RARRAY_FIRST(arguments))) {
-        value = magic_join(arguments, CSTR2RVAL(":"));
-        ma.data.file.path = RVAL2CSTR(value);
+	value = magic_join(arguments, CSTR2RVAL(":"));
+	ma.data.file.path = RVAL2CSTR(value);
     }
     else
-        ma.data.file.path = magic_getpath_wrapper();
+	ma.data.file.path = magic_getpath_wrapper();
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
 
     MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
     if (ma.status < 0)
-        MAGIC_LIBRARY_ERROR(ma.cookie);
+	MAGIC_LIBRARY_ERROR(ma.cookie);
 
     value = magic_split(CSTR2RVAL(ma.data.file.path), CSTR2RVAL(":"));
 
@@ -321,16 +407,16 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
-        value = magic_join(arguments, CSTR2RVAL(":"));
+	value = magic_join(arguments, CSTR2RVAL(":"));
     else
-        value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
+	value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
     if (ma.status < 0)
-        MAGIC_LIBRARY_ERROR(ma.cookie);
+	MAGIC_LIBRARY_ERROR(ma.cookie);
 
     RB_GC_GUARD(value);
     return Qtrue;
@@ -360,16 +446,16 @@ rb_mgc_check(VALUE object, VALUE arguments)
     MAGIC_COOKIE(ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
-        value = magic_join(arguments, CSTR2RVAL(":"));
+	value = magic_join(arguments, CSTR2RVAL(":"));
     else
-        value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
+	value = magic_join(rb_mgc_get_path(object), CSTR2RVAL(":"));
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
     ma.data.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
     if (ma.status < 0)
-        return Qfalse;
+	return Qfalse;
 
     RB_GC_GUARD(value);
     return Qtrue;
@@ -406,25 +492,25 @@ rb_mgc_file(VALUE object, VALUE value)
 
     MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
     if (!ma.result) {
-        rv = magic_version_wrapper();
+	rv = magic_version_wrapper();
 
-        if (ma.flags & MAGIC_ERROR)
-            MAGIC_LIBRARY_ERROR(ma.cookie);
-        else if (rv < 515 || ma.flags & MAGIC_EXTENSION) {
-            (void)magic_errno(ma.cookie);
-            ma.result = magic_error(ma.cookie);
+	if (ma.flags & MAGIC_ERROR)
+	    MAGIC_LIBRARY_ERROR(ma.cookie);
+	else if (rv < 515 || ma.flags & MAGIC_EXTENSION) {
+	    (void)magic_errno(ma.cookie);
+	    ma.result = magic_error(ma.cookie);
 
-            if (!ma.result)
-                MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL,
-                                    error(E_UNKNOWN));
-        }
+	    if (!ma.result)
+		MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL,
+				    error(E_UNKNOWN));
+	}
     }
 
     assert(ma.result != NULL && \
-           "Must be a valid pointer to `const char' type");
+	   "Must be a valid pointer to `const char' type");
 
     assert(strncmp(ma.result, empty, strlen(empty)) != 0 && \
-                   "Empty or invalid result");
+		   "Empty or invalid result");
 
     return magic_return(&ma);
 }
@@ -462,7 +548,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
     if (!ma.result)
-        MAGIC_LIBRARY_ERROR(ma.cookie);
+	MAGIC_LIBRARY_ERROR(ma.cookie);
 
     return magic_return(&ma);
 }
@@ -496,7 +582,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 
     MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
     if (!ma.result)
-        MAGIC_LIBRARY_ERROR(ma.cookie);
+	MAGIC_LIBRARY_ERROR(ma.cookie);
 
     return magic_return(&ma);
 }
@@ -525,8 +611,8 @@ rb_mgc_version(RB_UNUSED_VAR(VALUE object))
     local_errno = errno;
 
     if (rv < 0 && local_errno == ENOSYS)
-        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
-                            error(E_NOT_IMPLEMENTED));
+	MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+			    error(E_NOT_IMPLEMENTED));
 
     return INT2NUM(rv);
 }
@@ -569,6 +655,24 @@ nogvl_magic_descriptor(void *data)
     magic_arguments_t *ma = data;
     ma->result = magic_descriptor_wrapper(ma->cookie, ma->data.file.fd, ma->flags);
     return ma;
+}
+
+static inline VALUE
+magic_getparam_internal(void *data)
+{
+    magic_arguments_t *ma = data;
+    ma->status = magic_getparam_wrapper(ma->cookie, ma->data.parameter.tag,
+					&ma->data.parameter.value);
+    return (VALUE)ma;
+}
+
+static inline VALUE
+magic_setparam_internal(void *data)
+{
+    magic_arguments_t *ma = data;
+    ma->status = magic_setparam_wrapper(ma->cookie, ma->data.parameter.tag,
+					&ma->data.parameter.value);
+    return (VALUE)ma;
 }
 
 static inline VALUE
@@ -615,7 +719,7 @@ magic_buffer_internal(void *data)
 {
     magic_arguments_t *ma = data;
     ma->result = magic_buffer_wrapper(ma->cookie, ma->data.buffer.buffer,
-                                      ma->data.buffer.size, ma->flags);
+				      ma->data.buffer.size, ma->flags);
     return (VALUE)ma;
 }
 
@@ -632,8 +736,8 @@ magic_allocate(VALUE klass)
 
     cookie = magic_open(MAGIC_NONE);
     if (!cookie)
-        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
-                            error(E_MAGIC_LIBRARY_INITIALIZE));
+	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
+			    error(E_MAGIC_LIBRARY_INITIALIZE));
 
     return Data_Wrap_Struct(klass, NULL, magic_free, cookie);
 }
@@ -644,11 +748,11 @@ magic_free(void *data)
     magic_t cookie = data;
 
     assert(cookie != NULL && \
-           "Must be a valid pointer to `magic_t' type");
+	   "Must be a valid pointer to `magic_t' type");
 
     if (cookie) {
-        magic_close(cookie);
-        cookie = NULL;
+	magic_close(cookie);
+	cookie = NULL;
     }
 }
 
@@ -668,12 +772,12 @@ magic_exception(void *data)
     magic_exception_t *e = data;
 
     assert(e != NULL && \
-           "Must be a valid pointer to `magic_exception_t' type");
+	   "Must be a valid pointer to `magic_exception_t' type");
 
     object = rb_protect(magic_exception_wrapper, (VALUE)e, &exception);
 
     if (exception)
-        rb_jump_tag(exception);
+	rb_jump_tag(exception);
 
     rb_iv_set(object, "@errno", INT2NUM(e->magic_errno));
 
@@ -703,7 +807,7 @@ magic_library_error(VALUE klass, void *data)
     magic_t cookie = data;
 
     assert(cookie != NULL && \
-           "Must be a valid pointer to `magic_t' type");
+	   "Must be a valid pointer to `magic_t' type");
 
     e.magic_errno = -1;
     e.magic_error = error(E_UNKNOWN);
@@ -711,12 +815,12 @@ magic_library_error(VALUE klass, void *data)
 
     message = magic_error(cookie);
     if (message) {
-        e.magic_errno = magic_errno(cookie);
-        e.magic_error = message;
+	e.magic_errno = magic_errno(cookie);
+	e.magic_error = message;
     }
 
     assert(strncmp(e.magic_error, empty, strlen(empty)) != 0 && \
-                   "Empty or invalid error message");
+		   "Empty or invalid error message");
 
     return magic_exception(&e);
 }
@@ -741,16 +845,28 @@ static VALUE
 magic_return(void *data)
 {
     magic_arguments_t *ma = data;
+    const char *empty = "???";
+
     VALUE value = Qnil;
     VALUE array = Qnil;
 
     value = CSTR2RVAL(ma->result);
 
-    if (ma->flags & MAGIC_CONTINUE) {
-        array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
+    if (ma->flags & MAGIC_EXTENSION) {
+	if (strncmp(ma->result, empty, strlen(empty)) == 0)
+	    return Qnil;
 
-        RB_GC_GUARD(array);
-        return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+	array = magic_split(value, CSTR2RVAL("\x5c"));
+
+	RB_GC_GUARD(array);
+	return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+    }
+
+    if (ma->flags & MAGIC_CONTINUE) {
+	array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
+
+	RB_GC_GUARD(array);
+	return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
     RB_GC_GUARD(value);
@@ -760,7 +876,7 @@ magic_return(void *data)
 void
 Init_magic(void)
 {
-    id_at_path  = rb_intern("@path");
+    id_at_path	= rb_intern("@path");
     id_at_flags = rb_intern("@flags");
     id_at_mutex = rb_intern("@mutex");
 
@@ -790,6 +906,11 @@ Init_magic(void)
     /*
      * Raised when
      */
+    rb_mgc_eParameterError = rb_define_class_under(rb_cMagic, "ParameterError", rb_mgc_eError);
+
+    /*
+     * Raised when
+     */
     rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError", rb_mgc_eError);
 
     /*
@@ -803,6 +924,10 @@ Init_magic(void)
     rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_closed), 0);
 
     rb_define_method(rb_cMagic, "path", RUBY_METHOD_FUNC(rb_mgc_get_path), 0);
+
+    rb_define_method(rb_cMagic, "get_parameter", RUBY_METHOD_FUNC(rb_mgc_getparam), 1);
+    rb_define_method(rb_cMagic, "set_parameter", RUBY_METHOD_FUNC(rb_mgc_setparam), 2);
+
     rb_define_method(rb_cMagic, "flags", RUBY_METHOD_FUNC(rb_mgc_getflags), 0);
     rb_define_method(rb_cMagic, "flags=", RUBY_METHOD_FUNC(rb_mgc_setflags), 1);
 
@@ -817,6 +942,42 @@ Init_magic(void)
     rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 
     rb_define_singleton_method(rb_cMagic, "version", RUBY_METHOD_FUNC(rb_mgc_version), 0);
+
+    /*
+     * Controls how many levels of recursion will be followed for
+     * indirect magic entries.
+     */
+    MAGIC_DEFINE_PARAMETER(INDIR_MAX);
+
+    /*
+     * Controls the maximum number of calls for name or use magic.
+     */
+    MAGIC_DEFINE_PARAMETER(NAME_MAX);
+
+    /*
+     * Controls how many ELF program sections will be processed.
+     */
+    MAGIC_DEFINE_PARAMETER(ELF_PHNUM_MAX);
+
+    /*
+     * Controls how many ELF sections will be processed.
+     */
+    MAGIC_DEFINE_PARAMETER(ELF_SHNUM_MAX);
+
+    /*
+     * Controls how many ELF notes will be processed.
+     */
+    MAGIC_DEFINE_PARAMETER(ELF_NOTES_MAX);
+
+    /*
+     * Controls the length limit for regular expression searches.
+     */
+    MAGIC_DEFINE_PARAMETER(REGEX_MAX);
+
+    /*
+     * Controls the maximum number of bytes to read from a file.
+     */
+    MAGIC_DEFINE_PARAMETER(BYTES_MAX);
 
     /*
      * No special handling and/or flags specified. Default behaviour.

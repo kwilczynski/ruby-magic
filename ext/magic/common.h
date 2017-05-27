@@ -32,20 +32,8 @@ extern "C" {
 # include <xlocale.h>
 #endif
 
-#if !defined(ENOMEM)
-# define ENOMEM 12
-#endif
-
-#if !defined(EFAULT)
-# define EFAULT 14
-#endif
-
-#if !defined(EINVAL)
-# define EINVAL 22
-#endif
-
-#if !defined(ENOSYS)
-# define ENOSYS 38
+#if !defined(USHRT_MAX)
+# define USHRT_MAX ((uint16_t)(~0U))
 #endif
 
 #if !defined(ANYARGS)
@@ -76,12 +64,44 @@ extern "C" {
 # define HAVE_SAFE_LOCALE 1
 #endif
 
+#if defined(HAVE_MAGIC_GETPARAM) && defined(HAVE_MAGIC_SETPARAM)
+# define HAVE_MAGIC_PARAM 1
+#endif
+
 #if !defined(MAGIC_EXTENSION)
 # define MAGIC_EXTENSION -1
 #endif
 
 #if !defined(MAGIC_COMPRESS_TRANSP)
 # define MAGIC_COMPRESS_TRANSP -1
+#endif
+
+#if !defined(MAGIC_PARAM_INDIR_MAX)
+# define MAGIC_PARAM_INDIR_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_NAME_MAX)
+# define MAGIC_PARAM_NAME_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_PHNUM_MAX)
+# define MAGIC_PARAM_ELF_PHNUM_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_SHNUM_MAX)
+# define MAGIC_PARAM_ELF_SHNUM_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_ELF_NOTES_MAX)
+# define MAGIC_PARAM_ELF_NOTES_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_REGEX_MAX)
+# define MAGIC_PARAM_REGEX_MAX -1
+#endif
+
+#if !defined(MAGIC_PARAM_BYTES_MAX)
+# define MAGIC_PARAM_BYTES_MAX -1
 #endif
 
 #if defined(__cplusplus)

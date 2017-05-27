@@ -45,6 +45,16 @@ extern "C" {
 # define RSTRING_PTR(s) (RSTRING(s)->ptr)
 #endif
 
+#if !defined(NUM2SIZET)
+# if SIZEOF_SIZE_T == SIZEOF_LONG
+#  define NUM2SIZET(n) ((size_t)NUM2ULONG(n))
+#  define SIZET2NUM(n) ((size_t)ULONG2NUM(n))
+# else
+#  define NUM2SIZET(n) ((size_t)NUM2ULL(n))
+#  define SIZET2NUM(n) ((size_t)ULL2NUM(n))
+# endif
+#endif
+
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
 #define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : rb_ary_entry((a), 0))
@@ -84,20 +94,25 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
 #define MAGIC_GENERIC_ERROR(k, e, m) \
-        rb_exc_raise(magic_generic_error((k), (e), (m)))
+	rb_exc_raise(magic_generic_error((k), (e), (m)))
 
 #define MAGIC_LIBRARY_ERROR(c) \
-        rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
+	rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
 
-#define MAGIC_CHECK_OPEN(o)                                     \
-    do {                                                        \
-        if (MAGIC_CLOSED_P(o))                                  \
-            MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,   \
-                                error(E_MAGIC_LIBRARY_CLOSED)); \
-    } while(0)                                                  \
+#define MAGIC_CHECK_OPEN(o)					\
+    do {							\
+	if (MAGIC_CLOSED_P(o))					\
+	    MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,	\
+				error(E_MAGIC_LIBRARY_CLOSED)); \
+    } while(0)							\
+
+#define MAGIC_STRINGIFY(s) #s
 
 #define MAGIC_DEFINE_FLAG(c) \
-	rb_define_const(rb_cMagic, #c, INT2NUM(MAGIC_##c));
+	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c));
+
+#define MAGIC_DEFINE_PARAMETER(c) \
+	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
 
 #define error(t) errors[(t)]
 
@@ -106,9 +121,16 @@ enum error {
     E_NOT_IMPLEMENTED,
     E_MAGIC_LIBRARY_INITIALIZE,
     E_MAGIC_LIBRARY_CLOSED,
-    E_FLAG_INVALID_VALUE,
-    E_FLAG_NOT_IMPLEMENTED
+    E_PARAM_INVALID_TYPE,
+    E_PARAM_INVALID_VALUE,
+    E_FLAG_NOT_IMPLEMENTED,
+    E_FLAG_INVALID_VALUE
 };
+
+typedef struct parameter {
+    int tag;
+    size_t value;
+} parameter_t;
 
 typedef union file {
     int fd;
@@ -124,8 +146,9 @@ typedef struct magic_arguments {
     int flags;
     magic_t cookie;
     union {
-        file_t file;
-        buffer_t buffer;
+	parameter_t parameter;
+	file_t file;
+	buffer_t buffer;
     } data;
     int status;
     const char *result;
@@ -142,8 +165,10 @@ static const char *errors[] = {
     "function is not implemented",
     "failed to initialize Magic library",
     "Magic library is not open",
-    "unknown or invalid flag specified",
+    "unknown or invalid parameter specified",
+    "invalid parameter value specified",
     "flag is not implemented",
+    "unknown or invalid flag specified",
     NULL
 };
 
@@ -186,6 +211,7 @@ RUBY_EXTERN VALUE rb_cMagic;
 RUBY_EXTERN VALUE rb_mgc_eError;
 RUBY_EXTERN VALUE rb_mgc_eMagicError;
 RUBY_EXTERN VALUE rb_mgc_eLibraryError;
+RUBY_EXTERN VALUE rb_mgc_eParameterError;
 RUBY_EXTERN VALUE rb_mgc_eFlagsError;
 RUBY_EXTERN VALUE rb_mgc_eNotImplementedError;
 
@@ -195,6 +221,9 @@ RUBY_EXTERN VALUE rb_mgc_close(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_closed(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_get_path(VALUE object);
+
+RUBY_EXTERN VALUE rb_mgc_getparam(VALUE object, VALUE tag);
+RUBY_EXTERN VALUE rb_mgc_setparam(VALUE object, VALUE tag, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_getflags(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_setflags(VALUE object, VALUE value);

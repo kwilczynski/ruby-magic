@@ -8,32 +8,32 @@ extern "C" {
 #include "common.h"
 
 #if defined(HAVE_BROKEN_MAGIC)
-# define OVERRIDE_LOCALE(f, r, ...)           \
-    do {                                      \
-        save_t __l_##f;                       \
-        override_current_locale(&(__l_##f));  \
-        r = f(__VA_ARGS__);                   \
-        restore_current_locale(&(__l_##f));   \
+# define OVERRIDE_LOCALE(f, r, ...)	      \
+    do {				      \
+	save_t __l_##f;			      \
+	override_current_locale(&(__l_##f));  \
+	r = f(__VA_ARGS__);		      \
+	restore_current_locale(&(__l_##f));   \
     } while(0)
 #else
 # define OVERRIDE_LOCALE(f, r, ...) \
 	 r = f(__VA_ARGS__)
 #endif
 
-#define SUPPRESS_EVERYTHING(f, r, ...)      \
-    do {                                    \
-        save_t __e_##f;                     \
-        suppress_error_output(&(__e_##f));  \
-        OVERRIDE_LOCALE(f, r, __VA_ARGS__); \
-        restore_error_output(&(__e_##f));   \
+#define SUPPRESS_EVERYTHING(f, r, ...)	    \
+    do {				    \
+	save_t __e_##f;			    \
+	suppress_error_output(&(__e_##f));  \
+	OVERRIDE_LOCALE(f, r, __VA_ARGS__); \
+	restore_error_output(&(__e_##f));   \
     } while(0)
 
-#define MAGIC_FUNCTION(f, r, x, ...)                \
-     do {                                           \
-        if ((x) & MAGIC_ERROR)                      \
-            OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
-        else                                        \
-            SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
+#define MAGIC_FUNCTION(f, r, x, ...)		    \
+     do {					    \
+	if ((x) & MAGIC_ERROR)			    \
+	    OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
+	else					    \
+	    SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
      } while(0)
 
 typedef struct file_data {
@@ -54,12 +54,15 @@ typedef struct locale_data {
 typedef struct save {
     int status;
     union {
-        file_data_t file;
-        locale_data_t locale;
+	file_data_t file;
+	locale_data_t locale;
     } data;
 } save_t;
 
 extern const char* magic_getpath_wrapper(void);
+
+extern int magic_getparam_wrapper(magic_t magic, int parameter, void *value);
+extern int magic_setparam_wrapper(magic_t magic, int parameter, const void *value);
 
 extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
