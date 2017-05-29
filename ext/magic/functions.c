@@ -4,11 +4,86 @@ extern "C" {
 
 #include "functions.h"
 
+static inline int safe_cloexec(int fd);
+
+int safe_dup(int fd);
+int safe_close(int fd);
+
 int suppress_error_output(void *data);
 int restore_error_output(void *data);
 
 int override_current_locale(void *data);
 int restore_current_locale(void *data);
+
+static inline int
+safe_cloexec(int fd)
+{
+    int local_errno;
+    int flags = fcntl(fd, F_GETFD);
+
+    if (flags < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+    return 0;
+
+out:
+    errno = local_errno;
+    return -1;
+}
+
+int
+safe_dup(int fd)
+{
+    int new_fd;
+    int local_errno;
+    int flags = F_DUPFD;
+
+#if defined(HAVE_F_DUPFD_CLOEXEC)
+    flags = F_DUPFD_CLOEXEC;
+#endif
+
+    new_fd = fcntl(fd, flags, fileno(stderr) + 1);
+    if (new_fd < 0 && errno == EINVAL) {
+	new_fd = dup(fd);
+	if (new_fd < 0) {
+	   local_errno = errno;
+	   goto out;
+	}
+    }
+
+    if (safe_cloexec(new_fd) < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+    return new_fd;
+
+out:
+    errno = local_errno;
+    return -1;
+}
+
+int
+safe_close(int fd)
+{
+    int rv;
+#if defined(HAVE_POSIX_CLOSE_RESTART)
+    rv = posix_close(fd, 0);
+#else
+    rv = close(fd);
+    if (rv < 0 && errno == EINTR)
+	errno = EINPROGRESS;
+#endif
+
+    return rv;
+}
 
 int
 suppress_error_output(void *data)
@@ -16,6 +91,10 @@ suppress_error_output(void *data)
     int local_errno;
     mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
     save_t *s = data;
+
+#if defined(HAVE_O_CLOEXEC)
+    mode |= O_CLOEXEC;
+#endif
 
     assert(s != NULL && \
 	   "Must be a valid pointer to `save_t' type");
@@ -27,7 +106,7 @@ suppress_error_output(void *data)
     fflush(stderr);
     fgetpos(stderr, &s->data.file.position);
 
-    s->data.file.old_fd = dup(fileno(stderr));
+    s->data.file.old_fd = safe_dup(fileno(stderr));
     if (s->data.file.old_fd < 0) {
 	local_errno = errno;
 	goto out;
@@ -42,7 +121,12 @@ suppress_error_output(void *data)
 	    goto out;
 	}
 
-	close(s->data.file.old_fd);
+	safe_close(s->data.file.old_fd);
+	goto out;
+    }
+
+    if (safe_cloexec(s->data.file.new_fd) < 0) {
+	local_errno = errno;
 	goto out;
     }
 
@@ -51,7 +135,7 @@ suppress_error_output(void *data)
 	goto out;
     }
 
-    close(s->data.file.new_fd);
+    safe_close(s->data.file.new_fd);
     return 0;
 
 out:
@@ -80,7 +164,7 @@ restore_error_output(void *data)
 	goto out;
     }
 
-    close(s->data.file.old_fd);
+    safe_close(s->data.file.old_fd);
     clearerr(stderr);
     fsetpos(stderr, &s->data.file.position);
 

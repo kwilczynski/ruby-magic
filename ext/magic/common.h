@@ -68,6 +68,18 @@ extern "C" {
 # define HAVE_MAGIC_PARAM 1
 #endif
 
+#if defined(F_DUPFD_CLOEXEC)
+# define HAVE_F_DUPFD_CLOEXEC
+#endif
+
+#if defined(O_CLOEXEC)
+# define HAVE_O_CLOEXEC
+#endif
+
+#if defined(POSIX_CLOSE_RESTART)
+# define HAVE_POSIX_CLOSE_RESTART
+#endif
+
 #if !defined(MAGIC_EXTENSION)
 # define MAGIC_EXTENSION -1
 #endif

@@ -59,6 +59,9 @@ typedef struct save {
     } data;
 } save_t;
 
+extern int safe_dup(int fd);
+extern int safe_close(int fd);
+
 extern const char* magic_getpath_wrapper(void);
 
 extern int magic_getparam_wrapper(magic_t magic, int parameter, void *value);
