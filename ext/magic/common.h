@@ -56,28 +56,28 @@ extern "C" {
 # define UNUSED(x) (void)(x)
 #endif
 
-#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
-# define HAVE_BROKEN_MAGIC 1
+#if defined(F_DUPFD_CLOEXEC)
+# define HAVE_F_DUPFD_CLOEXEC 1
+#endif
+
+#if defined(O_CLOEXEC)
+# define HAVE_O_CLOEXEC 1
+#endif
+
+#if defined(POSIX_CLOSE_RESTART)
+# define HAVE_POSIX_CLOSE_RESTART 1
 #endif
 
 #if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
 # define HAVE_SAFE_LOCALE 1
 #endif
 
+#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
+# define HAVE_BROKEN_MAGIC 1
+#endif
+
 #if defined(HAVE_MAGIC_GETPARAM) && defined(HAVE_MAGIC_SETPARAM)
 # define HAVE_MAGIC_PARAM 1
-#endif
-
-#if defined(F_DUPFD_CLOEXEC)
-# define HAVE_F_DUPFD_CLOEXEC
-#endif
-
-#if defined(O_CLOEXEC)
-# define HAVE_O_CLOEXEC
-#endif
-
-#if defined(POSIX_CLOSE_RESTART)
-# define HAVE_POSIX_CLOSE_RESTART
 #endif
 
 #if !defined(MAGIC_EXTENSION)

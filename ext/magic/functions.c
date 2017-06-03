@@ -340,10 +340,6 @@ magic_getflags_wrapper(magic_t magic)
 #endif
 }
 
-#if defined(__cplusplus)
-}
-#endif
-
 inline int
 magic_setflags_wrapper(magic_t magic, int flags)
 {
