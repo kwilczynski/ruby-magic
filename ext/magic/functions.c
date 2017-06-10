@@ -6,6 +6,7 @@ extern "C" {
 
 static inline int safe_cloexec(int fd);
 
+int check_fd(int fd);
 int safe_dup(int fd);
 int safe_close(int fd);
 
@@ -14,6 +15,18 @@ int restore_error_output(void *data);
 
 int override_current_locale(void *data);
 int restore_current_locale(void *data);
+
+int
+check_fd(int fd)
+{
+    errno = 0;
+    if (fd < 0 || (fcntl(fd, F_GETFD) < 0 && errno == EBADF)) {
+	errno = EBADF;
+	return -EBADF;
+    }
+
+    return 0;
+}
 
 static inline int
 safe_cloexec(int fd)
@@ -402,8 +415,32 @@ inline const char*
 magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
     const char *cstring;
+#if defined(HAVE_BROKEN_MAGIC)
+    int local_errno;
+
+    if ((fd = safe_dup(fd)) < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+    MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
+
+    if (check_fd(fd) < 0) {
+	local_errno = errno;
+	goto out;
+    }
+
+    safe_close(fd);
+
+    return cstring;
+
+out:
+    errno = local_errno;
+    return NULL;
+#else
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
     return cstring;
+#endif
 }
 
 inline int
