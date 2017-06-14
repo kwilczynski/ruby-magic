@@ -4,7 +4,12 @@ extern "C" {
 
 #include "ruby-magic.h"
 
-ID id_at_flags, id_at_path, id_at_mutex;
+ID id_to_io;
+ID id_to_path;
+
+ID id_at_flags;
+ID id_at_path;
+ID id_at_mutex;
 
 VALUE rb_cMagic = Qnil;
 
@@ -76,7 +81,7 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 	klass = "Magic";
 
 	if (!NIL_P(object))
-	    klass = rb_class2name(CLASS_OF(object));
+	    klass = rb_obj_classname(object);
 
 	rb_warn("%s::new() does not take block; use %s::open() instead",
 		klass, klass);
@@ -200,7 +205,7 @@ rb_mgc_getparam(VALUE object, VALUE tag)
     int local_errno;
     magic_arguments_t ma;
 
-    Check_Type(tag, T_FIXNUM);
+    MAGIC_CHECK_INTEGER_TYPE(tag);
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
@@ -239,8 +244,8 @@ rb_mgc_setparam(VALUE object, VALUE tag, VALUE value)
     int local_errno;
     magic_arguments_t ma;
 
-    Check_Type(tag, T_FIXNUM);
-    Check_Type(value, T_FIXNUM);
+    MAGIC_CHECK_INTEGER_TYPE(tag);
+    MAGIC_CHECK_INTEGER_TYPE(value);
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
@@ -312,7 +317,7 @@ rb_mgc_setflags(VALUE object, VALUE value)
     int local_errno;
     magic_arguments_t ma;
 
-    Check_Type(value, T_FIXNUM);
+    MAGIC_CHECK_INTEGER_TYPE(value);
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
@@ -463,6 +468,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 
 /*
  * call-seq:
+ *    magic.file( io )   -> string or array
  *    magic.file( path ) -> string or array
  *
  * Returns
@@ -482,15 +488,29 @@ rb_mgc_file(VALUE object, VALUE value)
     magic_arguments_t ma;
     const char *empty = "(null)";
 
-    Check_Type(value, T_STRING);
+    if (NIL_P(value))
+	goto error;
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
-    ma.data.file.path = RVAL2CSTR(value);
 
-    MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+    if (rb_respond_to(value, id_to_io)) {
+	ma.data.file.fd = magic_fileno(value);
+	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
+    }
+    else {
+	if (rb_respond_to(value, id_to_path))
+	    value = rb_funcall(value, id_to_path, 0);
+
+	if (!STRING_P(value))
+	    goto error;
+
+	ma.data.file.path = RVAL2CSTR(value);
+	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+    }
+
     if (!ma.result) {
 	rv = magic_version_wrapper();
 
@@ -513,6 +533,9 @@ rb_mgc_file(VALUE object, VALUE value)
 		   "Empty or invalid result");
 
     return magic_return(&ma);
+
+error:
+    MAGIC_ARGUMENT_ERROR(value, "String or IO-like object");
 }
 
 /*
@@ -534,9 +557,9 @@ rb_mgc_buffer(VALUE object, VALUE value)
 {
     magic_arguments_t ma;
 
-    Check_Type(value, T_STRING);
-
+    MAGIC_CHECK_STRING_TYPE(value);
     MAGIC_CHECK_OPEN(object);
+
     MAGIC_COOKIE(ma.cookie);
 
     ma.flags = NUM2INT(rb_mgc_getflags(object));
@@ -572,8 +595,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 {
     magic_arguments_t ma;
 
-    Check_Type(value, T_FIXNUM);
-
+    MAGIC_CHECK_INTEGER_TYPE(value);
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
@@ -876,7 +898,10 @@ magic_return(void *data)
 void
 Init_magic(void)
 {
-    id_at_path	= rb_intern("@path");
+    id_to_io = rb_intern("to_io");
+    id_to_path = rb_intern("to_path");
+
+    id_at_path = rb_intern("@path");
     id_at_flags = rb_intern("@flags");
     id_at_mutex = rb_intern("@mutex");
 

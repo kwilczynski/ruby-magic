@@ -24,6 +24,12 @@ extern "C" {
 #include <magic.h>
 #include <ruby.h>
 
+#if defined(HAVE_RUBY_IO_H)
+# include <ruby/io.h>
+#else
+# include <rubyio.h>
+#endif
+
 #if defined(HAVE_LOCALE_H)
 # include <locale.h>
 #endif
@@ -54,6 +60,14 @@ extern "C" {
 
 #if !defined(UNUSED)
 # define UNUSED(x) (void)(x)
+#endif
+
+#if !defined(RUBY_METHOD_FUNC)
+# define RUBY_METHOD_FUNC(f) ((VALUE (*)(ANYARGS))(f))
+#endif
+
+#if defined(RUBY_INTEGER_UNIFICATION) || RUBY_API_VERSION_CODE >= 20400
+# define HAVE_INTEGER_UNIFICATION 1
 #endif
 
 #if defined(F_DUPFD_CLOEXEC)

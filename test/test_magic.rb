@@ -14,6 +14,7 @@ class MagicTest < Test::Unit::TestCase
     @version = Magic.version rescue nil
     @magic = Magic.new
 
+    @new_format = @version && @version >= 519
     @magic_parameters = @version && @version > 520
   end
 
@@ -56,7 +57,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_instance_default_flags
-    assert_equal(@magic.flags, 0)
+    assert_equal(0, @magic.flags)
   end
 
   def test_magic_new_with_block
@@ -66,7 +67,7 @@ class MagicTest < Test::Unit::TestCase
 
     expected = "Magic::new() does not take block; use Magic::open() instead\n"
     assert_kind_of(Magic, magic)
-    assert_equal(output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop, expected)
+    assert_equal(expected, output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop)
   end
 
   def test_magic_instance_methods
@@ -131,7 +132,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.flags
     end
 
-    assert_equal(error.message, 'Magic library is not open')
+    assert_equal('Magic library is not open', error.message)
   end
 
   def test_magic_closed?
@@ -151,7 +152,7 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_path
     assert_kind_of(Array, @magic.path)
-    assert_not_equal(@magic.path.size, 0)
+    assert_not_equal(0, @magic.path.size)
   end
 
   def test_magic_path_with_MAGIC_environment_variable
@@ -178,7 +179,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.get_parameter(0)
     end
 
-    assert_equal(error.message, 'function is not implemented')
+    assert_equal('function is not implemented', error.message)
   end
 
   def test_magic_get_parameter_with_PARAM_INDIR_MAX
@@ -188,7 +189,7 @@ class MagicTest < Test::Unit::TestCase
 
     # Older versions of libmagic will have lower value.
     expected = @version < 526 ? 15 : 50
-    assert_equal(@magic.get_parameter(Magic::PARAM_INDIR_MAX), expected)
+    assert_equal(expected, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
   end
 
   def test_magic_get_parameter_with_PARAM_BYTES_MAX
@@ -196,7 +197,7 @@ class MagicTest < Test::Unit::TestCase
       omit('Magic library is too old')
     end
 
-    assert_equal(@magic.get_parameter(Magic::PARAM_BYTES_MAX), 1024 * 1024)
+    assert_equal(1024 * 1024, @magic.get_parameter(Magic::PARAM_BYTES_MAX))
   end
 
   def test_magic_get_parameter_lower_boundary
@@ -206,7 +207,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.get_parameter(-1)
     end
 
-    assert_equal(error.message, 'unknown or invalid parameter specified')
+    assert_equal('unknown or invalid parameter specified', error.message)
   end
 
   def test_magic_get_parameter_upper_boundary
@@ -216,7 +217,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.get_parameter(128)
     end
 
-    assert_equal(error.message, 'unknown or invalid parameter specified')
+    assert_equal('unknown or invalid parameter specified', error.message)
   end
 
   def test_magic_set_parameter_error
@@ -238,7 +239,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(0, 0)
     end
 
-    assert_equal(error.message, 'function is not implemented')
+    assert_equal('function is not implemented', error.message)
   end
 
   def test_magic_set_parameter_with_PARAM_INDIR_MAX
@@ -247,7 +248,7 @@ class MagicTest < Test::Unit::TestCase
     end
 
     @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128)
-    assert_equal(@magic.get_parameter(Magic::PARAM_INDIR_MAX), 128)
+    assert_equal(128, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
   end
 
   def test_magic_set_parameter_with_PARAM_BYTES_MAX
@@ -259,7 +260,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(Magic::PARAM_BYTES_MAX, 1024 * 1024 * 10)
     end
 
-    assert_equal(@magic.get_parameter(Magic::PARAM_BYTES_MAX), 1024 * 1024 * 10)
+    assert_equal(1024 * 1024 * 10, @magic.get_parameter(Magic::PARAM_BYTES_MAX))
   end
 
   def test_magic_set_parameter_lower_boundary
@@ -269,8 +270,8 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(-1, 0)
     end
 
-    assert_equal(error.message, 'unknown or invalid parameter specified')
-    assert_equal(error.errno, Errno::EINVAL::Errno)
+    assert_equal('unknown or invalid parameter specified', error.message)
+    assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
   def test_magic_set_parameter_upper_boundary
@@ -280,8 +281,8 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(128, 0)
     end
 
-    assert_equal(error.message, 'unknown or invalid parameter specified')
-    assert_equal(error.errno, Errno::EINVAL::Errno)
+    assert_equal('unknown or invalid parameter specified', error.message)
+    assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
   def test_magic_set_parameter_value_lower_boundary
@@ -299,8 +300,8 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(0, -1)
     end
 
-    assert_equal(error.message, 'invalid parameter value specified')
-    assert_equal(error.errno, Errno::EOVERFLOW::Errno)
+    assert_equal('invalid parameter value specified', error.message)
+    assert_equal(Errno::EOVERFLOW::Errno, error.errno)
   end
 
   def test_magic_set_parameter_overflow_with_PARAM_INDIR_MAX
@@ -312,80 +313,80 @@ class MagicTest < Test::Unit::TestCase
       @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128 * 1024)
     end
 
-    assert_equal(error.message, 'invalid parameter value specified')
-    assert_equal(error.errno, Errno::EOVERFLOW::Errno)
+    assert_equal('invalid parameter value specified', error.message)
+    assert_equal(Errno::EOVERFLOW::Errno, error.errno)
   end
 
   def test_magic_flags_with_NONE_flag
     @magic.flags = 0x000000 # Flag: NONE
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(@magic.flags, Magic::NONE)
+    assert_equal(Magic::NONE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
     @magic.flags = 0x000010 # Flag: MIME_TYPE
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(@magic.flags, Magic::MIME_TYPE)
+    assert_equal(Magic::MIME_TYPE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
     @magic.flags = 0x000400 # Flag: MIME_ENCODING
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(@magic.flags, Magic::MIME_ENCODING)
+    assert_equal(Magic::MIME_ENCODING, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_flag
     @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(@magic.flags, Magic::MIME)
+    assert_equal(Magic::MIME, @magic.flags)
   end
 
   def test_magic_flags_to_a_with_NONE_flag
     @magic.flags = Magic::NONE
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a, [Magic::NONE])
+    assert_equal([Magic::NONE], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag
     @magic.flags = Magic::MIME_TYPE
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a, [Magic::MIME_TYPE])
+    assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag
     @magic.flags = Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a, [Magic::MIME_ENCODING])
+    assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_flag
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a, [Magic::MIME_TYPE, Magic::MIME_ENCODING])
+    assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_NONE_flag_and_argument_true
     @magic.flags = Magic::NONE
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a(true), ['NONE'])
+    assert_equal(['NONE'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a(true), ['MIME_TYPE'])
+    assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag_and_argument_true
     @magic.flags = Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a(true), ['MIME_ENCODING'])
+    assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(@magic.flags_to_a(true), ['MIME_TYPE', 'MIME_ENCODING'])
+    assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_error_lower_boundary
@@ -393,8 +394,8 @@ class MagicTest < Test::Unit::TestCase
       @magic.flags = -@flags_limit
     end
 
-    assert_equal(error.message, 'unknown or invalid flag specified')
-    assert_equal(error.errno, Errno::EINVAL::Errno)
+    assert_equal('unknown or invalid flag specified', error.message)
+    assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
   def test_magic_flags_error_upper_boundary
@@ -402,16 +403,51 @@ class MagicTest < Test::Unit::TestCase
       @magic.flags = @flags_limit + 1
     end
 
-    assert_equal(error.message, 'unknown or invalid flag specified')
-    assert_equal(error.errno, Errno::EINVAL::Errno)
+    assert_equal('unknown or invalid flag specified', error.message)
+    assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
   def test_magic_file
   end
 
+  def test_magic_file_with_nil_argument
+    error = assert_raise TypeError do
+      @magic.file nil
+    end
+
+    assert_equal('wrong argument type nil (expected String or IO-like object)', error.message)
+  end
+
   def test_magic_file_argument_with_NULL
     assert_raise ArgumentError do
       @magic.file "string\0value"
+    end
+  end
+
+  def test_magic_file_with_IO_like_argument
+    with_fixtures do |_, format|
+      @magic.load(File.join(format, 'png-fake.magic'))
+      File.open('ruby.png') do |file|
+        assert_match(%r{^Ruby Gem image}, @magic.file(file))
+      end
+    end
+  end
+
+  def test_magic_file_with_IO_like_argument_stream_closed
+    error = assert_raise IOError do
+      IO.pipe do |r, w|
+        r.close
+        @magic.file r
+      end
+    end
+
+    assert_equal('closed stream', error.message)
+  end
+
+  def test_magic_file_with_String_like_argument
+    with_fixtures do |_, format|
+      @magic.load(File.join(format, 'png-fake.magic'))
+      assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
     end
   end
 
@@ -427,6 +463,14 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_buffer
   end
 
+  def test_magic_buffer_with_nil_argument
+    error = assert_raise TypeError do
+      @magic.buffer nil
+    end
+
+    assert_equal('wrong argument type nil (expected String)', error.message)
+  end
+
   def test_magic_buffer_argument_with_NULL
     assert_nothing_raised do
       @magic.buffer "string\0value"
@@ -437,6 +481,15 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_descriptor
+  end
+
+  def test_magic_descriptor_with_nil_argument
+    error = assert_raise TypeError do
+      @magic.descriptor nil
+    end
+
+    expected = format('wrong argument type nil (expected %s)', 0.class)
+    assert_equal(expected, error.message)
   end
 
   def test_magic_descriptor_with_old_descriptor_open
@@ -499,7 +552,7 @@ class MagicTest < Test::Unit::TestCase
       Magic.version
     end
 
-    assert_equal(error.message, 'function is not implemented')
+    assert_equal('function is not implemented', error.message)
   end
 
   def test_magic_version_to_a
@@ -508,7 +561,7 @@ class MagicTest < Test::Unit::TestCase
     end
 
     expected = [Magic.version / 100, Magic.version % 100]
-    assert_equal(Magic.version_to_a, expected)
+    assert_equal(expected, Magic.version_to_a)
   end
 
   def test_magic_version_to_s
@@ -517,7 +570,7 @@ class MagicTest < Test::Unit::TestCase
     end
 
     expected = '%d.%02d' % Magic.version_to_a
-    assert_equal(Magic.version_to_s, expected)
+    assert_equal(expected, Magic.version_to_s)
   end
 
   def test_magic_singleton_open
@@ -561,7 +614,7 @@ class MagicTest < Test::Unit::TestCase
     error = Magic::Error.new(message)
 
     assert_respond_to(error, :errno)
-    assert_equal(error.message, message)
+    assert_equal(message, error.message)
     assert_nil(error.errno)
   end
 
@@ -569,7 +622,7 @@ class MagicTest < Test::Unit::TestCase
     @magic.flags = @flags_limit + 1 # Should raise Magic::FlagsError.
   rescue Magic::Error => error
     assert_kind_of(Magic::FlagsError, error)
-    assert_equal(error.errno, Errno::EINVAL::Errno)
+    assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
   def test_magic_new_instance_with_arguments

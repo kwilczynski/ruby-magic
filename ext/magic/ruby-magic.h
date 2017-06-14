@@ -8,10 +8,17 @@ extern "C" {
 #include "common.h"
 #include "functions.h"
 
+#if defined(HAVE_INTEGER_UNIFICATION)
+# define T_INTEGER rb_cInteger
+#else
+# define T_INTEGER rb_cFixnum
+#endif
+
 #define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
 #define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
-#define STRING_P(x)  (RB_TYPE_P((x), T_STRING))
+#define STRING_P(x)  (RB_TYPE_P((x), T_STRING) && CLASS_OF(x) == rb_cString)
 #define ARRAY_P(x)   (RB_TYPE_P((x), T_ARRAY))
+#define FILE_P(x)    (RB_TYPE_P((x), T_FILE))
 
 #if !defined(RVAL2CBOOL)
 # define RVAL2CBOOL(x) (RTEST(x))
@@ -59,6 +66,18 @@ extern "C" {
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
 #define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : rb_ary_entry((a), 0))
 
+#define CLASS_NAME(o) (NIL_P((o)) ? "nil" : rb_obj_classname((o)))
+
+#if !defined(HAVE_RB_IO_T)
+# define rb_io_t OpenFile
+#endif
+
+#if !defined(GetReadFile)
+# define FPTR_TO_FD(p) ((p)->fd)
+#else
+# define FPTR_TO_FD(p) (fileno(GetReadFile(p)))
+#endif
+
 #define NOGVL_FUNCTION (VALUE (*)(void *))
 
 #if defined(HAVE_RB_THREAD_CALL_WITHOUT_GVL) && \
@@ -93,18 +112,24 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
+#define MAGIC_ARGUMENT_ERROR(o, ...) \
+	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE), CLASS_NAME((o)), __VA_ARGS__)
+
 #define MAGIC_GENERIC_ERROR(k, e, m) \
 	rb_exc_raise(magic_generic_error((k), (e), (m)))
 
 #define MAGIC_LIBRARY_ERROR(c) \
 	rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
 
+#define MAGIC_CHECK_INTEGER_TYPE(o) magic_check_type((o), T_FIXNUM)
+#define MAGIC_CHECK_STRING_TYPE(o)  magic_check_type((o), T_STRING)
+
 #define MAGIC_CHECK_OPEN(o)					\
     do {							\
 	if (MAGIC_CLOSED_P(o))					\
 	    MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,	\
 				error(E_MAGIC_LIBRARY_CLOSED)); \
-    } while(0)							\
+    } while(0)
 
 #define MAGIC_STRINGIFY(s) #s
 
@@ -118,6 +143,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 enum error {
     E_UNKNOWN = 0,
+    E_ARGUMENT_TYPE,
     E_NOT_IMPLEMENTED,
     E_MAGIC_LIBRARY_INITIALIZE,
     E_MAGIC_LIBRARY_CLOSED,
@@ -162,6 +188,7 @@ typedef struct magic_exception {
 
 static const char *errors[] = {
     "an unknown error has occurred",
+    "wrong argument type %s (expected %s)",
     "function is not implemented",
     "failed to initialize Magic library",
     "Magic library is not open",
@@ -204,7 +231,39 @@ magic_join(VALUE a, VALUE b)
 	   Qnil;
 }
 
-RUBY_EXTERN ID id_at_flags, id_at_path, id_at_mutex;
+static int
+magic_fileno(VALUE object)
+{
+    int fd;
+    rb_io_t *io;
+
+    if (!FILE_P(object))
+	object = rb_convert_type(object, T_FILE, "IO", "to_io");
+
+    GetOpenFile(object, io);
+    if ((fd = FPTR_TO_FD(io)) < 0)
+	rb_raise(rb_eIOError, "closed stream");
+
+    return fd;
+}
+
+static void
+magic_check_type(VALUE object, int type)
+{
+    if (type == T_FIXNUM) {
+	if (!RVAL2CBOOL(rb_obj_is_kind_of(object, T_INTEGER)))
+	    MAGIC_ARGUMENT_ERROR(object, rb_class2name(T_INTEGER));
+    }
+
+    Check_Type(object, type);
+}
+
+RUBY_EXTERN ID id_to_io;
+RUBY_EXTERN ID id_to_path;
+
+RUBY_EXTERN ID id_at_flags;
+RUBY_EXTERN ID id_at_path;
+RUBY_EXTERN ID id_at_mutex;
 
 RUBY_EXTERN VALUE rb_cMagic;
 
