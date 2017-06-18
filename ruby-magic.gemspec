@@ -31,7 +31,6 @@ Gem::Specification.new do |s|
                ruby-magic.gemspec kwilczynski.asc
                kwilczynski-public.pem)
 
-  s.executables   << 'magic'
   s.require_paths << 'lib'
   s.extensions    << 'ext/magic/extconf.rb'
 
