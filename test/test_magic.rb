@@ -445,6 +445,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_file_with_String_like_argument
+    require 'pathname'
     with_fixtures do |_, format|
       @magic.load(File.join(format, 'png-fake.magic'))
       assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
