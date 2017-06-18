@@ -425,12 +425,8 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
 
-    if (check_fd(fd) < 0) {
-	local_errno = errno;
-	goto out;
-    }
-
-    safe_close(fd);
+    if (check_fd(fd) == 0)
+	safe_close(fd);
 
     return cstring;
 

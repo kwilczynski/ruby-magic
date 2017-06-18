@@ -428,6 +428,7 @@ class MagicTest < Test::Unit::TestCase
       @magic.load(File.join(format, 'png-fake.magic'))
       File.open('ruby.png') do |file|
         assert_match(%r{^Ruby Gem image}, @magic.file(file))
+        assert_false(file.closed?)
       end
     end
   end
