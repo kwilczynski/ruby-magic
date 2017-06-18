@@ -16,7 +16,7 @@ extern "C" {
 
 #define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
 #define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
-#define STRING_P(x)  (RB_TYPE_P((x), T_STRING) && CLASS_OF(x) == rb_cString)
+#define STRING_P(x)  (RB_TYPE_P((x), T_STRING))
 #define ARRAY_P(x)   (RB_TYPE_P((x), T_ARRAY))
 #define FILE_P(x)    (RB_TYPE_P((x), T_FILE))
 
