@@ -8,7 +8,7 @@ module MagicTestHelpers
   end
 
   def with_fixtures(fixtures = 'fixtures', &block)
-    new = @version && @version >= 512
+    new = @version && @version >= 519
     cwd = File.join('test', fixtures)
     Dir.chdir(cwd) do
       yield(Dir.pwd, File.join(new ? 'new-format' : 'old-format'))

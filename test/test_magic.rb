@@ -14,7 +14,6 @@ class MagicTest < Test::Unit::TestCase
     @version = Magic.version rescue nil
     @magic = Magic.new
 
-    @new_format = @version && @version >= 519
     @magic_parameters = @version && @version > 520
   end
 
