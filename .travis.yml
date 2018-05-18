@@ -48,6 +48,7 @@ notifications:
     on_failure: change
 
 before_install:
+  - gem install --no-rdoc --no-ri bundler
   - export CC=$(which $COMPILER)
   - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH scripts/libmagic.sh
 
