@@ -8,10 +8,11 @@ cache:
 bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
 
 rvm:
-  - 2.1.x
-  - 2.2.x
-  - 2.3.x
-  - 2.4.x
+  - 2.1.10
+  - 2.2.9
+  - 2.3.7
+  - 2.4.4
+  - 2.5.1
   - ruby-head
   - rbx-2
 
