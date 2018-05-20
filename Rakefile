@@ -5,16 +5,16 @@ require 'rake/testtask'
 require 'rake/extensiontask'
 require 'rdoc/task'
 
-CLEAN.include   '*{.h,.o,.log,.so}', 'ext/**/*{.o,.log,.so}', 'Makefile', 'ext/**/Makefile'
+CLEAN.include '*{.h,.o,.log,.so}', 'ext/**/*{.o,.log,.so}', 'Makefile', 'ext/**/Makefile'
 CLOBBER.include 'lib/**/*.so', 'doc/**/*'
 
 gem = eval File.read('ruby-magic.gemspec')
 
 RDoc::Task.new do |d|
-  files = %w(AUTHORS CHANGES.rdoc COPYRIGHT LICENSE README.rdoc TODO)
+  files = %w(AUTHORS CHANGELOG.md COPYRIGHT LICENSE README.md TODO)
 
   d.title = 'File Magic in Ruby'
-  d.main  = 'README.rdoc'
+  d.main = 'README.md'
 
   d.rdoc_dir = 'doc/rdoc'
 
@@ -25,8 +25,8 @@ RDoc::Task.new do |d|
 end
 
 Rake::TestTask.new do |t|
-  t.verbose    = true
-  t.warning    = true
+  t.verbose = true
+  t.warning = true
   t.test_files = Dir['test/**/test_*']
 end
 
