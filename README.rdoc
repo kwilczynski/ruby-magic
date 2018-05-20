@@ -1,5 +1,0 @@
-Simple interface to libmagic for Ruby Programming Language
-
-{<img src="https://travis-ci.org/kwilczynski/ruby-magic.png?branch=master" alt="Build Status"/>}[https://travis-ci.org/kwilczynski/ruby-magic]
-{<img src="http://inch-ci.org/github/kwilczynski/ruby-magic.svg?branch=master" alt="Documentation Status" />}[http://inch-ci.org/github/kwilczynski/ruby-magic]
-{<img src="https://badge.fury.io/rb/ruby-magic.png" alt="Gem Version" />}[http://badge.fury.io/rb/ruby-magic]
