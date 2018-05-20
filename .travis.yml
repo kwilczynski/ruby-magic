@@ -51,7 +51,8 @@ before_install:
   - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH scripts/libmagic.sh
 
 before_script:
-  - bundle exec rake clean clobber
+  - bundle exec rake clean
+  - bundle exec rake clobber
 
 script:
   - bundle exec rake test
