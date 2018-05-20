@@ -48,6 +48,7 @@ safe_cloexec(int fd)
 
 out:
     errno = local_errno;
+
     return -1;
 }
 
@@ -80,6 +81,7 @@ safe_dup(int fd)
 
 out:
     errno = local_errno;
+
     return -1;
 }
 
@@ -110,7 +112,7 @@ suppress_error_output(void *data)
 #endif
 
     assert(s != NULL && \
-	   "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     s->data.file.old_fd = -1;
     s->data.file.new_fd = -1;
@@ -149,6 +151,7 @@ suppress_error_output(void *data)
     }
 
     safe_close(s->data.file.new_fd);
+
     return 0;
 
 out:
@@ -165,7 +168,7 @@ restore_error_output(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	   "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     if (s->data.file.old_fd < 0 && s->status != 0)
 	return -1;
@@ -204,7 +207,7 @@ override_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	   "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
 
@@ -217,14 +220,14 @@ override_current_locale(void *data)
 	goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-	   "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 
     s->data.locale.old_locale = uselocale(s->data.locale.new_locale);
     if (s->data.locale.old_locale == (locale_t)0)
 	goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	   "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 #else
     s->data.locale.old_locale = NULL;
 
@@ -241,7 +244,7 @@ override_current_locale(void *data)
 	goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	   "Must be a valid pointer to `char' type");
+	    "Must be a valid pointer to `char' type");
 #endif
     s->status = 0;
 
@@ -255,19 +258,19 @@ restore_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	   "Must be a valid pointer to `save_t' type");
+	    "Must be a valid pointer to `save_t' type");
 
 #if defined(HAVE_SAFE_LOCALE)
     if (!(s->data.locale.new_locale || \
-	s->data.locale.old_locale) && \
-	s->status != 0)
+	    s->data.locale.old_locale) && \
+	    s->status != 0)
 	return -1;
 
     if (uselocale(s->data.locale.old_locale) == (locale_t)0)
 	goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-	   "Must be a valid pointer to `locale_t' type");
+	    "Must be a valid pointer to `locale_t' type");
 
     freelocale(s->data.locale.new_locale);
 #else
@@ -278,7 +281,7 @@ restore_current_locale(void *data)
 	goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	   "Must be a valid pointer to `char' type");
+	    "Must be a valid pointer to `char' type");
 
     xfree(s->data.locale.old_locale);
 #endif
