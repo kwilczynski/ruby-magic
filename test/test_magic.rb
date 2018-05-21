@@ -481,7 +481,17 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_buffer_with_MAGIC_CONTINUE_flag
   end
 
+  def test_magic_buffer_with_EXTENSION_flag
+  end
+
   def test_magic_descriptor
+    with_fixtures do |_, format|
+      @magic.load(File.join(format, 'png-fake.magic'))
+      File.open('ruby.png') do |file|
+        assert_match(%r{^Ruby Gem image}, @magic.descriptor(file.fileno))
+        assert_false(file.closed?)
+      end
+    end
   end
 
   def test_magic_descriptor_with_nil_argument
@@ -493,10 +503,32 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(expected, error.message)
   end
 
+  def test_magic_descriptor_with_invalid_descriptor
+    error = assert_raise IOError do
+      @magic.descriptor(-1)
+    end
+
+    assert_equal('Bad file descriptor', error.message)
+  end
+
+  def test_magic_descriptor_with_descriptor_closed
+    error = assert_raise IOError do
+      IO.pipe do |r, w|
+        r.close
+        @magic.descriptor r.fileno
+      end
+    end
+
+    assert_equal('closed stream', error.message)
+  end
+
   def test_magic_descriptor_with_old_descriptor_open
   end
 
   def test_magic_descriptor_with_MAGIC_CONTINUE_flag
+  end
+
+  def test_magic_descriptor_with_EXTENSION_flag
   end
 
   def test_magic_fd_with_integer

@@ -502,7 +502,7 @@ rb_mgc_file(VALUE object, VALUE value)
     }
     else {
 	if (rb_respond_to(value, id_to_path))
-	    value = rb_funcall(value, id_to_path, 0);
+	    value = rb_funcall(value, id_to_path, 0, Qundef);
 
 	if (!STRING_P(value))
 	    goto error;
@@ -573,6 +573,9 @@ rb_mgc_buffer(VALUE object, VALUE value)
     if (!ma.result)
 	MAGIC_LIBRARY_ERROR(ma.cookie);
 
+    assert(ma.result != NULL && \
+	   "Must be a valid pointer to `const char' type");
+
     return magic_return(&ma);
 }
 
@@ -593,6 +596,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 VALUE
 rb_mgc_descriptor(VALUE object, VALUE value)
 {
+    int local_errno;
     magic_arguments_t ma;
 
     MAGIC_CHECK_INTEGER_TYPE(value);
@@ -603,8 +607,17 @@ rb_mgc_descriptor(VALUE object, VALUE value)
     ma.data.file.fd = NUM2INT(value);
 
     MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
-    if (!ma.result)
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+    local_errno = errno;
+
+    if (!ma.result) {
+    	if (local_errno == EBADF)
+	    rb_raise(rb_eIOError, "Bad file descriptor");
+
+    	MAGIC_LIBRARY_ERROR(ma.cookie);
+    }
+
+    assert(ma.result != NULL && \
+	   "Must be a valid pointer to `const char' type");
 
     return magic_return(&ma);
 }
@@ -851,7 +864,7 @@ VALUE
 magic_lock(VALUE object, VALUE(*function)(ANYARGS), void *data)
 {
     VALUE mutex = rb_ivar_get(object, id_at_mutex);
-    rb_funcall(mutex, rb_intern("lock"), 0);
+    rb_funcall(mutex, rb_intern("lock"), 0, Qundef);
     return rb_ensure(function, (VALUE)data, magic_unlock, object);
 }
 
@@ -859,7 +872,7 @@ VALUE
 magic_unlock(VALUE object)
 {
     VALUE mutex = rb_ivar_get(object, id_at_mutex);
-    rb_funcall(mutex, rb_intern("unlock"), 0);
+    rb_funcall(mutex, rb_intern("unlock"), 0, Qundef);
     return Qnil;
 }
 

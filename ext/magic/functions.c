@@ -418,9 +418,14 @@ inline const char*
 magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 {
     const char *cstring;
-#if defined(HAVE_BROKEN_MAGIC)
     int local_errno;
 
+    if (check_fd(fd) < 0) {
+    	local_errno = errno;
+	goto out;
+    }
+
+#if defined(HAVE_BROKEN_MAGIC)
     if ((fd = safe_dup(fd)) < 0) {
 	local_errno = errno;
 	goto out;
@@ -432,14 +437,14 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 	safe_close(fd);
 
     return cstring;
-
-out:
-    errno = local_errno;
-    return NULL;
 #else
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
     return cstring;
 #endif
+
+out:
+    errno = local_errno;
+    return NULL;
 }
 
 inline int

@@ -202,16 +202,16 @@ static const char *errors[] = {
 static VALUE
 magic_size(VALUE v)
 {
-    return (ARRAY_P(v) || STRING_P(v)) ?	       \
-	   rb_funcall(v, rb_intern("size"), 0, NULL) : \
+    return (ARRAY_P(v) || STRING_P(v)) ?	         \
+	   rb_funcall(v, rb_intern("size"), 0, Qundef) : \
 	   Qnil;
 }
 
 static VALUE
 magic_shift(VALUE v)
 {
-    return ARRAY_P(v) ?					\
-	   rb_funcall(v, rb_intern("shift"), 0, NULL) : \
+    return ARRAY_P(v) ?					  \
+	   rb_funcall(v, rb_intern("shift"), 0, Qundef) : \
 	   Qnil;
 }
 

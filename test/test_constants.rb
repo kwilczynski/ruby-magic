@@ -38,6 +38,8 @@ class MagicConstantsTest < Test::Unit::TestCase
       :NO_CHECK_ASCII,
       :NO_CHECK_FORTRAN,
       :NO_CHECK_TROFF,
+      :EXTENSION,
+      :COMPRESS_TRANSP
     ].each {|i| assert_const_defined(Magic, i) }
   end
 
