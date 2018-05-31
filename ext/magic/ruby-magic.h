@@ -143,6 +143,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 enum error {
     E_UNKNOWN = 0,
+    E_NOT_ENOUGH_MEMORY,
     E_ARGUMENT_TYPE,
     E_NOT_IMPLEMENTED,
     E_MAGIC_LIBRARY_INITIALIZE,
@@ -163,19 +164,20 @@ typedef union file {
     const char *path;
 } file_t;
 
-typedef struct buffer {
-    size_t size;
-    const char *buffer;
-} buffer_t;
+typedef struct buffers {
+    size_t count;
+    size_t *sizes;
+    void **buffers;
+} buffers_t;
 
 typedef struct magic_arguments {
     int flags;
     magic_t cookie;
     union {
-	parameter_t parameter;
 	file_t file;
-	buffer_t buffer;
-    } data;
+	parameter_t parameter;
+	buffers_t buffers;
+    } type;
     int status;
     const char *result;
 } magic_arguments_t;
@@ -188,6 +190,7 @@ typedef struct magic_exception {
 
 static const char *errors[] = {
     "an unknown error has occurred",
+    "cannot allocate memory",
     "wrong argument type %s (expected %s)",
     "function is not implemented",
     "failed to initialize Magic library",
@@ -202,7 +205,7 @@ static const char *errors[] = {
 static VALUE
 magic_size(VALUE v)
 {
-    return (ARRAY_P(v) || STRING_P(v)) ?	         \
+    return (ARRAY_P(v) || STRING_P(v)) ?		 \
 	   rb_funcall(v, rb_intern("size"), 0, Qundef) : \
 	   Qnil;
 }
@@ -258,6 +261,8 @@ magic_check_type(VALUE object, int type)
     Check_Type(object, type);
 }
 
+RUBY_EXTERN int rb_mgc_auto_load;
+
 RUBY_EXTERN ID id_to_io;
 RUBY_EXTERN ID id_to_path;
 
@@ -288,6 +293,8 @@ RUBY_EXTERN VALUE rb_mgc_getflags(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_setflags(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_load(VALUE object, VALUE arguments);
+RUBY_EXTERN VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
+
 RUBY_EXTERN VALUE rb_mgc_compile(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_check(VALUE object, VALUE arguments);
 

@@ -14,6 +14,7 @@ class MagicTest < Test::Unit::TestCase
     @version = Magic.version rescue nil
     @magic = Magic.new
 
+    @magic_load_buffers = @version && @version > 519
     @magic_parameters = @version && @version > 520
   end
 
@@ -47,7 +48,9 @@ class MagicTest < Test::Unit::TestCase
       :check,
       :version,
       :version_to_a,
-      :version_to_s
+      :version_to_s,
+      :do_not_auto_load,
+      :do_not_auto_load=
     ].each {|i| assert_respond_to(Magic, i) }
   end
 
@@ -540,6 +543,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_load
   end
 
+  def test_magic_load_with_array_argument
+  end
+
   def test_magic_load_with_custom_Magic_file_path
   end
 
@@ -549,6 +555,14 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_load_with_MAGIC_environment_variable
     # XXX(krzysztof): How to override "MAGIC" environment
     # variable so that the C extension will pick it up?
+  end
+
+  def test_magic_load_buffers
+    omit('Magic library is too old') unless @magic_load_buffers
+  end
+
+  def test_magic_load_buffers_with_array_argument
+    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_check
@@ -604,6 +618,46 @@ class MagicTest < Test::Unit::TestCase
 
     expected = '%d.%02d' % Magic.version_to_a
     assert_equal(expected, Magic.version_to_s)
+  end
+
+  def test_magic_singleton_do_not_auto_load_global
+    omit('Magic library is too old') unless @magic_load_buffers
+
+    fork do
+      Magic.do_not_auto_load = true
+
+      magic_1 = Magic.new
+      magic_2 = Magic.new
+
+      error_1 = assert_raise Magic::MagicError do
+        magic_1.buffer ''
+      end
+
+      magic_1.close
+
+      error_2 = assert_raise Magic::MagicError do
+        magic_2.buffer ''
+      end
+
+      magic_2.close
+
+      assert_equal('no magic files loaded', error_1.message)
+      assert_equal('no magic files loaded', error_2.message)
+
+      assert_true(Magic.do_not_auto_load)
+    end
+
+    Process.waitpid rescue Errno::ECHILD
+
+    assert_false(Magic.do_not_auto_load)
+  end
+
+  def test_magic_singleton_do_not_auto_load
+    omit('Magic library is too old') unless @magic_load_buffers
+  end
+
+  def test_magic_singleton_do_not_auto_load=
+    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_singleton_open

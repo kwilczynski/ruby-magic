@@ -383,6 +383,19 @@ magic_load_wrapper(magic_t magic, const char *magicfile, int flags)
 }
 
 inline int
+magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t count, int flags)
+{
+#if defined(HAVE_MAGIC_LOAD_BUFFERS)
+    int rv;
+    MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes, count);
+    return rv;
+#else
+    errno = ENOSYS;
+    return -ENOSYS;
+#endif
+}
+
+inline int
 magic_compile_wrapper(magic_t magic, const char *magicfile, int flags)
 {
     int rv;
@@ -421,7 +434,7 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
     int local_errno;
 
     if (check_fd(fd) < 0) {
-    	local_errno = errno;
+	local_errno = errno;
 	goto out;
     }
 

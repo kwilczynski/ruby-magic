@@ -102,8 +102,10 @@ unless have_library('magic', 'magic_getpath')
     EOS
 end
 
-have_func('magic_version', 'magic.h')
 have_func('magic_getflags', 'magic.h')
+have_func('magic_load_buffers', 'magic.h')
+have_func('magic_version', 'magic.h')
+
 have_func('magic_getparam', 'magic.h')
 have_func('magic_setparam', 'magic.h')
 

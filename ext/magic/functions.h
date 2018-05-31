@@ -71,6 +71,8 @@ extern int magic_getflags_wrapper(magic_t magic);
 extern int magic_setflags_wrapper(magic_t magic, int flags);
 
 extern int magic_load_wrapper(magic_t magic, const char *magicfile, int flags);
+extern int magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t count, int flags);
+
 extern int magic_compile_wrapper(magic_t magic, const char *magicfile, int flags);
 extern int magic_check_wrapper(magic_t magic, const char *magicfile, int flags);
 
