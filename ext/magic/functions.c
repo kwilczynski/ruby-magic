@@ -390,6 +390,12 @@ magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t 
     MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes, count);
     return rv;
 #else
+    UNUSED(magic);
+    UNUSED(buffers);
+    UNUSED(sizes);
+    UNUSED(count);
+    UNUSED(flags);
+
     errno = ENOSYS;
     return -ENOSYS;
 #endif
