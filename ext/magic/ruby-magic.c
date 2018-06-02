@@ -466,7 +466,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 VALUE
 rb_mgc_load_buffers(VALUE object, VALUE arguments)
 {
-    long count;
+    size_t count;
     int local_errno;
     magic_arguments_t ma;
 
@@ -478,7 +478,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
 
-    count = RARRAY_LEN(arguments);
+    count = (size_t)RARRAY_LEN(arguments);
 
     buffers = (void **)ruby_xcalloc(count, sizeof(void *));
     if (!buffers) {
@@ -496,8 +496,8 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	goto out;
     }
 
-    for (long i = 0; i < count; i++) {
-	value = rb_ary_entry(arguments, i);
+    for (size_t i = 0; i < count; i++) {
+	value = rb_ary_entry(arguments, (long)i);
 	buffers[i] = (void *)RSTRING_PTR(value);
 	sizes[i] = (size_t)RSTRING_LEN(value);
     }
