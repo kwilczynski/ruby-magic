@@ -427,10 +427,25 @@ VALUE
 rb_mgc_load(VALUE object, VALUE arguments)
 {
     magic_arguments_t ma;
+
+    const char *klass = NULL;
+
     VALUE value = Qundef;
+    VALUE boolean = Qundef;
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(ma.cookie);
+
+    boolean = rb_mgc_get_do_not_auto_load(object);
+    if (RVAL2CBOOL(boolean)) {
+	klass = "Magic";
+
+	if (!NIL_P(object))
+	    klass = rb_obj_classname(object);
+
+	rb_warn("%s::do_not_auto_load is set; using %s#load will load Magic library from a file",
+		klass, klass);
+    }
 
     if (!RARRAY_EMPTY_P(arguments) && !NIL_P(RARRAY_FIRST(arguments))) {
 	value = magic_join(arguments, CSTR2RVAL(":"));
