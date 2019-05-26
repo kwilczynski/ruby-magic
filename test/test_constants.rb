@@ -70,6 +70,11 @@ class MagicConstantsTest < Test::Unit::TestCase
       custom_NO_CHECK_BUILTIN ^= 0x080000 # 0x37b000 ^ 0x080000 is 0x3fb000
     end
 
+    # Latest version of libmagic have 0x77b000 by default.
+    if @version && @version > 533
+		  custom_NO_CHECK_BUILTIN ^= 0x0400000 # 0x37b000 ^ 0x040000 is 0x77b000
+    end
+
     assert_equal(Magic::NO_CHECK_BUILTIN, custom_NO_CHECK_BUILTIN)
   end
 
