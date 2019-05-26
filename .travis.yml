@@ -8,10 +8,10 @@ cache:
 bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
 
 rvm:
-  - 2.3.8
-  - 2.4.6
-  - 2.5.5
-  - 2.6.3
+  - '2.3'
+  - '2.4'
+  - '2.5'
+  - '2.6'
   - ruby-head
 
 env:
@@ -26,8 +26,8 @@ env:
     - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=clang
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=gcc
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=clang
-    - VERSION=5.36 SHA1=473e0a2fb4f091031d449ed4d7ea912741f0c7e9 COMPILER=gcc
-    - VERSION=5.36 SHA1=473e0a2fb4f091031d449ed4d7ea912741f0c7e9 COMPILER=clang
+    - VERSION=5.37 SHA1=891176efa3006eff222bd364cd96135aad171941 COMPILER=gcc
+    - VERSION=5.37 SHA1=891176efa3006eff222bd364cd96135aad171941 COMPILER=clang
 
 matrix:
   fast_finish: true
