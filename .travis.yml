@@ -44,8 +44,7 @@ notifications:
     on_failure: change
 
 before_install:
-  - export GEM_ARGUMENTS=$(ruby -e 'puts Gem::Version.new(RUBY_VERSION) > Gem::Version.new("2.6.0") ? "--no-rdoc --no-ri" : "--no-document"')
-  - gem install "$GEM_ARGUMENTS" bundler
+  - gem install bundler
   - export CC=$(which $COMPILER)
   - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PATH=$PATH scripts/libmagic.sh
 
