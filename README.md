@@ -33,7 +33,7 @@ Krzysztof Wilczynski (<kw@linux.com>)
 
 ## Copyright
 
-Copyright 2013-2018 Krzysztof Wilczynski
+Copyright 2013-2019 Krzysztof Wilczynski
 
 ## License
 
