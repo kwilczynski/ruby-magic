@@ -30,18 +30,15 @@ env:
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - rvm: ruby-head
 
 branches:
   only:
     - master
-    - development
 
 notifications:
   email:
-    on_success: change
-    on_failure: change
+    on_success: never
+    on_failure: always
 
 before_install:
   - gem install bundler
