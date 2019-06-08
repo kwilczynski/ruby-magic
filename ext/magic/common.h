@@ -9,6 +9,10 @@
 # define _BSD_SOURCE 1
 #endif
 
+#if !defined(_DEFAULT_SOURCE)
+# define _DEFAULT_SOURCE 1
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
