@@ -48,7 +48,12 @@ class MagicTest < Test::Unit::TestCase
       :check,
       :version,
       :version_to_a,
-      :version_to_s,
+      :version_to_s
+    ].each {|i| assert_respond_to(Magic, i) }
+  end
+
+  def test_magic_global_singleton_methods
+    [
       :do_not_auto_load,
       :do_not_auto_load=
     ].each {|i| assert_respond_to(Magic, i) }
@@ -158,8 +163,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_path_with_MAGIC_environment_variable
-    # XXX(krzysztof): How to override "MAGIC" environment
-    # variable so that the C extension will pick it up?
+    # XXX(Krzysztof Wilczynski): How to override "MAGIC"
+    # environment variable so that the C extension will
+    # pick it up?
   end
 
   def test_magic_get_parameter_error
@@ -553,8 +559,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_MAGIC_environment_variable
-    # XXX(krzysztof): How to override "MAGIC" environment
-    # variable so that the C extension will pick it up?
+    # XXX(Krzysztof Wilczynski): How to override "MAGIC"
+    # environment variable so that the C extension will
+    # pick it up?
   end
 
   def test_magic_load_buffers
@@ -621,8 +628,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_singleton_do_not_auto_load_global
-    omit('Magic library is too old') unless @magic_load_buffers
-
     fork do
       Magic.do_not_auto_load = true
 
@@ -653,11 +658,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_singleton_do_not_auto_load
-    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_singleton_do_not_auto_load=
-    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_singleton_open

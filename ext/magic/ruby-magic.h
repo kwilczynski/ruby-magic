@@ -261,7 +261,7 @@ magic_check_type(VALUE object, int type)
     Check_Type(object, type);
 }
 
-RUBY_EXTERN int rb_mgc_auto_load;
+RUBY_EXTERN int rb_mgc_do_not_auto_load;
 
 RUBY_EXTERN ID id_to_io;
 RUBY_EXTERN ID id_to_path;
@@ -278,6 +278,9 @@ RUBY_EXTERN VALUE rb_mgc_eLibraryError;
 RUBY_EXTERN VALUE rb_mgc_eParameterError;
 RUBY_EXTERN VALUE rb_mgc_eFlagsError;
 RUBY_EXTERN VALUE rb_mgc_eNotImplementedError;
+
+RUBY_EXTERN VALUE rb_mgc_get_do_not_auto_load(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_set_do_not_auto_load(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
 
