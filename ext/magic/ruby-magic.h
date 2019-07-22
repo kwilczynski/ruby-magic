@@ -107,8 +107,11 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 #define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
-#define MAGIC_COOKIE(c) \
-	Data_Get_Struct(object, struct magic_set, (c))
+#define MAGIC_OBJECT(o) \
+	Data_Get_Struct(object, magic_object_t, (o))
+
+#define MAGIC_COOKIE(o, c)	\
+	((c) = MAGIC_OBJECT((o))->cookie)
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
@@ -169,6 +172,11 @@ typedef struct buffers {
     size_t *sizes;
     void **buffers;
 } buffers_t;
+
+typedef struct magic_object {
+    magic_t cookie;
+    VALUE mutex;
+} magic_object_t;
 
 typedef struct magic_arguments {
     int flags;
@@ -268,7 +276,6 @@ RUBY_EXTERN ID id_to_path;
 
 RUBY_EXTERN ID id_at_flags;
 RUBY_EXTERN ID id_at_path;
-RUBY_EXTERN ID id_at_mutex;
 
 RUBY_EXTERN VALUE rb_cMagic;
 

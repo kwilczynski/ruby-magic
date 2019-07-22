@@ -300,6 +300,18 @@ out:
     return -1;
 }
 
+inline magic_t
+magic_open_wrapper(int flags)
+{
+    return magic_open(flags);
+}
+
+inline void
+magic_close_wrapper(magic_t magic)
+{
+    (void)magic_close(magic);
+}
+
 inline const char*
 magic_getpath_wrapper(void)
 {
