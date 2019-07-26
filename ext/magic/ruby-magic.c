@@ -987,7 +987,7 @@ magic_allocate(VALUE klass)
 			    error(E_NOT_ENOUGH_MEMORY));
 
     mo->cookie = NULL;
-    mo->mutex = Qnil;
+    mo->mutex = Qundef;
 
     mo->cookie = magic_open_wrapper(MAGIC_NONE);
     if (!mo->cookie) {
