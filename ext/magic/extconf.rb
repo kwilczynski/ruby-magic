@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mkmf'
 
 RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']

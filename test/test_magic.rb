@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 gem 'test-unit', '>= 3.0.0'
 
 require 'test/unit'

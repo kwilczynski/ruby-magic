@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MagicTestHelpers
   def capture_stderr
     require 'stringio'
