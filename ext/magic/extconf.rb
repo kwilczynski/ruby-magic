@@ -19,28 +19,39 @@ $LDFLAGS << format(' %s', ENV['LDFLAGS']) if ENV['LDFLAGS']
   $CFLAGS << format(' %s', ENV[variable]) if ENV[variable]
 end
 
-have_header('locale.h')
-have_header('xlocale.h')
-have_header('utime.h')
-have_header('sys/types.h')
-have_header('sys/time.h')
-
 have_ruby_h = have_header('ruby.h')
 have_magic_h = have_header('magic.h')
 
-have_func('newlocale', 'locale.h')
-have_func('newlocale', 'xlocale.h')
+headers = {
+  'locale' => [],
+  'utime'  => [],
+}
 
-have_func('uselocale', 'locale.h')
-have_func('uselocale', 'xlocale.h')
+%w(
+  locale.h
+  xlocale.h
+).each do |h|
+  if have_header(h)
+    headers['locale'] << h
+  end
+end
 
-have_func('freelocale', 'locale.h')
-have_func('freelocale', 'xlocale.h')
+%w(
+  utime.h
+  sys/types.h
+  sys/time.h
+).each do |h|
+  if have_header(h)
+    headers['utime'] << h
+  end
+end
 
-have_func('utime', 'utime.h')
-have_func('utime', 'sys/types.h')
+have_func('newlocale', headers['locale'])
+have_func('uselocale',headers['locale'])
+have_func('freelocale',headers['locale'])
 
-have_func('utimes', 'sys/time.h')
+have_func('utime', headers['utime'])
+have_func('utimes', headers['utime'])
 
 unless have_ruby_h
   abort "\n" + (<<-EOS).gsub(/^[ ]+/, '') + "\n"
@@ -109,12 +120,15 @@ unless have_library('magic', 'magic_getpath')
     EOS
 end
 
-have_func('magic_getflags', 'magic.h')
-have_func('magic_load_buffers', 'magic.h')
-have_func('magic_version', 'magic.h')
-
-have_func('magic_getparam', 'magic.h')
-have_func('magic_setparam', 'magic.h')
+%w(
+  magic_getflags
+  magic_version
+  magic_load_buffers
+  magic_getparam
+  magic_setparam
+).each do |f|
+  have_func(f, 'magic.h')
+end
 
 dir_config('magic')
 
