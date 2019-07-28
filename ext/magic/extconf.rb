@@ -28,11 +28,18 @@ have_header('sys/time.h')
 have_ruby_h = have_header('ruby.h')
 have_magic_h = have_header('magic.h')
 
-have_func('newlocale', ['locale.h', 'xlocale.h'])
-have_func('uselocale', ['locale.h', 'xlocale.h'])
-have_func('freelocale', ['locale.h', 'xlocale.h'])
+have_func('newlocale', 'locale.h')
+have_func('newlocale', 'xlocale.h')
 
-have_func('utime', ['utime.h', 'sys/types.h'])
+have_func('uselocale', 'locale.h')
+have_func('uselocale', 'xlocale.h')
+
+have_func('freelocale', 'locale.h')
+have_func('freelocale', 'xlocale.h')
+
+have_func('utime', 'utime.h')
+have_func('utime', 'sys/types.h')
+
 have_func('utimes', 'sys/time.h')
 
 unless have_ruby_h
