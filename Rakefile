@@ -1,5 +1,3 @@
-gem 'rdoc', '>= 4.1.1'
-
 require 'rake'
 require 'rake/testtask'
 require 'rake/extensiontask'
