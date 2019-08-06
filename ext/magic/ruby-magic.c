@@ -103,7 +103,7 @@ rb_mgc_set_do_not_auto_load(VALUE object, VALUE value)
     UNUSED(object);
 
     if (!BOOLEAN_P(value))
-	MAGIC_ARGUMENT_ERROR(value, "TrueClass or FalseClass");
+	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     rb_mgc_do_not_auto_load = RVAL2CBOOL(value);
 
@@ -455,11 +455,15 @@ rb_mgc_load(VALUE object, VALUE arguments)
     magic_arguments_t ma;
 
     const char *klass = NULL;
-
     VALUE value = Qundef;
     VALUE boolean = Qundef;
 
+    if (ARRAY_P(RARRAY_FIRST(arguments)))
+	arguments = magic_flatten(arguments);
+
+    MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
+
     MAGIC_COOKIE(mo, ma.cookie);
 
     boolean = rb_mgc_get_do_not_auto_load(object);
@@ -473,7 +477,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 		klass, klass);
     }
 
-    if (!RARRAY_EMPTY_P(arguments) && !NIL_P(RARRAY_FIRST(arguments))) {
+    if (!RARRAY_EMPTY_P(arguments)) {
 	value = magic_join(arguments, CSTR2RVAL(":"));
 	ma.type.file.path = RVAL2CSTR(value);
     }
@@ -516,18 +520,28 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     size_t *sizes = NULL;
     VALUE value = Qundef;
 
-    MAGIC_CHECK_OPEN(object);
-    MAGIC_COOKIE(mo, ma.cookie);
-
     count = (size_t)RARRAY_LEN(arguments);
 
-    buffers = (void **)ruby_xcalloc(count, sizeof(void *));
+    MAGIC_CHECK_ARGUMENT_MISSING(count, 1);
+
+    if (ARRAY_P(RARRAY_FIRST(arguments))) {
+	arguments = magic_flatten(arguments);
+	count = (size_t)RARRAY_LEN(arguments);
+    }
+
+    MAGIC_CHECK_ARRAY_EMPTY(arguments);
+    MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
+    MAGIC_CHECK_OPEN(object);
+
+    MAGIC_COOKIE(mo, ma.cookie);
+
+    buffers = ALLOC_N(void *, count);
     if (!buffers) {
 	local_errno = ENOMEM;
 	goto error;
     }
 
-    sizes = (size_t *)ruby_xcalloc(count, sizeof(size_t));
+    sizes = ALLOC_N(size_t, count);
     if (!sizes) {
 	ruby_xfree(buffers);
 	buffers = NULL;
@@ -536,7 +550,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     }
 
     for (size_t i = 0; i < count; i++) {
-	value = rb_ary_entry(arguments, (long)i);
+	value = RARRAY_AREF(arguments, (long)i);
 	buffers[i] = (void *)RSTRING_PTR(value);
 	sizes[i] = (size_t)RSTRING_LEN(value);
     }
@@ -594,7 +608,12 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     magic_arguments_t ma;
     VALUE value = Qundef;
 
+    if (ARRAY_P(RARRAY_FIRST(arguments)))
+	arguments = magic_flatten(arguments);
+
+    MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
+
     MAGIC_COOKIE(mo, ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
@@ -634,7 +653,12 @@ rb_mgc_check(VALUE object, VALUE arguments)
     magic_arguments_t ma;
     VALUE value = Qundef;
 
+    if (ARRAY_P(RARRAY_FIRST(arguments)))
+	arguments = magic_flatten(arguments);
+
+    MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
+
     MAGIC_COOKIE(mo, ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
@@ -727,7 +751,7 @@ rb_mgc_file(VALUE object, VALUE value)
     return magic_return(&ma);
 
 error:
-    MAGIC_ARGUMENT_ERROR(value, "String or IO-like object");
+    MAGIC_ARGUMENT_TYPE_ERROR(value, "String or IO-like object");
 }
 
 /*
@@ -840,7 +864,8 @@ rb_mgc_version(RB_UNUSED_VAR(VALUE object))
     local_errno = errno;
 
     if (rv < 0 && local_errno == ENOSYS)
-	MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError, ENOSYS,
+	MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+			    local_errno,
 			    error(E_NOT_IMPLEMENTED));
 
     return INT2NUM(rv);
@@ -850,7 +875,9 @@ static inline void*
 nogvl_magic_load(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_load_wrapper(ma->cookie, ma->type.file.path, ma->flags);
+    ma->status = magic_load_wrapper(ma->cookie,
+				    ma->type.file.path,
+				    ma->flags);
     return ma;
 }
 
@@ -858,7 +885,9 @@ static inline void*
 nogvl_magic_compile(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_compile_wrapper(ma->cookie, ma->type.file.path, ma->flags);
+    ma->status = magic_compile_wrapper(ma->cookie,
+				       ma->type.file.path,
+				       ma->flags);
     return ma;
 }
 
@@ -866,7 +895,9 @@ static inline void*
 nogvl_magic_check(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_check_wrapper(ma->cookie, ma->type.file.path, ma->flags);
+    ma->status = magic_check_wrapper(ma->cookie,
+				     ma->type.file.path,
+				     ma->flags);
     return ma;
 }
 
@@ -874,7 +905,9 @@ static inline void*
 nogvl_magic_file(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->result = magic_file_wrapper(ma->cookie, ma->type.file.path, ma->flags);
+    ma->result = magic_file_wrapper(ma->cookie,
+				    ma->type.file.path,
+				    ma->flags);
     return ma;
 }
 
@@ -882,7 +915,9 @@ static inline void*
 nogvl_magic_descriptor(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->result = magic_descriptor_wrapper(ma->cookie, ma->type.file.fd, ma->flags);
+    ma->result = magic_descriptor_wrapper(ma->cookie,
+					  ma->type.file.fd,
+					  ma->flags);
     return ma;
 }
 
@@ -890,7 +925,8 @@ static inline VALUE
 magic_get_parameter_internal(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_getparam_wrapper(ma->cookie, ma->type.parameter.tag,
+    ma->status = magic_getparam_wrapper(ma->cookie,
+					ma->type.parameter.tag,
 					&ma->type.parameter.value);
     return (VALUE)ma;
 }
@@ -899,7 +935,8 @@ static inline VALUE
 magic_set_parameter_internal(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_setparam_wrapper(ma->cookie, ma->type.parameter.tag,
+    ma->status = magic_setparam_wrapper(ma->cookie,
+					ma->type.parameter.tag,
 					&ma->type.parameter.value);
     return (VALUE)ma;
 }
@@ -937,8 +974,10 @@ static inline VALUE
 magic_load_buffers_internal(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->status = magic_load_buffers_wrapper(ma->cookie, ma->type.buffers.buffers,
-					    ma->type.buffers.sizes, ma->type.buffers.count,
+    ma->status = magic_load_buffers_wrapper(ma->cookie,
+					    ma->type.buffers.buffers,
+					    ma->type.buffers.sizes,
+					    ma->type.buffers.count,
 					    ma->flags);
     return (VALUE)ma;
 }
@@ -965,8 +1004,10 @@ static inline VALUE
 magic_buffer_internal(void *data)
 {
     magic_arguments_t *ma = data;
-    ma->result = magic_buffer_wrapper(ma->cookie, (const void *)ma->type.buffers.buffers,
-				      (size_t)ma->type.buffers.sizes, ma->flags);
+    ma->result = magic_buffer_wrapper(ma->cookie,
+				      (const void *)ma->type.buffers.buffers,
+				      (size_t)ma->type.buffers.sizes,
+				      ma->flags);
     return (VALUE)ma;
 }
 
@@ -982,9 +1023,12 @@ magic_allocate(VALUE klass)
     magic_object_t *mo;
 
     mo = (magic_object_t *)ruby_xmalloc(sizeof(magic_object_t));
-    if (!mo)
-	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
+    if (!mo) {
+	errno = ENOMEM;
+	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
+			    errno,
 			    error(E_NOT_ENOUGH_MEMORY));
+    }
 
     mo->cookie = NULL;
     mo->mutex = Qundef;
@@ -993,7 +1037,9 @@ magic_allocate(VALUE klass)
     if (!mo->cookie) {
 	ruby_xfree(mo);
 	mo = NULL;
-	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, ENOMEM,
+	errno = ENOMEM;
+	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
+			    errno,
 			    error(E_MAGIC_LIBRARY_INITIALIZE));
     }
 

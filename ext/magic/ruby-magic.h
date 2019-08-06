@@ -115,8 +115,8 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
-#define MAGIC_ARGUMENT_ERROR(o, ...) \
-	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE), CLASS_NAME((o)), __VA_ARGS__)
+#define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
+	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
 
 #define MAGIC_GENERIC_ERROR(k, e, m) \
 	rb_exc_raise(magic_generic_error((k), (e), (m)))
@@ -126,6 +126,21 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 
 #define MAGIC_CHECK_INTEGER_TYPE(o) magic_check_type((o), T_FIXNUM)
 #define MAGIC_CHECK_STRING_TYPE(o)  magic_check_type((o), T_STRING)
+
+#define MAGIC_CHECK_ARGUMENT_MISSING(t, o)				 \
+    do {								 \
+	if ((t) < (o))							 \
+	    rb_raise(rb_eArgError, error(E_ARGUMENT_MISSING), (t), (o)); \
+    } while(0)
+
+#define MAGIC_CHECK_ARRAY_EMPTY(o)					      \
+    do {								      \
+	if (RARRAY_EMPTY_P(o))						      \
+	    rb_raise(rb_eArgError, "%s", error(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
+    } while(0)
+
+#define MAGIC_CHECK_ARRAY_OF_STRINGS(o) \
+	magic_check_type_array_of_strings((o))
 
 #define MAGIC_CHECK_OPEN(o)					\
     do {							\
@@ -147,7 +162,10 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 enum error {
     E_UNKNOWN = 0,
     E_NOT_ENOUGH_MEMORY,
-    E_ARGUMENT_TYPE,
+    E_ARGUMENT_MISSING,
+    E_ARGUMENT_TYPE_INVALID,
+    E_ARGUMENT_TYPE_ARRAY_EMPTY,
+    E_ARGUMENT_TYPE_ARRAY_STRINGS,
     E_NOT_IMPLEMENTED,
     E_MAGIC_LIBRARY_INITIALIZE,
     E_MAGIC_LIBRARY_CLOSED,
@@ -199,7 +217,10 @@ typedef struct magic_exception {
 static const char *errors[] = {
     "an unknown error has occurred",
     "cannot allocate memory",
+    "wrong number of arguments (given %d, expected %d)",
     "wrong argument type %s (expected %s)",
+    "arguments list cannot be empty (expected array of String)",
+    "wrong argument type %s in arguments list (expected String)",
     "function is not implemented",
     "failed to initialize Magic library",
     "Magic library is not open",
@@ -242,6 +263,14 @@ magic_join(VALUE a, VALUE b)
 	   Qnil;
 }
 
+static VALUE
+magic_flatten(VALUE v)
+{
+    return ARRAY_P(v) ?					    \
+	   rb_funcall(v, rb_intern("flatten"), 0, Qundef) : \
+	   Qnil;
+}
+
 static int
 magic_fileno(VALUE object)
 {
@@ -263,10 +292,25 @@ magic_check_type(VALUE object, int type)
 {
     if (type == T_FIXNUM) {
 	if (!RVAL2CBOOL(rb_obj_is_kind_of(object, T_INTEGER)))
-	    MAGIC_ARGUMENT_ERROR(object, rb_class2name(T_INTEGER));
+	    MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
     }
 
     Check_Type(object, type);
+}
+
+static void
+magic_check_type_array_of_strings(VALUE object)
+{
+    VALUE value = Qundef;
+
+    for (int i = 0; i < RARRAY_LEN(object); i++) {
+	value = RARRAY_AREF(object, (long)i);
+
+	if (NIL_P(value) || !STRING_P(value))
+	    rb_raise(rb_eTypeError,
+		     error(E_ARGUMENT_TYPE_ARRAY_STRINGS),
+		     CLASS_NAME(value));
+    }
 }
 
 RUBY_EXTERN int rb_mgc_do_not_auto_load;
