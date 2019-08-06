@@ -84,10 +84,10 @@ extern "C" {
     defined(HAVE_RUBY_THREAD_H) && HAVE_RUBY_THREAD_H
 # include <ruby/thread.h>
 # define NOGVL(f, d) \
-	 rb_thread_call_without_gvl((f), (d), RUBY_UBF_IO, NULL)
+         rb_thread_call_without_gvl((f), (d), RUBY_UBF_IO, NULL)
 #elif defined(HAVE_RB_THREAD_BLOCKING_REGION)
 # define NOGVL(f, d) \
-	 rb_thread_blocking_region(NOGVL_FUNCTION(f), (d), RUBY_UBF_IO, NULL)
+         rb_thread_blocking_region(NOGVL_FUNCTION(f), (d), RUBY_UBF_IO, NULL)
 #else
 # include <rubysig.h>
 static inline VALUE
@@ -102,60 +102,60 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
   return rv;
 }
 # define NOGVL(f, d) \
-	 fake_blocking_region(NOGVL_FUNCTION(f), (d))
+         fake_blocking_region(NOGVL_FUNCTION(f), (d))
 #endif
 
 #define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
 #define MAGIC_OBJECT(o) \
-	Data_Get_Struct(object, magic_object_t, (o))
+        Data_Get_Struct(object, magic_object_t, (o))
 
-#define MAGIC_COOKIE(o, c)	\
-	((c) = MAGIC_OBJECT((o))->cookie)
+#define MAGIC_COOKIE(o, c)      \
+        ((c) = MAGIC_OBJECT((o))->cookie)
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
 
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
-	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
+        rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
 
 #define MAGIC_GENERIC_ERROR(k, e, m) \
-	rb_exc_raise(magic_generic_error((k), (e), (m)))
+        rb_exc_raise(magic_generic_error((k), (e), (m)))
 
 #define MAGIC_LIBRARY_ERROR(c) \
-	rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
+        rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
 
 #define MAGIC_CHECK_INTEGER_TYPE(o) magic_check_type((o), T_FIXNUM)
 #define MAGIC_CHECK_STRING_TYPE(o)  magic_check_type((o), T_STRING)
 
-#define MAGIC_CHECK_ARGUMENT_MISSING(t, o)				 \
-    do {								 \
-	if ((t) < (o))							 \
-	    rb_raise(rb_eArgError, error(E_ARGUMENT_MISSING), (t), (o)); \
+#define MAGIC_CHECK_ARGUMENT_MISSING(t, o)                               \
+    do {                                                                 \
+        if ((t) < (o))                                                   \
+            rb_raise(rb_eArgError, error(E_ARGUMENT_MISSING), (t), (o)); \
     } while(0)
 
-#define MAGIC_CHECK_ARRAY_EMPTY(o)					      \
-    do {								      \
-	if (RARRAY_EMPTY_P(o))						      \
-	    rb_raise(rb_eArgError, "%s", error(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
+#define MAGIC_CHECK_ARRAY_EMPTY(o)                                            \
+    do {                                                                      \
+        if (RARRAY_EMPTY_P(o))                                                \
+            rb_raise(rb_eArgError, "%s", error(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
     } while(0)
 
 #define MAGIC_CHECK_ARRAY_OF_STRINGS(o) \
-	magic_check_type_array_of_strings((o))
+        magic_check_type_array_of_strings((o))
 
-#define MAGIC_CHECK_OPEN(o)					\
-    do {							\
-	if (MAGIC_CLOSED_P(o))					\
-	    MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,	\
-				error(E_MAGIC_LIBRARY_CLOSED)); \
+#define MAGIC_CHECK_OPEN(o)                                     \
+    do {                                                        \
+        if (MAGIC_CLOSED_P(o))                                  \
+            MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT,   \
+                                error(E_MAGIC_LIBRARY_CLOSED)); \
     } while(0)
 
 #define MAGIC_STRINGIFY(s) #s
 
 #define MAGIC_DEFINE_FLAG(c) \
-	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c));
+        rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c));
 
 #define MAGIC_DEFINE_PARAMETER(c) \
-	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
+        rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
 
 #define error(t) errors[(t)]
 
@@ -200,9 +200,9 @@ typedef struct magic_arguments {
     int flags;
     magic_t cookie;
     union {
-	file_t file;
-	parameter_t parameter;
-	buffers_t buffers;
+        file_t file;
+        parameter_t parameter;
+        buffers_t buffers;
     } type;
     int status;
     const char *result;
@@ -234,41 +234,41 @@ static const char *errors[] = {
 static VALUE
 magic_size(VALUE v)
 {
-    return (ARRAY_P(v) || STRING_P(v)) ?		 \
-	   rb_funcall(v, rb_intern("size"), 0, Qundef) : \
-	   Qnil;
+    return (ARRAY_P(v) || STRING_P(v)) ?                 \
+           rb_funcall(v, rb_intern("size"), 0, Qundef) : \
+           Qnil;
 }
 
 static VALUE
 magic_shift(VALUE v)
 {
-    return ARRAY_P(v) ?					  \
-	   rb_funcall(v, rb_intern("shift"), 0, Qundef) : \
-	   Qnil;
+    return ARRAY_P(v) ?                                   \
+           rb_funcall(v, rb_intern("shift"), 0, Qundef) : \
+           Qnil;
 }
 
 static VALUE
 magic_split(VALUE a, VALUE b)
 {
-    return (STRING_P(a) && STRING_P(b)) ?	     \
-	   rb_funcall(a, rb_intern("split"), 1, b) : \
-	   Qnil;
+    return (STRING_P(a) && STRING_P(b)) ?            \
+           rb_funcall(a, rb_intern("split"), 1, b) : \
+           Qnil;
 }
 
 static VALUE
 magic_join(VALUE a, VALUE b)
 {
-    return (ARRAY_P(a) && STRING_P(b)) ?	    \
-	   rb_funcall(a, rb_intern("join"), 1, b) : \
-	   Qnil;
+    return (ARRAY_P(a) && STRING_P(b)) ?            \
+           rb_funcall(a, rb_intern("join"), 1, b) : \
+           Qnil;
 }
 
 static VALUE
 magic_flatten(VALUE v)
 {
-    return ARRAY_P(v) ?					    \
-	   rb_funcall(v, rb_intern("flatten"), 0, Qundef) : \
-	   Qnil;
+    return ARRAY_P(v) ?                                     \
+           rb_funcall(v, rb_intern("flatten"), 0, Qundef) : \
+           Qnil;
 }
 
 static int
@@ -278,11 +278,11 @@ magic_fileno(VALUE object)
     rb_io_t *io;
 
     if (!FILE_P(object))
-	object = rb_convert_type(object, T_FILE, "IO", "to_io");
+        object = rb_convert_type(object, T_FILE, "IO", "to_io");
 
     GetOpenFile(object, io);
     if ((fd = FPTR_TO_FD(io)) < 0)
-	rb_raise(rb_eIOError, "closed stream");
+        rb_raise(rb_eIOError, "closed stream");
 
     return fd;
 }
@@ -291,8 +291,8 @@ static void
 magic_check_type(VALUE object, int type)
 {
     if (type == T_FIXNUM) {
-	if (!RVAL2CBOOL(rb_obj_is_kind_of(object, T_INTEGER)))
-	    MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
+        if (!RVAL2CBOOL(rb_obj_is_kind_of(object, T_INTEGER)))
+            MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
     }
 
     Check_Type(object, type);
@@ -304,12 +304,12 @@ magic_check_type_array_of_strings(VALUE object)
     VALUE value = Qundef;
 
     for (int i = 0; i < RARRAY_LEN(object); i++) {
-	value = RARRAY_AREF(object, (long)i);
+        value = RARRAY_AREF(object, (long)i);
 
-	if (NIL_P(value) || !STRING_P(value))
-	    rb_raise(rb_eTypeError,
-		     error(E_ARGUMENT_TYPE_ARRAY_STRINGS),
-		     CLASS_NAME(value));
+        if (NIL_P(value) || !STRING_P(value))
+            rb_raise(rb_eTypeError,
+                     error(E_ARGUMENT_TYPE_ARRAY_STRINGS),
+                     CLASS_NAME(value));
     }
 }
 
