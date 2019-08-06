@@ -15,8 +15,6 @@ RDoc::Task.new do |d|
     LICENSE
     README.md
     CHANGELOG.md
-    CODE_OF_CONDUCT.md
-    CONTRIBUTING.md
   )
 
   d.title = 'File Magic in Ruby'
