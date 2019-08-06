@@ -56,7 +56,7 @@ have_func('utime', headers['utime'])
 have_func('utimes', headers['utime'])
 
 unless have_ruby_h
-  abort "\n" + (<<-EOS).gsub(/^[ ]+/, '') + "\n"
+  abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
     You appear to be missing Ruby development libraries and/or header
     files. You can install missing compile-time dependencies in one of
     the following ways:
@@ -84,7 +84,7 @@ have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
 
 unless have_magic_h
-  abort "\n" + (<<-EOS).gsub(/^[ ]+/, '') + "\n"
+  abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
     You appear to be missing libmagic(3) library and/or necessary header
     files. You can install missing compile-time dependencies in one of
     the following ways:
