@@ -2,8 +2,9 @@ language: ruby
 dist: precise
 
 cache:
-  - apt
-  - bundler
+  bundler: true
+  directories:
+    - $HOME/cache
 
 bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
 

@@ -36,26 +36,43 @@ for action in 'autoremove' 'autoclean' 'clean'; do
     apt-get --assume-yes "$action" &>/dev/null
 done
 
+rm -Rf "file-${VERSION}"
+
+CACHE_DIRECTORY="${HOME}/cache"
 ARCHIVE_NAME="file-${VERSION}.tar.gz"
 
-rm -Rf \
-    "file-${VERSION}" \
-    "file-${VERSION}.tar.gz"
+mkdir -p "$CACHE_DIRECTORY"
 
-MIRRORS=(
-    'https://fossies.org/linux/misc'
-    'http://ftp.clfs.org/pub/clfs/conglomeration/file'
-    'http://ftp.uni-stuttgart.de/pub/mirrors/mirror.slitaz.org/slitaz/sources/packages/f'
-    'ftp://ftp.astron.com/pub/file'
-)
+if [[ -f "${CACHE_DIRECTORY}/${ARCHIVE_NAME}" ]]; then
+    cp -f "${CACHE_DIRECTORY}/${ARCHIVE_NAME}" .
+fi
 
-for mirror in "${MIRRORS[@]}"; do
-    wget -O "$ARCHIVE_NAME" "${mirror}/${ARCHIVE_NAME}" && break
-done
-
+set +e
 echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
+set -e
 
-tar -zxf "$ARCHIVE_NAME"
+if [[ $? != 0 ]]; then
+    rm -f "file-${VERSION}.tar.gz"
+
+    MIRRORS=(
+        'https://fossies.org/linux/misc'
+        'http://ftp.clfs.org/pub/clfs/conglomeration/file'
+        'http://ftp.uni-stuttgart.de/pub/mirrors/mirror.slitaz.org/slitaz/sources/packages/f'
+        'ftp://ftp.astron.com/pub/file'
+    )
+
+    for mirror in "${MIRRORS[@]}"; do
+        wget -O "$ARCHIVE_NAME" "${mirror}/${ARCHIVE_NAME}" && break
+    done
+
+    echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
+
+    if [[ $? == 0 ]]; then
+        cp -f "$ARCHIVE_NAME" "${CACHE_DIRECTORY}/${ARCHIVE_NAME}"
+    fi
+
+    tar -zxf "$ARCHIVE_NAME"
+fi
 
 pushd "file-${VERSION}" &> /dev/null
 
