@@ -13,7 +13,7 @@ EOF
 export DEBIAN_FRONTEND='noninteractive'
 export DEBCONF_NONINTERACTIVE_SEEN='true'
 
-apt-get update &> /dev/null
+apt-get update
 
 apt-get install --assume-yes \
     wget            \
@@ -30,8 +30,10 @@ apt-get install --assume-yes \
     libtool         \
     libtool-doc
 
-apt-get remove --purge --assume-yes \
-    libmagic-dev
+dpkg --purge --ignore-depends libtool \
+    libmagic-dev \
+    libmagic1    \
+    file
 
 for action in 'autoremove' 'autoclean' 'clean'; do
     apt-get --assume-yes "$action"
