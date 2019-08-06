@@ -40,6 +40,11 @@ done
 rm -Rf "file-${VERSION}"
 
 CACHE_DIRECTORY="${HOME}/cache"
+if [[ $USER == 'root' ]]; then
+    eval HOME_DIRECTORY="~${SUDO_USER}"
+    CACHE_DIRECTORY="${HOME_DIRECTORY}/cache"
+fi
+
 ARCHIVE_NAME="file-${VERSION}.tar.gz"
 
 mkdir -p "$CACHE_DIRECTORY"
@@ -69,6 +74,7 @@ if [[ $? != 0 ]]; then
 
     if [[ $? == 0 ]]; then
         cp -f "$ARCHIVE_NAME" "${CACHE_DIRECTORY}/${ARCHIVE_NAME}"
+        chown -R "$SUDO_USER" "$CACHE_DIRECTORY"
     fi
 fi
 set -e
