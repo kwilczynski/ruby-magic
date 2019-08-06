@@ -49,7 +49,6 @@ fi
 
 set +e
 echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
-set -e
 
 if [[ $? != 0 ]]; then
     rm -f "file-${VERSION}.tar.gz"
@@ -70,9 +69,10 @@ if [[ $? != 0 ]]; then
     if [[ $? == 0 ]]; then
         cp -f "$ARCHIVE_NAME" "${CACHE_DIRECTORY}/${ARCHIVE_NAME}"
     fi
-
-    tar -zxf "$ARCHIVE_NAME"
 fi
+set -e
+
+tar -zxf "$ARCHIVE_NAME"
 
 pushd "file-${VERSION}" &> /dev/null
 
