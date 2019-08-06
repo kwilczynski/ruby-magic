@@ -28,13 +28,13 @@ apt-get install --assume-yes \
     autotools-dev   \
     libltdl-dev     \
     libtool         \
-    libtool-doc &> /dev/null
+    libtool-doc
 
 apt-get remove --purge --assume-yes \
-    libmagic-dev &> /dev/null
+    libmagic-dev
 
 for action in 'autoremove' 'autoclean' 'clean'; do
-    apt-get --assume-yes "$action" &>/dev/null
+    apt-get --assume-yes "$action"
 done
 
 rm -Rf "file-${VERSION}"
