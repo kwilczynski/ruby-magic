@@ -1437,6 +1437,11 @@ Init_magic(void)
     MAGIC_DEFINE_FLAG(NO_CHECK_CDF);
 
     /*
+     * Do not check for CSV files.
+     */
+    MAGIC_DEFINE_FLAG(NO_CHECK_CSV);
+
+    /*
      * Do not look for known tokens inside ASCII files.
      */
     MAGIC_DEFINE_FLAG(NO_CHECK_TOKENS);
@@ -1445,6 +1450,11 @@ Init_magic(void)
      * Return a MIME encoding, instead of a textual description.
      */
     MAGIC_DEFINE_FLAG(NO_CHECK_ENCODING);
+
+    /*
+     * Do not check for JSON files.
+     */
+    MAGIC_DEFINE_FLAG(NO_CHECK_JSON);
 
     /*
      * Do not use built-in tests; only consult the Magic file.

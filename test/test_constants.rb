@@ -32,8 +32,10 @@ class MagicConstantsTest < Test::Unit::TestCase
       :NO_CHECK_ELF,
       :NO_CHECK_TEXT,
       :NO_CHECK_CDF,
+      :NO_CHECK_CSV,
       :NO_CHECK_TOKENS,
       :NO_CHECK_ENCODING,
+      :NO_CHECK_JSON,
       :NO_CHECK_BUILTIN,
       :NO_CHECK_ASCII,
       :NO_CHECK_FORTRAN,
@@ -70,9 +72,14 @@ class MagicConstantsTest < Test::Unit::TestCase
       custom_NO_CHECK_BUILTIN ^= 0x080000 # 0x37b000 ^ 0x080000 is 0x3fb000
     end
 
-    # Latest version of libmagic have 0x77b000 by default.
+    # Starting from version 5.34, the value libmagic has is 0x77b000 by default.
     if @version && @version > 533
 		  custom_NO_CHECK_BUILTIN ^= 0x0400000 # 0x37b000 ^ 0x040000 is 0x77b000
+    end
+
+    # Latest version of libmagic have 0x7fb000 by default.
+    if @version && @version > 537
+		  custom_NO_CHECK_BUILTIN ^= 0x0080000 # 0x77b000 ^ 0x0080000 is 0x7fb000
     end
 
     assert_equal(Magic::NO_CHECK_BUILTIN, custom_NO_CHECK_BUILTIN)

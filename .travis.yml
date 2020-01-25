@@ -1,5 +1,5 @@
 language: ruby
-dist: xenial
+dist: precise
 
 cache:
   bundler: true
@@ -13,6 +13,7 @@ rvm:
   - '2.4'
   - '2.5'
   - '2.6'
+  - '2.7'
 
 env:
   matrix:
@@ -28,6 +29,8 @@ env:
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=clang
     - VERSION=5.37 SHA1=891176efa3006eff222bd364cd96135aad171941 COMPILER=gcc
     - VERSION=5.37 SHA1=891176efa3006eff222bd364cd96135aad171941 COMPILER=clang
+    - VERSION=5.38 SHA1=57cad9341c3f74f8681c2ef931786c420105f35e COMPILER=gcc
+    - VERSION=5.38 SHA1=57cad9341c3f74f8681c2ef931786c420105f35e COMPILER=clang
 
 matrix:
   fast_finish: true
@@ -48,7 +51,6 @@ before_install:
 
 before_script:
   - bundle exec rake clean
-  - bundle exec rake clobber
 
 script:
   - bundle exec rake test
