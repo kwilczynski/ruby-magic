@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.version = File.read('VERSION').strip
   s.license = 'Apache-2.0'
-  s.author = 'Krzysztof Wilczynski'
+  s.author = 'Krzysztof Wilczyński'
   s.email = 'kw@linux.com'
   s.homepage = 'https://github.com/kwilczynski/ruby-magic'
 

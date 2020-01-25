@@ -29,11 +29,11 @@ For the versions available, see the tags on this repository.
 
 ## Author
 
-Krzysztof Wilczynski (<kw@linux.com>)
+Krzysztof Wilczyński (<kw@linux.com>)
 
 ## Copyright
 
-Copyright 2013-2019 Krzysztof Wilczynski
+Copyright 2013-2020 Krzysztof Wilczyński
 
 ## License
 
