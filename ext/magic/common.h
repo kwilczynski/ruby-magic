@@ -106,10 +106,6 @@ extern "C" {
 # define MAGIC_EXTENSION -1
 #endif
 
-#if !defined(MAGIC_EXTENSION)
-# define MAGIC_EXTENSION -1
-#endif
-
 #if !defined(MAGIC_NO_CHECK_CSV)
 # define MAGIC_NO_CHECK_CSV -1
 #endif
