@@ -51,9 +51,9 @@ before_install:
   - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PREFIX=$PREFIX PATH=$PATH scripts/libmagic.sh
 
 before_script:
+  - export CFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib"
+  - export LD_LIBRARY_PATH="${PREFIX}/lib"
   - bundle exec rake clean
 
 script:
-  - export CFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib"
-  - export LD_LIBRARY_PATH="${PREFIX}/lib"
   - bundle exec rake test
