@@ -3,6 +3,8 @@
 set -e
 set -o pipefail
 
+PREFIX=${PREFIX:-/tmp/magic}
+
 export PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:${PATH}"
 
 cat <<'EOF' | tee /etc/apt/apt.conf.d/99apt &>/dev/null
@@ -29,14 +31,6 @@ apt-get install --assume-yes \
     libtool         \
     libtool-doc
 
-dpkg --purge --ignore-depends libtool \
-    libmagic-dev \
-    libmagic1    \
-    file
-
-for action in 'autoremove' 'autoclean' 'clean'; do
-    apt-get --assume-yes "$action"
-done
 
 rm -Rf "file-${VERSION}"
 
@@ -55,9 +49,7 @@ if [[ -f "${CACHE_DIRECTORY}/${ARCHIVE_NAME}" ]]; then
 fi
 
 set +e
-echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
-
-if [[ $? != 0 ]]; then
+if ! echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c; then
     rm -f "file-${VERSION}.tar.gz"
 
     MIRRORS=(
@@ -71,9 +63,7 @@ if [[ $? != 0 ]]; then
         wget -O "$ARCHIVE_NAME" "${mirror}/${ARCHIVE_NAME}" && break
     done
 
-    echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c
-
-    if [[ $? == 0 ]]; then
+    if echo "$SHA1 *${ARCHIVE_NAME}" | sha1sum -c; then
         cp -f "$ARCHIVE_NAME" "${CACHE_DIRECTORY}/${ARCHIVE_NAME}"
         chown -R "$SUDO_USER" "$CACHE_DIRECTORY"
     fi
@@ -118,7 +108,7 @@ autoheader
 automake --add-missing
 autoconf
 
-if ! ./configure --prefix=/usr --enable-fsect-man5; then
+if ! ./configure --prefix="$PREFIX" --enable-fsect-man5; then
   $CC --version
   cat config.log
   declare -p
@@ -127,6 +117,11 @@ fi
 
 make -j 4
 make install
+
+cat <<EOF > /etc/ld.so.conf.d/libmagic.conf
+${PREFIX}
+${PREFIX}/lib
+EOF
 
 ldconfig
 
