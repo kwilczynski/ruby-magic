@@ -1,3 +1,8 @@
 * text=auto
 
+*.rb eol=lf diff=ruby
+*.gemspec eol=lf diff=ruby
+
+Rakefile eol=lf diff=ruby
+
 .github/ export-ignore
