@@ -340,11 +340,11 @@ RUBY_EXTERN VALUE rb_mgc_closed(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_get_path(VALUE object);
 
-RUBY_EXTERN VALUE rb_mgc_getparam(VALUE object, VALUE tag);
-RUBY_EXTERN VALUE rb_mgc_setparam(VALUE object, VALUE tag, VALUE value);
+RUBY_EXTERN VALUE rb_mgc_get_parameter(VALUE object, VALUE tag);
+RUBY_EXTERN VALUE rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value);
 
-RUBY_EXTERN VALUE rb_mgc_getflags(VALUE object);
-RUBY_EXTERN VALUE rb_mgc_setflags(VALUE object, VALUE value);
+RUBY_EXTERN VALUE rb_mgc_get_flags(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_set_flags(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_load(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
