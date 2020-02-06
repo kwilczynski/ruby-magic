@@ -92,6 +92,8 @@ class MagicTest < Test::Unit::TestCase
       :descriptor,
       :fd,
       :load,
+      :load_buffers,
+      :loaded?,
       :compile,
       :check
     ].each {|i| assert_respond_to(@magic, i) }
@@ -142,7 +144,7 @@ class MagicTest < Test::Unit::TestCase
     assert_equal('Magic library is not open', error.message)
   end
 
-  def test_magic_closed?
+  def test_magic_closed
     assert_false(@magic.closed?)
     @magic.close
     assert_true(@magic.closed?)
@@ -572,6 +574,12 @@ class MagicTest < Test::Unit::TestCase
     omit('Magic library is too old') unless @magic_load_buffers
   end
 
+  def test_magic_loaded
+  end
+
+  def test_magic_loaded_with_do_not_auto_load_set
+  end
+
   def test_magic_check
   end
 
@@ -658,9 +666,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_singleton_do_not_auto_load
-  end
-
-  def test_magic_singleton_do_not_auto_load=
   end
 
   def test_magic_singleton_open

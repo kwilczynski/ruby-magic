@@ -192,6 +192,7 @@ typedef struct buffers {
 } buffers_t;
 
 typedef struct magic_object {
+    int loaded;
     magic_t cookie;
     VALUE mutex;
 } magic_object_t;
@@ -348,6 +349,7 @@ RUBY_EXTERN VALUE rb_mgc_set_flags(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_load(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
+RUBY_EXTERN VALUE rb_mgc_loaded(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_compile(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_check(VALUE object, VALUE arguments);

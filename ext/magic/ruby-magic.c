@@ -30,6 +30,7 @@ static VALUE magic_set_flags_internal(void *data);
 static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
 static VALUE magic_load_buffers_internal(void *data);
+static VALUE magic_loaded_internal(void *data);
 static VALUE magic_compile_internal(void *data);
 static VALUE magic_check_internal(void *data);
 static VALUE magic_file_internal(void *data);
@@ -49,6 +50,7 @@ static void magic_free(void *data);
 static VALUE magic_exception_wrapper(VALUE value);
 static VALUE magic_exception(void *data);
 
+static void magic_library_loaded(void *data);
 static void magic_library_close(void *data);
 static VALUE magic_library_error(VALUE klass, void *data);
 
@@ -490,6 +492,8 @@ rb_mgc_load(VALUE object, VALUE arguments)
     if (ma.status < 0)
         MAGIC_LIBRARY_ERROR(ma.cookie);
 
+    MAGIC_SYNCHRONIZED(magic_loaded_internal, mo);
+
     value = magic_split(CSTR2RVAL(ma.type.file.path), CSTR2RVAL(":"));
 
     RB_GC_GUARD(value);
@@ -570,6 +574,8 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     ruby_xfree(buffers);
     ruby_xfree(sizes);
 
+    MAGIC_SYNCHRONIZED(magic_loaded_internal, mo);
+
     return Qtrue;
 
 error:
@@ -585,6 +591,25 @@ error:
     }
 
     MAGIC_LIBRARY_ERROR(ma.cookie);
+}
+
+/*
+ * call-seq:
+ *    magic.loaded? -> true or false
+ *
+ * Example:
+ *
+ * See also: Magic#load and Magic#load_buffers
+ */
+VALUE
+rb_mgc_loaded(VALUE object)
+{
+    magic_object_t *mo;
+
+    MAGIC_CHECK_OPEN(object);
+    MAGIC_OBJECT(mo);
+
+    return CBOOL2RVAL(mo->loaded);
 }
 
 /*
@@ -983,6 +1008,13 @@ magic_load_buffers_internal(void *data)
 }
 
 static inline VALUE
+magic_loaded_internal(void *data)
+{
+    magic_library_loaded(data);
+    return Qnil;
+}
+
+static inline VALUE
 magic_compile_internal(void *data)
 {
     return (VALUE)NOGVL(nogvl_magic_compile, data);
@@ -1047,6 +1079,17 @@ magic_allocate(VALUE klass)
 }
 
 static void
+magic_library_loaded(void *data)
+{
+    magic_object_t *mo = data;
+
+    assert(mo != NULL && \
+           "Must be a valid pointer to `magic_object_t' type");
+
+    mo->loaded = 1;
+}
+
+static void
 magic_library_close(void *data)
 {
     magic_object_t *mo = data;
@@ -1057,6 +1100,7 @@ magic_library_close(void *data)
     if (mo->cookie)
         magic_close_wrapper(mo->cookie);
     
+    mo->loaded = 0;
     mo->cookie = NULL;
 }
 
@@ -1282,6 +1326,7 @@ Init_magic(void)
 
     rb_define_method(rb_cMagic, "load", RUBY_METHOD_FUNC(rb_mgc_load), -2);
     rb_define_method(rb_cMagic, "load_buffers", RUBY_METHOD_FUNC(rb_mgc_load_buffers), -2);
+    rb_define_method(rb_cMagic, "loaded?", RUBY_METHOD_FUNC(rb_mgc_loaded), 0);
 
     rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), -2);
     rb_define_method(rb_cMagic, "check", RUBY_METHOD_FUNC(rb_mgc_check), -2);
