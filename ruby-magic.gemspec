@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.email = 'kw@linux.com'
   s.homepage = 'https://github.com/kwilczynski/ruby-magic'
 
-  s.required_ruby_version = '>= 2.3.0'
+  s.required_ruby_version = '>= 2.4.0'
   s.rubygems_version = '>= 3.0.3'
 
   s.metadata = {
