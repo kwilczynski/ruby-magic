@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 gemspec
 
-gem 'rdoc'
 gem 'rake'
 gem 'rake-compiler'
+gem 'rdoc'
 
 group :test do
   gem 'mocha'
@@ -12,6 +12,6 @@ end
 
 group :development do
   gem 'guard'
-  gem 'guard-rake'
   gem 'guard-bundler'
+  gem 'guard-rake'
 end
