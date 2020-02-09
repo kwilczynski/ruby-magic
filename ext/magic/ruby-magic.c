@@ -475,7 +475,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
         if (!NIL_P(object))
             klass = rb_obj_classname(object);
 
-        rb_warn("%s::do_not_auto_load is set; using %s#load will load Magic library from a file",
+        rb_warn("%s::do_not_auto_load is set; using %s#load will load Magic database from a file",
                 klass, klass);
     }
 
@@ -571,10 +571,10 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
         goto error;
     }
 
+    MAGIC_SYNCHRONIZED(magic_loaded_internal, mo);
+
     ruby_xfree(buffers);
     ruby_xfree(sizes);
-
-    MAGIC_SYNCHRONIZED(magic_loaded_internal, mo);
 
     return Qtrue;
 
