@@ -42,6 +42,10 @@ extern "C" {
 # include <xlocale.h>
 #endif
 
+#if !defined(BIT)
+# define BIT(n) (1U << (n))
+#endif
+
 #if !defined(USHRT_MAX)
 # define USHRT_MAX ((uint16_t)(~0U))
 #endif
@@ -60,10 +64,6 @@ extern "C" {
 # else
 #  define RB_UNUSED_VAR(x) (x)
 # endif
-#endif
-
-#if !defined(UNUSED)
-# define UNUSED(x) (void)(x)
 #endif
 
 #if !defined(RUBY_METHOD_FUNC)

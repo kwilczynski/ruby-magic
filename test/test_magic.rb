@@ -55,7 +55,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_global_singleton_methods
     [
       :do_not_auto_load,
-      :do_not_auto_load=
+      :do_not_auto_load=,
+      :do_not_stop_on_error,
+      :do_not_stop_on_error=
     ].each {|i| assert_respond_to(Magic, i) }
   end
 
@@ -64,7 +66,11 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_instance_default_flags
-    assert_equal(0, @magic.flags)
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(0, @magic.flags)
+    end
+
+    assert_equal(512, @magic.flags)
   end
 
   def test_magic_new_with_block
@@ -73,15 +79,19 @@ class MagicTest < Test::Unit::TestCase
     end
 
     expected = "Magic::new() does not take block; use Magic::open() instead\n"
+
     assert_kind_of(Magic, magic)
     assert_equal(expected, output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop)
   end
 
   def test_magic_instance_methods
     [
+      :do_not_stop_on_error,
+      :do_not_stop_on_error=,
+      :open?,
       :close,
       :closed?,
-      :path,
+      :paths,
       :get_parameter,
       :set_parameter,
       :flags,
@@ -123,6 +133,12 @@ class MagicTest < Test::Unit::TestCase
     ].each {|i| assert_respond_to(File.allocate, i) }
   end
 
+  def test_magic_open
+    assert_true(@magic.open?)
+    @magic.close
+    assert_false(@magic.open?)
+  end
+
   def test_magic_close
     @magic.close
     assert_true(@magic.closed?)
@@ -160,14 +176,11 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_path
-    assert_kind_of(Array, @magic.path)
-    assert_not_equal(0, @magic.path.size)
+    assert_kind_of(Array, @magic.paths)
+    assert_not_equal(0, @magic.paths.size)
   end
 
   def test_magic_path_with_MAGIC_environment_variable
-    # XXX(Krzysztof Wilczynski): How to override "MAGIC"
-    # environment variable so that the C extension will
-    # pick it up?
   end
 
   def test_magic_get_parameter_error
@@ -199,6 +212,7 @@ class MagicTest < Test::Unit::TestCase
 
     # Older versions of libmagic will have lower value.
     expected = @version < 526 ? 15 : 50
+
     assert_equal(expected, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
   end
 
@@ -329,74 +343,146 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_flags_with_NONE_flag
     @magic.flags = 0x000000 # Flag: NONE
+
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(Magic::NONE, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(Magic::NONE, @magic.flags)
+    end
+
+    assert_equal(Magic::NONE | Magic::ERROR, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
     @magic.flags = 0x000010 # Flag: MIME_TYPE
+
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(Magic::MIME_TYPE, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(Magic::MIME_TYPE, @magic.flags)
+    end
+
+    assert_equal(Magic::MIME_TYPE | Magic::ERROR, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
     @magic.flags = 0x000400 # Flag: MIME_ENCODING
+
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(Magic::MIME_ENCODING, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(Magic::MIME_ENCODING, @magic.flags)
+    end
+
+    assert_equal(Magic::MIME_ENCODING | Magic::ERROR, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_flag
     @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
+
     assert_kind_of(Integer, @magic.flags)
-    assert_equal(Magic::MIME, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(Magic::MIME, @magic.flags)
+    end
+
+    assert_equal(Magic::MIME | Magic::ERROR, @magic.flags)
   end
 
   def test_magic_flags_to_a_with_NONE_flag
     @magic.flags = Magic::NONE
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::NONE], @magic.flags_to_a)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal([Magic::NONE], @magic.flags_to_a)
+    end
+
+    assert_equal([Magic::ERROR], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag
     @magic.flags = Magic::MIME_TYPE
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
+    end
+
+    assert_equal([Magic::MIME_TYPE, Magic::ERROR], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag
     @magic.flags = Magic::MIME_ENCODING
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
+    end
+
+    assert_equal([Magic::ERROR, Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_flag
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
+    end
+
+    assert_equal([Magic::MIME_TYPE, Magic::ERROR, Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_NONE_flag_and_argument_true
     @magic.flags = Magic::NONE
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['NONE'], @magic.flags_to_a(true))
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(['NONE'], @magic.flags_to_a(true))
+    end
+
+    assert_equal(['ERROR'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
+    end
+
+    assert_equal(['MIME_TYPE', 'ERROR'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag_and_argument_true
     @magic.flags = Magic::MIME_ENCODING
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
+    end
+
+    assert_equal(['ERROR', 'MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
+
     assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
+
+    with_attribute_override(:do_not_stop_on_error, true) do
+      assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
+    end
+
+    assert_equal(['MIME_TYPE', 'ERROR', 'MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_error_lower_boundary
@@ -417,7 +503,13 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
+  def test_magic_do_not_stop_on_error
+  end
+
   def test_magic_file
+  end
+
+  def test_magic_file_with_do_not_stop_on_error_set
   end
 
   def test_magic_file_with_nil_argument
@@ -457,8 +549,10 @@ class MagicTest < Test::Unit::TestCase
 
   def test_magic_file_with_String_like_argument
     require 'pathname'
+
     with_fixtures do |_, format|
       @magic.load(File.join(format, 'png-fake.magic'))
+
       assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
     end
   end
@@ -498,6 +592,7 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_descriptor
     with_fixtures do |_, format|
       @magic.load(File.join(format, 'png-fake.magic'))
+
       File.open('ruby.png') do |file|
         assert_match(%r{^Ruby Gem image}, @magic.descriptor(file.fileno))
         assert_false(file.closed?)
@@ -551,6 +646,12 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_load
   end
 
+  def test_magic_load_with_DEBUG_flag
+  end
+
+  def test_magic_load_with_do_not_auto_load_set
+  end
+
   def test_magic_load_with_array_argument
   end
 
@@ -561,9 +662,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_MAGIC_environment_variable
-    # XXX(Krzysztof Wilczynski): How to override "MAGIC"
-    # environment variable so that the C extension will
-    # pick it up?
   end
 
   def test_magic_load_buffers
@@ -583,7 +681,13 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_check
   end
 
+  def test_magic_check_with_DEBUG_flag
+  end
+
   def test_magic_compile
+  end
+
+  def test_magic_compile_with_DEBUG_flag
   end
 
   def test_magic_version
@@ -623,6 +727,7 @@ class MagicTest < Test::Unit::TestCase
     end
 
     expected = [Magic.version / 100, Magic.version % 100]
+
     assert_equal(expected, Magic.version_to_a)
   end
 
@@ -632,10 +737,14 @@ class MagicTest < Test::Unit::TestCase
     end
 
     expected = '%d.%02d' % Magic.version_to_a
+
     assert_equal(expected, Magic.version_to_s)
   end
 
   def test_magic_singleton_do_not_auto_load_global
+  end
+
+  def test_magic_singleton_do_not_auto_load
     fork do
       Magic.do_not_auto_load = true
 
@@ -665,7 +774,10 @@ class MagicTest < Test::Unit::TestCase
     assert_false(Magic.do_not_auto_load)
   end
 
-  def test_magic_singleton_do_not_auto_load
+  def test_magic_singleton_do_not_stop_on_error_global
+  end
+
+  def test_magic_singleton_do_not_stop_on_error
   end
 
   def test_magic_singleton_open
@@ -757,8 +869,5 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_string_integration_type
-  end
-
-  def test_magic_mutex_unlocked
   end
 end

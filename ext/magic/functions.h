@@ -20,20 +20,20 @@ extern "C" {
          r = f(__VA_ARGS__)
 #endif
 
-#define SUPPRESS_EVERYTHING(f, r, ...)      \
+#define OVERRIDE_EVERYTHING(f, r, ...)      \
     do {                                    \
         save_t __e_##f;                     \
-        suppress_error_output(&(__e_##f));  \
+        override_error_output(&(__e_##f));  \
         OVERRIDE_LOCALE(f, r, __VA_ARGS__); \
         restore_error_output(&(__e_##f));   \
     } while(0)
 
 #define MAGIC_FUNCTION(f, r, x, ...)                \
      do {                                           \
-        if ((x) & MAGIC_ERROR)                      \
+        if ((x) & MAGIC_DEBUG)                      \
             OVERRIDE_LOCALE(f, r, __VA_ARGS__);     \
         else                                        \
-            SUPPRESS_EVERYTHING(f, r, __VA_ARGS__); \
+            OVERRIDE_EVERYTHING(f, r, __VA_ARGS__); \
      } while(0)
 
 typedef struct file_data {

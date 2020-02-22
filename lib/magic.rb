@@ -20,7 +20,9 @@ class Magic
   # Example:
   #
   #    magic = Magic.new    #=> #<Magic:0x007fd5258a1108>
-  #    magic.inspect        #=> "#<Magic:0x007fd5258a1108 @flags=0, @path=[\"/etc/magic\", \"/usr/share/misc/magic\"]>"
+  #    magic.inspect        #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"]>"
+  #    magic.close
+  #    magic.inspect        #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"] (closed)>"
   #
   def inspect
     super.insert(-2, self.closed? ? ' (closed)' : '')
