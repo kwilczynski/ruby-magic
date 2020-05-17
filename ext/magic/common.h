@@ -66,6 +66,10 @@ extern "C" {
 # endif
 #endif
 
+#if !defined(UNUSED)
+# define UNUSED(x) (void)(x)
+#endif
+
 #if !defined(RUBY_METHOD_FUNC)
 # define RUBY_METHOD_FUNC(f) ((VALUE (*)(ANYARGS))(f))
 #endif

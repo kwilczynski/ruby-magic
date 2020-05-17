@@ -324,9 +324,9 @@ magic_getparam_wrapper(magic_t magic, int parameter, void *value)
 #if defined(HAVE_MAGIC_PARAM)
     return magic_getparam(magic, parameter, value);
 #else
-    RB_UNUSED_VAR(magic);
-    RB_UNUSED_VAR(parameter);
-    RB_UNUSED_VAR(value);
+    UNUSED(magic);
+    UNUSED(parameter);
+    UNUSED(value);
 
     errno = ENOSYS;
     return -ENOSYS;
@@ -347,9 +347,9 @@ magic_setparam_wrapper(magic_t magic, int parameter, const void *value)
 
     return magic_setparam(magic, parameter, value);
 #else
-    RB_UNUSED_VAR(magic);
-    RB_UNUSED_VAR(parameter);
-    RB_UNUSED_VAR(value);
+    UNUSED(magic);
+    UNUSED(parameter);
+    UNUSED(value);
 
     errno = ENOSYS;
     return -ENOSYS;
@@ -362,7 +362,8 @@ magic_getflags_wrapper(magic_t magic)
 #if defined(HAVE_MAGIC_GETFLAGS)
     return magic_getflags(magic);
 #else
-    RB_UNUSED_VAR(magic);
+    UNUSED(magic);
+
     errno = ENOSYS;
     return -ENOSYS;
 #endif
@@ -402,11 +403,11 @@ magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t 
     MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes, count);
     return rv;
 #else
-    RB_UNUSED_VAR(magic);
-    RB_UNUSED_VAR(buffers);
-    RB_UNUSED_VAR(sizes);
-    RB_UNUSED_VAR(count);
-    RB_UNUSED_VAR(flags);
+    UNUSED(magic);
+    UNUSED(buffers);
+    UNUSED(sizes);
+    UNUSED(count);
+    UNUSED(flags);
 
     errno = ENOSYS;
     return -ENOSYS;
