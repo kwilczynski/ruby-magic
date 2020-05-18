@@ -346,10 +346,12 @@ RUBY_EXTERN VALUE rb_mgc_eFlagsError;
 RUBY_EXTERN VALUE rb_mgc_eNotImplementedError;
 
 RUBY_EXTERN VALUE rb_mgc_get_do_not_auto_load_global(VALUE object);
-RUBY_EXTERN VALUE rb_mgc_set_do_not_auto_load_global(VALUE object, VALUE value);
+RUBY_EXTERN VALUE rb_mgc_set_do_not_auto_load_global(VALUE object,
+						     VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_get_do_not_stop_on_error_global(VALUE object);
-RUBY_EXTERN VALUE rb_mgc_set_do_not_stop_on_error_global(VALUE object, VALUE value);
+RUBY_EXTERN VALUE rb_mgc_set_do_not_stop_on_error_global(VALUE object,
+							 VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
 

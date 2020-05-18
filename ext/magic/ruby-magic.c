@@ -101,6 +101,7 @@ rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     rb_mgc_do_not_auto_load = RVAL2CBOOL(value);
+
     return value;
 }
 
@@ -148,6 +149,7 @@ rb_mgc_set_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     rb_mgc_do_not_stop_on_error = RVAL2CBOOL(value);
+
     return value;
 }
 
@@ -387,6 +389,7 @@ rb_mgc_get_paths(VALUE object)
     value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
 
     RB_GC_GUARD(value);
+
     return rb_ivar_set(object, id_at_paths, value);
 }
 
@@ -631,6 +634,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
     value = magic_split(CSTR2RVAL(ma.type.file.path), CSTR2RVAL(":"));
 
     RB_GC_GUARD(value);
+
     return rb_ivar_set(object, id_at_paths, value);
 }
 
@@ -788,6 +792,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 	MAGIC_LIBRARY_ERROR(ma.cookie);
 
     RB_GC_GUARD(value);
+
     return Qtrue;
 }
 
@@ -833,6 +838,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 	return Qfalse;
 
     RB_GC_GUARD(value);
+
     return Qtrue;
 }
 
@@ -1252,6 +1258,7 @@ static VALUE
 magic_exception_wrapper(VALUE value)
 {
     magic_exception_t *e = (struct magic_exception *)value;
+
     return rb_exc_new2(e->klass, e->magic_error);
 }
 
@@ -1274,6 +1281,7 @@ magic_exception(void *data)
     rb_iv_set(object, "@errno", INT2NUM(e->magic_errno));
 
     RB_GC_GUARD(object);
+
     return object;
 }
 
@@ -1337,6 +1345,7 @@ magic_unlock(VALUE object)
     MAGIC_OBJECT(mo);
 
     rb_funcall(mo->mutex, rb_intern("unlock"), 0, Qundef);
+
     return Qnil;
 }
 
@@ -1369,6 +1378,7 @@ magic_return(void *data)
     }
 
     RB_GC_GUARD(value);
+
     return value;
 }
 
