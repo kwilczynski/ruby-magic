@@ -1380,6 +1380,13 @@ magic_return(void *data)
     value = CSTR2RVAL(ma->result);
 
     if (ma->flags & MAGIC_EXTENSION) {
+	/*
+	 * A number of Magic flags that support primarily files e.g.,
+	 * MAGIC_EXTENSION, etc., would not return a meaningful value for
+	 * directories and special files, and such.  Thus, it's better to
+	 * return a nil value, to indicate lack of results, rather than a
+	 * confusing string consisting of three questions marks.
+	 */
 	if (strncmp(ma->result, empty, strlen(empty)) == 0)
 	    return Qnil;
 
