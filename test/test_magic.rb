@@ -66,7 +66,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_instance_default_flags
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(0, @magic.flags)
     end
 
@@ -74,13 +74,15 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_with_block
-    magic, output = capture_stderr do
-      Magic.new {}
+    obtained = nil
+
+    output = capture_stderr do
+      obtained = Magic.new {}
     end
 
-    expected = "Magic::new() does not take block; use Magic::open() instead\n"
+    assert_kind_of(Magic, obtained)
 
-    assert_kind_of(Magic, magic)
+    expected = "Magic::new() does not take block; use Magic::open() instead\n"
     assert_equal(expected, output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop)
   end
 
@@ -346,7 +348,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Integer, @magic.flags)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(Magic::NONE, @magic.flags)
     end
 
@@ -358,7 +360,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Integer, @magic.flags)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(Magic::MIME_TYPE, @magic.flags)
     end
 
@@ -370,7 +372,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Integer, @magic.flags)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(Magic::MIME_ENCODING, @magic.flags)
     end
 
@@ -382,7 +384,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Integer, @magic.flags)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(Magic::MIME, @magic.flags)
     end
 
@@ -394,7 +396,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal([Magic::NONE], @magic.flags_to_a)
     end
 
@@ -406,7 +408,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
     end
 
@@ -418,7 +420,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
     end
 
@@ -430,7 +432,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
     end
 
@@ -442,7 +444,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(['NONE'], @magic.flags_to_a(true))
     end
 
@@ -454,7 +456,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
     end
 
@@ -466,7 +468,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
     end
 
@@ -478,7 +480,7 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Array, @magic.flags_to_a)
 
-    with_attribute_override(:do_not_stop_on_error, true) do
+    with_attribute_override(:do_not_stop_on_error, value: true) do
       assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
     end
 
@@ -672,6 +674,10 @@ class MagicTest < Test::Unit::TestCase
     omit('Magic library is too old') unless @magic_load_buffers
   end
 
+  def test_magic_load_buffers_with_DEBUG_flag
+    omit('Magic library is too old') unless @magic_load_buffers
+  end
+
   def test_magic_loaded
   end
 
@@ -682,6 +688,24 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_check_with_DEBUG_flag
+    @magic.flags = Magic::DEBUG
+
+    assert_kind_of(Integer, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, value: true) do
+      assert_equal(Magic::DEBUG, @magic.flags)
+    end
+
+    output = capture_stderr(children: true) do
+      with_fixtures do |_, format|
+        assert_nothing_raised do
+          @magic.check(File.join(format, 'png-broken.magic'))
+        end
+      end
+     end
+
+    expected = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc\n"
+    assert_equal(expected, output)
   end
 
   def test_magic_compile

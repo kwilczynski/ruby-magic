@@ -35,7 +35,7 @@ module MagicTestHelpers
     end
   end
 
-  def with_fixtures(fixtures = 'fixtures', &block)
+  def with_fixtures(fixtures: 'fixtures', &block)
     new = @version && @version >= 519
     cwd = File.join('test', fixtures)
     Dir.chdir(cwd) do
@@ -43,7 +43,7 @@ module MagicTestHelpers
     end
   end
 
-  def with_attribute_override(attribute, value,  &block)
+  def with_attribute_override(attribute, value:,  &block)
     writer = "#{attribute}="
     old = @magic.send(attribute)
     @magic.send(writer, value)
