@@ -892,6 +892,19 @@ rb_mgc_file(VALUE object, VALUE value)
     if (!ma.result) {
 	rv = magic_version_wrapper();
 
+	/*
+	 * Handle the case when the "ERROR" flag is set regardless of the
+	 * current version of the underlying Magic library.
+	 *
+	 * Prior to version 5.15 the correct behaviour that concerns the
+	 * following IEEE 1003.1 standards was broken:
+	 *
+	 * http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
+	 * http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
+	 *
+	 * This is an attempt to mitigate the problem and correct it to achieve
+	 * the desired behaviour as per the standards.
+	 */
 	if (ma.flags & MAGIC_ERROR)
 	    MAGIC_LIBRARY_ERROR(ma.cookie);
 	else {
@@ -910,6 +923,12 @@ rb_mgc_file(VALUE object, VALUE value)
     assert(ma.result != NULL && \
 	   "Must be a valid pointer to `const char' type");
 
+    /*
+     * Depending on the version of the underlying Magic library the magic_file()
+     * function can fail and either yield no results or return the "(null)"
+     * string instead.  Often this would indicate that an older version of the
+     * Magic library is in use.
+     */
     assert(strncmp(ma.result, empty, strlen(empty)) != 0 && \
 		   "Empty or invalid result");
 
@@ -1370,6 +1389,11 @@ magic_return(void *data)
 	return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
+    /*
+     * The value below is a field separator that can be used to split results
+     * when the CONTINUE flag is set causing all valid matches found by the
+     * Magic library to be returned.
+     */
     if (ma->flags & MAGIC_CONTINUE) {
 	array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
 
