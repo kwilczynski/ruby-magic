@@ -61,15 +61,16 @@ static VALUE magic_return(void *data);
  * call-seq:
  *    Magic.do_not_auto_load -> boolean
  *
- * Returns
+ * Returns +true+ if the global +do_not_auto_load+ flag is set, or +false+
+ * otherwise.
  *
  * Example:
  *
- *    Magic.do_not_auto_load          #=> false
+ *    Magic.do_not_auto_load	      #=> false
  *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load          #=> true
+ *    Magic.do_not_auto_load	      #=> true
  *
- * See also: Magic::new, Magic#load and Magic#load_buffers
+ * See also: Magic::new, Magic#loaded?, Magic#load and Magic#load_buffers
  */
 VALUE
 rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
@@ -81,18 +82,31 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
  * call-seq:
  *    Magic.do_not_auto_load= (boolean) -> boolean
  *
- * Returns
+ * Sets the global +do_not_auto_load+ flag for the Magic object and each of the
+ * Magic object instances. This flag can be used to disable automatic loading of
+ * the Magic database files.
+ *
+ * Returns +true+ if the global +do_not_auto_load+ flag is set, or +false+
+ * otherwise.
  *
  * Example:
  *
- *    Magic.do_not_auto_load          #=> false
+ *    Magic.do_not_auto_load	      #=> false
  *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load          #=> true
+ *    Magic.do_not_auto_load	      #=> true
  *
- * Will raise a <i>TypeError</i> exception if given value is not
- * an _TrueClass_ or _FalseClass_ type.
+ * Example:
  *
- * See also: Magic::new, Magic#load and Magic#load_buffers
+ *    Magic.do_not_auto_load = true			       #=> true
+ *    magic = Magic.new					       #=> #<Magic:0x00007fcc33070c90>
+ *    magic.loaded?					       #=> false
+ *    magic.load_buffers(File.read(magic.paths[0] + ".mgc"))   #=> true
+ *    magic.loaded?					       #=> true
+ *
+ * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
+ * or _FalseClass_ type.
+ *
+ * See also: Magic::new, Magic#loaded?, Magic#load and Magic#load_buffers
  */
 VALUE
 rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
@@ -109,7 +123,8 @@ rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
  * call-seq:
  *    Magic.do_not_stop_on_error -> boolean
  *
- * Returns
+ * Returns +true+ if the global +do_not_stop_on_error+ flag is set, or +false+
+ * otherwise.
  *
  * Example:
  *
@@ -137,8 +152,8 @@ rb_mgc_get_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object))
  *    Magic.do_not_stop_on_error = true   #=> true
  *    Magic.do_not_stop_on_error          #=> true
  *
- * Will raise a <i>TypeError</i> exception if given value is not
- * an _TrueClass_ or _FalseClass_ type.
+ * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
+ * or _FalseClass_ type.
  *
  * See also: Magic::new, Magic::open and Magic#do_not_stop_on_error
  */
@@ -735,7 +750,20 @@ error:
  * call-seq:
  *    magic.loaded? -> true or false
  *
+ * Returns +true+ if at least a single Magic database file had been loaded, or
+ * +false+ otherwise. Magic database files can be loaded from a file or from an
+ * in-memory buffer.
+ *
  * Example:
+ *
+ *    magic = Magic.new	=> #<Magic:0x00007fa13009af78>
+ *    magic.loaded?	=> true
+ *
+ * Example:
+ *
+ *    Magic.do_not_auto_load = true	#=> true
+ *    magic = Magic.new			#=> #<Magic:0x00007fa637873068>
+ *    magic.loaded?			#=> false
  *
  * See also: Magic#load and Magic#load_buffers
  */
