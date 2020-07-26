@@ -3,35 +3,38 @@
 module MagicTestHelpers
   def capture_stderr(children: false)
     require 'thread'
-    semaphore = Mutex.new
+    mutex = Mutex.new
+
     if children
       require 'tempfile'
       captured_stderr = Tempfile.new('captured_stderr')
-      semaphore.synchronize do
+
+      mutex.synchronize do
         backup_stderr = $stderr.dup
-        $stderr.reopen captured_stderr
+        $stderr.reopen(captured_stderr)
         begin
           yield
           $stderr.rewind
           captured_stderr.read
         ensure
           captured_stderr.unlink
-          $stderr.reopen backup_stderr
+          $stderr.reopen(backup_stderr)
         end
       end
     else
       require 'stringio'
       captured_stderr = StringIO.new
-      semaphore.synchronize do
+
+      mutex.synchronize do
         backup_stderr = $stderr
         $stderr = captured_stderr
         begin
           yield
+          captured_stderr.string
         ensure
           $stderr = backup_stderr
         end
       end
-      captured_stderr.string
     end
   end
 

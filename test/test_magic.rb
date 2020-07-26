@@ -177,12 +177,12 @@ class MagicTest < Test::Unit::TestCase
     assert_match(%r{^#<Magic:0x.+ \(closed\)>$}, @magic.inspect)
   end
 
-  def test_magic_path
+  def test_magic_paths
     assert_kind_of(Array, @magic.paths)
     assert_not_equal(0, @magic.paths.size)
   end
 
-  def test_magic_path_with_MAGIC_environment_variable
+  def test_magic_paths_with_MAGIC_environment_variable
   end
 
   def test_magic_get_parameter_error
@@ -508,10 +508,16 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_do_not_stop_on_error
   end
 
+  def test_magic_do_not_stop_on_error_set_globally
+  end
+
   def test_magic_file
   end
 
   def test_magic_file_with_do_not_stop_on_error_set
+  end
+
+  def test_magic_file_with_do_not_stop_on_error_set_globally
   end
 
   def test_magic_file_with_nil_argument
@@ -649,6 +655,23 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_DEBUG_flag
+    @magic.flags = Magic::DEBUG
+
+    assert_kind_of(Integer, @magic.flags)
+
+    with_attribute_override(:do_not_stop_on_error, value: true) do
+      assert_equal(Magic::DEBUG, @magic.flags)
+    end
+
+    output = capture_stderr(children: true) do
+      with_fixtures do
+        assert_raise Magic::MagicError do
+          @magic.load('invalid.magic')
+        end
+      end
+    end
+
+    assert_match(%r{^.+Not a valid Magic file!}, output)
   end
 
   def test_magic_load_with_do_not_auto_load_set
@@ -697,15 +720,14 @@ class MagicTest < Test::Unit::TestCase
     end
 
     output = capture_stderr(children: true) do
-      with_fixtures do |_, format|
+      with_fixtures do
         assert_nothing_raised do
-          @magic.check(File.join(format, 'png-broken.magic'))
+          @magic.check('invalid.magic')
         end
       end
      end
 
-    expected = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc\n"
-    assert_equal(expected, output)
+    assert_match(%r{^.+Not a valid Magic file!}, output)
   end
 
   def test_magic_compile
