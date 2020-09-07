@@ -188,6 +188,53 @@ class Magic
     def check(path)
       open {|m| m.check(path) }
     end
+
+    #
+    # call-seq:
+    #
+    # Returns
+    #
+    # Example:
+    #
+    # Will raise <i></i>
+    #
+    # See also:
+    #
+    def file(path, flags = Magic::MIME)
+      open(flags).file(path)
+    end
+
+    #
+    # call-seq:
+    #
+    # Returns
+    #
+    # Example:
+    #
+    # Will raise <i></i>
+    #
+    # See also:
+    #
+    def buffer(buffer, flags = Magic::MIME)
+      open(flags).buffer(buffer)
+    end
+
+    #
+    # call-seq:
+    #
+    # Returns
+    #
+    # Example:
+    #
+    # Will raise <i></i>
+    #
+    # See also:
+    #
+    def descriptor(fd, flags = Magic::MIME)
+      open(flags).fd(fd)
+    end
+
+    alias_method :fd, :descriptor
   end
 
   alias_method :flags_array, :flags_to_a

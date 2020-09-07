@@ -46,6 +46,9 @@ class MagicTest < Test::Unit::TestCase
       :encoding,
       :compile,
       :check,
+      :file,
+      :buffer,
+      :descriptor,
       :version,
       :version_to_a,
       :version_to_s
@@ -860,6 +863,15 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_singleton_check
+  end
+
+  def test_magic_singleton_file
+  end
+
+  def test_magic_singleton_buffer
+  end
+
+  def test_magic_singleton_descriptor
   end
 
   def test_magic_magic_error
