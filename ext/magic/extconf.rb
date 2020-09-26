@@ -4,7 +4,8 @@ require 'mkmf'
 
 RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 
-$CFLAGS << ' -std=c99 -Wall -Wextra -pedantic'
+$CFLAGS << ' -std=c99'
+$CFLAGS << ' -Wall -Wextra -pedantic' if ENV['WALL']
 
 if RbConfig::MAKEFILE_CONFIG['CC'] =~ /gcc/
   $CFLAGS << ' -O3' unless $CFLAGS =~ /-O\d/
@@ -13,6 +14,10 @@ end
 
 unless RbConfig::CONFIG['host_os'] =~ /darwin/
   $LDFLAGS << ' -Wl,--as-needed'
+end
+
+if RbConfig::CONFIG['host_os'] =~ /mswin|mingw32|windows/
+  $LDFLAGS << ' -static-libgcc'
 end
 
 $LDFLAGS << format(' %s', ENV['LDFLAGS']) if ENV['LDFLAGS']
