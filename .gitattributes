@@ -1,8 +1,12 @@
 * text=auto
 
+*.c eol=lf linguist-language=c
+*.h eol=lf linguist-language=c
+
 *.rb eol=lf diff=ruby
 *.gemspec eol=lf diff=ruby
 
+Guardfile eol=lf diff=ruby
 Rakefile eol=lf diff=ruby
 
 .github/ export-ignore
