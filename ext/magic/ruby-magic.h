@@ -113,7 +113,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 #define MAGIC_COOKIE(o, c) \
 	((c) = MAGIC_OBJECT((o))->cookie)
 
-#define MAGIC_CLOSED_P(o) RTEST(rb_mgc_closed((o)))
+#define MAGIC_CLOSED_P(o) RTEST(rb_mgc_close_p((o)))
 
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
 	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
@@ -154,23 +154,10 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 #define MAGIC_DEFINE_FLAG(c) \
 	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c));
 
-#define MAGIC_FLAG_SET(o, f)   ((o) |=	(f))
-#define MAGIC_FLAG_CLEAR(o, f) ((o) &= ~(f))
-#define MAGIC_FLAG_READ(o, f)  ((o) &	(f))
-
 #define MAGIC_DEFINE_PARAMETER(c) \
 	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
 
-#define MAGIC_STATE_SET(o, s)	((o)->state |=	BIT(s))
-#define MAGIC_STATE_CLEAR(o, s) ((o)->state &= ~BIT(s))
-#define MAGIC_STATE_READ(o, s)	((o)->state &	BIT(s))
-
 #define error(t) errors[(t)]
-
-enum state {
-    S_STOP_ON_LIBRARY_ERRORS = BIT(0),
-    S_MAGIC_DATABASE_LOADED  = BIT(1)
-};
 
 enum error {
     E_UNKNOWN = 0,
@@ -205,9 +192,10 @@ typedef struct buffers {
 } buffers_t;
 
 typedef struct magic_object {
-    unsigned int state;
     magic_t cookie;
     VALUE mutex;
+    int database_loaded:1;
+    int stop_on_errors:1;
 } magic_object_t;
 
 typedef struct magic_arguments {
@@ -360,7 +348,7 @@ RUBY_EXTERN VALUE rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_open(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_close(VALUE object);
-RUBY_EXTERN VALUE rb_mgc_closed(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_close_p(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_get_paths(VALUE object);
 
@@ -372,7 +360,7 @@ RUBY_EXTERN VALUE rb_mgc_set_flags(VALUE object, VALUE value);
 
 RUBY_EXTERN VALUE rb_mgc_load(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
-RUBY_EXTERN VALUE rb_mgc_loaded(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_load_p(VALUE object);
 
 RUBY_EXTERN VALUE rb_mgc_compile(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_check(VALUE object, VALUE arguments);

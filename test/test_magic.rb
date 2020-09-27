@@ -69,11 +69,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_instance_default_flags
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(0, @magic.flags)
-    end
-
-    assert_equal(512, @magic.flags)
+    assert_equal(0, @magic.flags)
   end
 
   def test_magic_new_with_block
@@ -350,144 +346,84 @@ class MagicTest < Test::Unit::TestCase
     @magic.flags = 0x000000 # Flag: NONE
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::NONE, @magic.flags)
-    end
-
-    assert_equal(Magic::NONE | Magic::ERROR, @magic.flags)
+    assert_equal(Magic::NONE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
     @magic.flags = 0x000010 # Flag: MIME_TYPE
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::MIME_TYPE, @magic.flags)
-    end
-
-    assert_equal(Magic::MIME_TYPE | Magic::ERROR, @magic.flags)
+    assert_equal(Magic::MIME_TYPE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
     @magic.flags = 0x000400 # Flag: MIME_ENCODING
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::MIME_ENCODING, @magic.flags)
-    end
-
-    assert_equal(Magic::MIME_ENCODING | Magic::ERROR, @magic.flags)
+    assert_equal(Magic::MIME_ENCODING, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_flag
     @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::MIME, @magic.flags)
-    end
-
-    assert_equal(Magic::MIME | Magic::ERROR, @magic.flags)
+    assert_equal(Magic::MIME, @magic.flags)
   end
 
   def test_magic_flags_to_a_with_NONE_flag
     @magic.flags = Magic::NONE
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal([Magic::NONE], @magic.flags_to_a)
-    end
-
-    assert_equal([Magic::ERROR], @magic.flags_to_a)
+    assert_equal([Magic::NONE], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag
     @magic.flags = Magic::MIME_TYPE
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
-    end
-
-    assert_equal([Magic::MIME_TYPE, Magic::ERROR], @magic.flags_to_a)
+    assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag
     @magic.flags = Magic::MIME_ENCODING
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
-    end
-
-    assert_equal([Magic::ERROR, Magic::MIME_ENCODING], @magic.flags_to_a)
+    assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_MIME_flag
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
-    end
-
-    assert_equal([Magic::MIME_TYPE, Magic::ERROR, Magic::MIME_ENCODING], @magic.flags_to_a)
+    assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
   end
 
   def test_magic_flags_to_a_with_NONE_flag_and_argument_true
     @magic.flags = Magic::NONE
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(['NONE'], @magic.flags_to_a(true))
-    end
-
-    assert_equal(['ERROR'], @magic.flags_to_a(true))
+    assert_equal(['NONE'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_TYPE_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
-    end
-
-    assert_equal(['MIME_TYPE', 'ERROR'], @magic.flags_to_a(true))
+    assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_ENCODING_flag_and_argument_true
     @magic.flags = Magic::MIME_ENCODING
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
-    end
-
-    assert_equal(['ERROR', 'MIME_ENCODING'], @magic.flags_to_a(true))
+    assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_to_a_with_MIME_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
 
     assert_kind_of(Array, @magic.flags_to_a)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
-    end
-
-    assert_equal(['MIME_TYPE', 'ERROR', 'MIME_ENCODING'], @magic.flags_to_a(true))
+    assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
   end
 
   def test_magic_flags_error_lower_boundary
@@ -661,10 +597,7 @@ class MagicTest < Test::Unit::TestCase
     @magic.flags = Magic::DEBUG
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::DEBUG, @magic.flags)
-    end
+    assert_equal(Magic::DEBUG, @magic.flags)
 
     output = capture_stderr(children: true) do
       with_fixtures do
@@ -717,10 +650,7 @@ class MagicTest < Test::Unit::TestCase
     @magic.flags = Magic::DEBUG
 
     assert_kind_of(Integer, @magic.flags)
-
-    with_attribute_override(:do_not_stop_on_error, value: true) do
-      assert_equal(Magic::DEBUG, @magic.flags)
-    end
+    assert_equal(Magic::DEBUG, @magic.flags)
 
     output = capture_stderr(children: true) do
       with_fixtures do

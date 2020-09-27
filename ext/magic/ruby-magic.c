@@ -205,15 +205,15 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     MAGIC_OBJECT(mo);
 
     mo->mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
-				      rb_intern("Mutex")));
+					 rb_intern("Mutex")));
 
     rb_ivar_set(object, id_at_paths, rb_ary_new());
 
-    MAGIC_STATE_SET(mo, S_STOP_ON_LIBRARY_ERRORS);
+    mo->stop_on_errors = 1;
 
     boolean = rb_mgc_get_do_not_stop_on_error_global(object);
     if (RVAL2CBOOL(boolean))
-	MAGIC_STATE_CLEAR(mo, S_STOP_ON_LIBRARY_ERRORS);
+	mo->stop_on_errors = 0;
 
     rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
 
@@ -246,7 +246,7 @@ rb_mgc_get_do_not_stop_on_error(VALUE object)
     MAGIC_CHECK_OPEN(object);
     MAGIC_OBJECT(mo);
 
-    return CBOOL2RVAL(!MAGIC_STATE_READ(mo, S_STOP_ON_LIBRARY_ERRORS));
+    return CBOOL2RVAL(!mo->stop_on_errors);
 }
 
 /*
@@ -265,7 +265,6 @@ rb_mgc_get_do_not_stop_on_error(VALUE object)
 VALUE
 rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
 {
-    int flags;
     magic_object_t *mo;
 
     if (!BOOLEAN_P(value))
@@ -274,18 +273,7 @@ rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
     MAGIC_CHECK_OPEN(object);
     MAGIC_OBJECT(mo);
 
-    flags = NUM2INT(rb_mgc_get_flags(object));
-
-    if (RVAL2CBOOL(value)) {
-	MAGIC_STATE_CLEAR(mo, S_STOP_ON_LIBRARY_ERRORS);
-	MAGIC_FLAG_CLEAR(flags, MAGIC_ERROR);
-    }
-    else {
-	MAGIC_STATE_SET(mo, S_STOP_ON_LIBRARY_ERRORS);
-	MAGIC_FLAG_SET(flags, MAGIC_ERROR);
-    }
-
-    rb_mgc_set_flags(object, INT2NUM(flags));
+    mo->stop_on_errors = !RVAL2CBOOL(value);
 
     return value;
 }
@@ -309,7 +297,7 @@ rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
 VALUE
 rb_mgc_open(VALUE object)
 {
-    return rb_mgc_closed(object) ? Qfalse : Qtrue;
+    return MAGIC_CLOSED_P(object) ? Qfalse : Qtrue;
 }
 
 /*
@@ -329,6 +317,9 @@ VALUE
 rb_mgc_close(VALUE object)
 {
     magic_object_t *mo;
+
+    if (MAGIC_CLOSED_P(object))
+	return Qnil;
 
     MAGIC_OBJECT(mo);
 
@@ -359,7 +350,7 @@ rb_mgc_close(VALUE object)
  * See also: Magic#close, Magic#open? and #Magic#new
  */
 VALUE
-rb_mgc_closed(VALUE object)
+rb_mgc_close_p(VALUE object)
 {
     magic_object_t *mo;
     magic_t cookie = NULL;
@@ -560,9 +551,6 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 
     ma.flags = NUM2INT(value);
 
-    if (MAGIC_STATE_READ(mo, S_STOP_ON_LIBRARY_ERRORS))
-	MAGIC_FLAG_SET(ma.flags, MAGIC_ERROR);
-
     MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
     local_errno = errno;
 
@@ -644,7 +632,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
     if (ma.status < 0)
 	MAGIC_LIBRARY_ERROR(ma.cookie);
 
-    MAGIC_STATE_SET(mo, S_MAGIC_DATABASE_LOADED);
+    mo->database_loaded = 1;
 
     value = magic_split(CSTR2RVAL(ma.type.file.path), CSTR2RVAL(":"));
 
@@ -724,7 +712,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	goto error;
     }
 
-    MAGIC_STATE_SET(mo, S_MAGIC_DATABASE_LOADED);
+    mo->database_loaded = 1;
 
     ruby_xfree(buffers);
     ruby_xfree(sizes);
@@ -768,14 +756,14 @@ error:
  * See also: Magic#load and Magic#load_buffers
  */
 VALUE
-rb_mgc_loaded(VALUE object)
+rb_mgc_load_p(VALUE object)
 {
     magic_object_t *mo;
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_OBJECT(mo);
 
-    return CBOOL2RVAL(MAGIC_STATE_READ(mo, S_MAGIC_DATABASE_LOADED));
+    return CBOOL2RVAL(mo->database_loaded);
 }
 
 /*
@@ -933,7 +921,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	 * This is an attempt to mitigate the problem and correct it to achieve
 	 * the desired behaviour as per the standards.
 	 */
-	if (ma.flags & MAGIC_ERROR)
+	if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR) == MAGIC_ERROR)
 	    MAGIC_LIBRARY_ERROR(ma.cookie);
 	else {
 	    boolean = rb_mgc_get_do_not_auto_load_global(object);
@@ -1269,7 +1257,6 @@ magic_library_close(void *data)
     if (mo->cookie)
 	magic_close_wrapper(mo->cookie);
     
-    mo->state = 0U;
     mo->cookie = NULL;
 }
 
@@ -1501,7 +1488,7 @@ Init_magic(void)
 
     rb_define_method(rb_cMagic, "open?", RUBY_METHOD_FUNC(rb_mgc_open), 0);
     rb_define_method(rb_cMagic, "close", RUBY_METHOD_FUNC(rb_mgc_close), 0);
-    rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_closed), 0);
+    rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_close_p), 0);
 
     rb_define_method(rb_cMagic, "paths", RUBY_METHOD_FUNC(rb_mgc_get_paths), 0);
 
@@ -1517,7 +1504,7 @@ Init_magic(void)
 
     rb_define_method(rb_cMagic, "load", RUBY_METHOD_FUNC(rb_mgc_load), -2);
     rb_define_method(rb_cMagic, "load_buffers", RUBY_METHOD_FUNC(rb_mgc_load_buffers), -2);
-    rb_define_method(rb_cMagic, "loaded?", RUBY_METHOD_FUNC(rb_mgc_loaded), 0);
+    rb_define_method(rb_cMagic, "loaded?", RUBY_METHOD_FUNC(rb_mgc_load_p), 0);
 
     rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), -2);
     rb_define_method(rb_cMagic, "check", RUBY_METHOD_FUNC(rb_mgc_check), -2);

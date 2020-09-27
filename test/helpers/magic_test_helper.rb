@@ -45,12 +45,4 @@ module MagicTestHelpers
       yield(Dir.pwd, File.join(new ? 'new-format' : 'old-format'))
     end
   end
-
-  def with_attribute_override(attribute, value:,  &block)
-    writer = "#{attribute}="
-    old = @magic.send(attribute)
-    @magic.send(writer, value)
-  ensure
-    @magic.send(writer, old)
-  end
 end
