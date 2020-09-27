@@ -905,7 +905,7 @@ rb_mgc_file(VALUE object, VALUE value)
 
 	ma.type.file.path = RVAL2CSTR(value);
 
-	if (mo->stop_on_errors) {
+	if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
 	    ma.flags |= MAGIC_ERROR;
 	    rb_mgc_set_flags(object, INT2NUM(ma.flags));
 	    clear_error = 1;
