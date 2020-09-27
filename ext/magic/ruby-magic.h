@@ -194,8 +194,8 @@ typedef struct buffers {
 typedef struct magic_object {
     magic_t cookie;
     VALUE mutex;
-    int database_loaded:1;
-    int stop_on_errors:1;
+    unsigned int database_loaded:1;
+    unsigned int stop_on_errors:1;
 } magic_object_t;
 
 typedef struct magic_arguments {

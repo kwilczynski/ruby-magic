@@ -42,10 +42,6 @@ extern "C" {
 # include <xlocale.h>
 #endif
 
-#if !defined(BIT)
-# define BIT(n) (1U << (n))
-#endif
-
 #if !defined(USHRT_MAX)
 # define USHRT_MAX ((uint16_t)(~0U))
 #endif

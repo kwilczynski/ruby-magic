@@ -879,6 +879,8 @@ rb_mgc_file(VALUE object, VALUE value)
     int rv;
     magic_object_t *mo;
     magic_arguments_t ma;
+
+    int clear_error = 0;
     const char *empty = "(null)";
     VALUE boolean = Qundef;
 
@@ -902,7 +904,19 @@ rb_mgc_file(VALUE object, VALUE value)
 	    goto error;
 
 	ma.type.file.path = RVAL2CSTR(value);
+
+	if (mo->stop_on_errors) {
+	    ma.flags |= MAGIC_ERROR;
+	    rb_mgc_set_flags(object, INT2NUM(ma.flags));
+	    clear_error = 1;
+	}
+
 	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+    }
+
+    if (clear_error) {
+	ma.flags &= ~MAGIC_ERROR;
+	rb_mgc_set_flags(object, INT2NUM(ma.flags));
     }
 
     if (!ma.result) {
@@ -921,20 +935,19 @@ rb_mgc_file(VALUE object, VALUE value)
 	 * This is an attempt to mitigate the problem and correct it to achieve
 	 * the desired behaviour as per the standards.
 	 */
-	if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR) == MAGIC_ERROR)
+	if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
 	    MAGIC_LIBRARY_ERROR(ma.cookie);
 	else {
 	    boolean = rb_mgc_get_do_not_auto_load_global(object);
 	    if (rv < 515 || RVAL2CBOOL(boolean) || ma.flags & MAGIC_EXTENSION) {
 		(void)magic_errno(ma.cookie);
 		ma.result = magic_error(ma.cookie);
-
-		if (!ma.result)
-		    MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL,
-					E_UNKNOWN);
 	    }
 	}
     }
+
+    if (!ma.result)
+	MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL, E_UNKNOWN);
 
     assert(ma.result != NULL && \
 	   "Must be a valid pointer to `const char' type");
