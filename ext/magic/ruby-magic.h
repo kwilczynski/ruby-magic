@@ -8,12 +8,6 @@ extern "C" {
 #include "common.h"
 #include "functions.h"
 
-#if defined(HAVE_INTEGER_UNIFICATION)
-# define T_INTEGER rb_cInteger
-#else
-# define T_INTEGER rb_cFixnum
-#endif
-
 #define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
 #define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
 #define STRING_P(x)  (RB_TYPE_P((x), T_STRING))

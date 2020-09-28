@@ -42,6 +42,10 @@ extern "C" {
 # include <xlocale.h>
 #endif
 
+#if !defined(T_INTEGER)
+# define T_INTEGER rb_cInteger
+#endif
+
 #if !defined(USHRT_MAX)
 # define USHRT_MAX ((uint16_t)(~0U))
 #endif
@@ -68,10 +72,6 @@ extern "C" {
 
 #if !defined(RUBY_METHOD_FUNC)
 # define RUBY_METHOD_FUNC(f) ((VALUE (*)(ANYARGS))(f))
-#endif
-
-#if defined(RUBY_INTEGER_UNIFICATION) || RUBY_API_VERSION_CODE >= 20400
-# define HAVE_INTEGER_UNIFICATION 1
 #endif
 
 #if defined(F_DUPFD_CLOEXEC)
