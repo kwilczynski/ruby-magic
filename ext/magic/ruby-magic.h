@@ -211,19 +211,19 @@ typedef struct magic_exception {
 } magic_exception_t;
 
 static const char *errors[] = {
-    "an unknown error has occurred",
-    "cannot allocate memory",
-    "wrong number of arguments (given %d, expected %d)",
-    "wrong argument type %s (expected %s)",
-    "arguments list cannot be empty (expected array of String)",
-    "wrong argument type %s in arguments list (expected String)",
-    "function is not implemented",
-    "failed to initialize Magic library",
-    "Magic library is not open",
-    "unknown or invalid parameter specified",
-    "invalid parameter value specified",
-    "flag is not implemented",
-    "unknown or invalid flag specified",
+    [E_UNKNOWN]			    = "an unknown error has occurred",
+    [E_NOT_ENOUGH_MEMORY]	    = "cannot allocate memory",
+    [E_ARGUMENT_MISSING]	    = "wrong number of arguments (given %d, expected %d)",
+    [E_ARGUMENT_TYPE_INVALID]	    = "wrong argument type %s (expected %s)",
+    [E_ARGUMENT_TYPE_ARRAY_EMPTY]   = "arguments list cannot be empty (expected array of String)",
+    [E_ARGUMENT_TYPE_ARRAY_STRINGS] = "wrong argument type %s in arguments list (expected String)",
+    [E_NOT_IMPLEMENTED]		    = "function is not implemented",
+    [E_MAGIC_LIBRARY_INITIALIZE]    = "failed to initialize Magic library",
+    [E_MAGIC_LIBRARY_CLOSED]	    = "Magic library is not open",
+    [E_PARAM_INVALID_TYPE]	    = "unknown or invalid parameter specified",
+    [E_PARAM_INVALID_VALUE]	    = "invalid parameter value specified",
+    [E_FLAG_NOT_IMPLEMENTED]	    = "flag is not implemented",
+    [E_FLAG_INVALID_VALUE]	    = "unknown or invalid flag specified",
     NULL
 };
 
