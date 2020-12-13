@@ -340,7 +340,7 @@ RUBY_EXTERN VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
 RUBY_EXTERN VALUE rb_mgc_get_do_not_stop_on_error(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value);
 
-RUBY_EXTERN VALUE rb_mgc_open(VALUE object);
+RUBY_EXTERN VALUE rb_mgc_open_p(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_close(VALUE object);
 RUBY_EXTERN VALUE rb_mgc_close_p(VALUE object);
 

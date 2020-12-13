@@ -295,7 +295,7 @@ rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
  * See also: Magic#close?, Magic#close and Magic#new
  */
 VALUE
-rb_mgc_open(VALUE object)
+rb_mgc_open_p(VALUE object)
 {
     return MAGIC_CLOSED_P(object) ? Qfalse : Qtrue;
 }
@@ -1499,7 +1499,7 @@ Init_magic(void)
     rb_define_method(rb_cMagic, "do_not_stop_on_error", RUBY_METHOD_FUNC(rb_mgc_get_do_not_stop_on_error), 0);
     rb_define_method(rb_cMagic, "do_not_stop_on_error=", RUBY_METHOD_FUNC(rb_mgc_set_do_not_stop_on_error), 1);
 
-    rb_define_method(rb_cMagic, "open?", RUBY_METHOD_FUNC(rb_mgc_open), 0);
+    rb_define_method(rb_cMagic, "open?", RUBY_METHOD_FUNC(rb_mgc_open_p), 0);
     rb_define_method(rb_cMagic, "close", RUBY_METHOD_FUNC(rb_mgc_close), 0);
     rb_define_method(rb_cMagic, "closed?", RUBY_METHOD_FUNC(rb_mgc_close_p), 0);
 
