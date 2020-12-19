@@ -102,22 +102,6 @@ extern "C" {
 # define HAVE_MAGIC_PARAM 1
 #endif
 
-#if !defined(MAGIC_EXTENSION)
-# define MAGIC_EXTENSION -1
-#endif
-
-#if !defined(MAGIC_NO_CHECK_CSV)
-# define MAGIC_NO_CHECK_CSV -1
-#endif
-
-#if !defined(MAGIC_NO_CHECK_JSON)
-# define MAGIC_NO_CHECK_JSON -1
-#endif
-
-#if !defined(MAGIC_COMPRESS_TRANSP)
-# define MAGIC_COMPRESS_TRANSP -1
-#endif
-
 #if !defined(MAGIC_PARAM_INDIR_MAX)
 # define MAGIC_PARAM_INDIR_MAX -1
 #endif
@@ -144,6 +128,22 @@ extern "C" {
 
 #if !defined(MAGIC_PARAM_BYTES_MAX)
 # define MAGIC_PARAM_BYTES_MAX -1
+#endif
+
+#if !defined(MAGIC_EXTENSION)
+# define MAGIC_EXTENSION -1
+#endif
+
+#if !defined(MAGIC_NO_CHECK_CSV)
+# define MAGIC_NO_CHECK_CSV -1
+#endif
+
+#if !defined(MAGIC_NO_CHECK_JSON)
+# define MAGIC_NO_CHECK_JSON -1
+#endif
+
+#if !defined(MAGIC_COMPRESS_TRANSP)
+# define MAGIC_COMPRESS_TRANSP -1
 #endif
 
 #if defined(__cplusplus)
