@@ -21,8 +21,8 @@ check_fd(int fd)
 {
     errno = 0;
     if (fd < 0 || (fcntl(fd, F_GETFD) < 0 && errno == EBADF)) {
-	errno = EBADF;
-	return -EBADF;
+        errno = EBADF;
+        return -EBADF;
     }
 
     return 0;
@@ -35,13 +35,13 @@ safe_cloexec(int fd)
     int flags = fcntl(fd, F_GETFD);
 
     if (flags < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     return 0;
@@ -65,16 +65,16 @@ safe_dup(int fd)
 
     new_fd = fcntl(fd, flags, fileno(stderr) + 1);
     if (new_fd < 0 && errno == EINVAL) {
-	new_fd = dup(fd);
-	if (new_fd < 0) {
-	   local_errno = errno;
-	   goto out;
-	}
+        new_fd = dup(fd);
+        if (new_fd < 0) {
+            local_errno = errno;
+            goto out;
+        }
     }
 
     if (safe_cloexec(new_fd) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     return new_fd;
@@ -94,7 +94,7 @@ safe_close(int fd)
 #else
     rv = close(fd);
     if (rv < 0 && errno == EINTR)
-	errno = EINPROGRESS;
+        errno = EINPROGRESS;
 #endif
 
     return rv;
@@ -112,7 +112,7 @@ override_error_output(void *data)
 #endif
 
     assert(s != NULL && \
-	    "Must be a valid pointer to `save_t' type");
+           "Must be a valid pointer to `save_t' type");
 
     s->data.file.old_fd = -1;
     s->data.file.new_fd = -1;
@@ -123,31 +123,31 @@ override_error_output(void *data)
 
     s->data.file.old_fd = safe_dup(fileno(stderr));
     if (s->data.file.old_fd < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     s->data.file.new_fd = open("/dev/null", O_WRONLY | O_APPEND, mode);
     if (s->data.file.new_fd < 0) {
-	local_errno = errno;
+        local_errno = errno;
 
-	if (dup2(s->data.file.old_fd, fileno(stderr)) < 0) {
-	    local_errno = errno;
-	    goto out;
-	}
+        if (dup2(s->data.file.old_fd, fileno(stderr)) < 0) {
+            local_errno = errno;
+            goto out;
+        }
 
-	safe_close(s->data.file.old_fd);
-	goto out;
+        safe_close(s->data.file.old_fd);
+        goto out;
     }
 
     if (safe_cloexec(s->data.file.new_fd) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     if (dup2(s->data.file.new_fd, fileno(stderr)) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     safe_close(s->data.file.new_fd);
@@ -168,16 +168,16 @@ restore_error_output(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	    "Must be a valid pointer to `save_t' type");
+           "Must be a valid pointer to `save_t' type");
 
     if (s->data.file.old_fd < 0 && s->status != 0)
-	return -1;
+        return -1;
 
     fflush(stderr);
 
     if (dup2(s->data.file.old_fd, fileno(stderr)) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     safe_close(s->data.file.old_fd);
@@ -185,8 +185,8 @@ restore_error_output(void *data)
     fsetpos(stderr, &s->data.file.position);
 
     if (setvbuf(stderr, NULL, _IONBF, 0) != 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     return 0;
@@ -207,7 +207,7 @@ override_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	    "Must be a valid pointer to `save_t' type");
+           "Must be a valid pointer to `save_t' type");
 
     s->status = -1;
 
@@ -217,34 +217,34 @@ override_current_locale(void *data)
 
     s->data.locale.new_locale = newlocale(LC_ALL_MASK, "C", NULL);
     if (s->data.locale.new_locale == (locale_t)0)
-	goto out;
+        goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-	    "Must be a valid pointer to `locale_t' type");
+           "Must be a valid pointer to `locale_t' type");
 
     s->data.locale.old_locale = uselocale(s->data.locale.new_locale);
     if (s->data.locale.old_locale == (locale_t)0)
-	goto out;
+        goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	    "Must be a valid pointer to `locale_t' type");
+           "Must be a valid pointer to `locale_t' type");
 #else
     s->data.locale.old_locale = NULL;
 
     current_locale = setlocale(LC_ALL, NULL);
     if (!current_locale)
-	goto out;
+        goto out;
 
     s->data.locale.old_locale = strndup(current_locale,
-					strlen(current_locale));
+                                        strlen(current_locale));
     if (!s->data.locale.old_locale)
-	goto out;
+        goto out;
 
     if (!setlocale(LC_ALL, "C"))
-	goto out;
+        goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	    "Must be a valid pointer to `char' type");
+           "Must be a valid pointer to `char' type");
 #endif
     s->status = 0;
 
@@ -258,30 +258,30 @@ restore_current_locale(void *data)
     save_t *s = data;
 
     assert(s != NULL && \
-	    "Must be a valid pointer to `save_t' type");
+           "Must be a valid pointer to `save_t' type");
 
 #if defined(HAVE_SAFE_LOCALE)
     if (!(s->data.locale.new_locale || \
-	    s->data.locale.old_locale) && \
-	    s->status != 0)
-	return -1;
+          s->data.locale.old_locale) && \
+          s->status != 0)
+        return -1;
 
     if (uselocale(s->data.locale.old_locale) == (locale_t)0)
-	goto out;
+        goto out;
 
     assert(s->data.locale.new_locale != NULL && \
-	    "Must be a valid pointer to `locale_t' type");
+           "Must be a valid pointer to `locale_t' type");
 
     freelocale(s->data.locale.new_locale);
 #else
     if (!s->data.locale.old_locale && s->status != 0)
-	return -1;
+        return -1;
 
     if (!setlocale(LC_ALL, s->data.locale.old_locale))
-	goto out;
+        goto out;
 
     assert(s->data.locale.old_locale != NULL && \
-	    "Must be a valid pointer to `char' type");
+           "Must be a valid pointer to `char' type");
 
     xfree(s->data.locale.old_locale);
 #endif
@@ -343,11 +343,11 @@ magic_setparam_wrapper(magic_t magic, int parameter, const void *value)
     }
 
     if (parameter == MAGIC_PARAM_BYTES_MAX)
-	return magic_setparam(magic, parameter, value);
+        return magic_setparam(magic, parameter, value);
 
     if (*(const size_t *)value > USHRT_MAX) {
-	errno = EOVERFLOW;
-	return -EOVERFLOW;
+        errno = EOVERFLOW;
+        return -EOVERFLOW;
     }
 
     return magic_setparam(magic, parameter, value);
@@ -378,14 +378,14 @@ inline int
 magic_setflags_wrapper(magic_t magic, int flags)
 {
     if (flags < 0 || flags > 0xfffffff) {
-	errno = EINVAL;
-	return -EINVAL;
+        errno = EINVAL;
+        return -EINVAL;
     }
 
 #if !(defined(HAVE_UTIME) || defined(HAVE_UTIMES))
     if (flags & MAGIC_PRESERVE_ATIME) {
-	errno = ENOSYS;
-	return -ENOSYS;
+        errno = ENOSYS;
+        return -ENOSYS;
     }
 #endif
 
@@ -458,20 +458,20 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
     int local_errno;
 
     if (check_fd(fd) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
 #if defined(HAVE_BROKEN_MAGIC)
     if ((fd = safe_dup(fd)) < 0) {
-	local_errno = errno;
-	goto out;
+        local_errno = errno;
+        goto out;
     }
 
     MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
 
     if (check_fd(fd) == 0)
-	safe_close(fd);
+        safe_close(fd);
 
     return cstring;
 #else

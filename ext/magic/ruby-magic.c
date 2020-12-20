@@ -51,9 +51,9 @@ static VALUE magic_exception(void *data);
 static void magic_library_close(void *data);
 static VALUE magic_library_error(VALUE klass, void *data);
 static VALUE magic_generic_error(VALUE klass, int magic_errno,
-				 const char *magic_error);
+                                 const char *magic_error);
 static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
-			void *data);
+                        void *data);
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
 
@@ -66,9 +66,9 @@ static VALUE magic_return(void *data);
  *
  * Example:
  *
- *    Magic.do_not_auto_load	      #=> false
+ *    Magic.do_not_auto_load          #=> false
  *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load	      #=> true
+ *    Magic.do_not_auto_load          #=> true
  *
  * See also: Magic::new, Magic#loaded?, Magic#load and Magic#load_buffers
  */
@@ -91,17 +91,17 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
  *
  * Example:
  *
- *    Magic.do_not_auto_load	      #=> false
+ *    Magic.do_not_auto_load          #=> false
  *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load	      #=> true
+ *    Magic.do_not_auto_load          #=> true
  *
  * Example:
  *
- *    Magic.do_not_auto_load = true			       #=> true
- *    magic = Magic.new					       #=> #<Magic:0x00007fcc33070c90>
- *    magic.loaded?					       #=> false
+ *    Magic.do_not_auto_load = true                            #=> true
+ *    magic = Magic.new                                        #=> #<Magic:0x00007fcc33070c90>
+ *    magic.loaded?                                            #=> false
  *    magic.load_buffers(File.read(magic.paths[0] + ".mgc"))   #=> true
- *    magic.loaded?					       #=> true
+ *    magic.loaded?                                            #=> true
  *
  * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
  * or _FalseClass_ type.
@@ -112,7 +112,7 @@ VALUE
 rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 {
     if (!BOOLEAN_P(value))
-	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
+        MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     rb_mgc_do_not_auto_load = RVAL2CBOOL(value);
 
@@ -161,7 +161,7 @@ VALUE
 rb_mgc_set_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 {
     if (!BOOLEAN_P(value))
-	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
+        MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     rb_mgc_do_not_stop_on_error = RVAL2CBOOL(value);
 
@@ -193,19 +193,19 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
     VALUE boolean = Qundef;
 
     if (rb_block_given_p()) {
-	klass = "Magic";
+        klass = "Magic";
 
-	if (!NIL_P(object))
-	    klass = rb_obj_classname(object);
+        if (!NIL_P(object))
+            klass = rb_obj_classname(object);
 
-	rb_warn("%s::new() does not take block; use %s::open() instead",
-		klass, klass);
+        rb_warn("%s::new() does not take block; use %s::open() instead",
+                klass, klass);
     }
 
     MAGIC_OBJECT(mo);
 
     mo->mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
-					 rb_intern("Mutex")));
+                                         rb_intern("Mutex")));
 
     rb_ivar_set(object, id_at_paths, rb_ary_new());
 
@@ -213,14 +213,14 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
     boolean = rb_mgc_get_do_not_stop_on_error_global(object);
     if (RVAL2CBOOL(boolean))
-	mo->stop_on_errors = 0;
+        mo->stop_on_errors = 0;
 
     rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
 
     boolean = rb_mgc_get_do_not_auto_load_global(object);
     if (RVAL2CBOOL(boolean)) {
-	rb_mgc_get_paths(object);
-	return object;
+        rb_mgc_get_paths(object);
+        return object;
     }
 
     rb_mgc_load(object, arguments);
@@ -268,7 +268,7 @@ rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
     magic_object_t *mo;
 
     if (!BOOLEAN_P(value))
-	MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
+        MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_OBJECT(mo);
@@ -319,15 +319,15 @@ rb_mgc_close(VALUE object)
     magic_object_t *mo;
 
     if (MAGIC_CLOSED_P(object))
-	return Qnil;
+        return Qnil;
 
     MAGIC_OBJECT(mo);
 
     if (mo) {
-	MAGIC_SYNCHRONIZED(magic_close_internal, mo);
+        MAGIC_SYNCHRONIZED(magic_close_internal, mo);
 
-	if (DATA_P(object))
-	    DATA_PTR(object) = NULL;
+        if (DATA_P(object))
+            DATA_PTR(object) = NULL;
     }
 
     return Qnil;
@@ -358,10 +358,10 @@ rb_mgc_close_p(VALUE object)
     MAGIC_OBJECT(mo);
 
     if (mo)
-	cookie = mo->cookie;
+        cookie = mo->cookie;
 
     if (DATA_P(object) && cookie)
-	return Qfalse;
+        return Qfalse;
 
     return Qtrue;
 }
@@ -389,7 +389,7 @@ rb_mgc_get_paths(VALUE object)
 
     value = rb_ivar_get(object, id_at_paths);
     if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC"))
-	return value;
+        return value;
 
     cstring = magic_getpath_wrapper();
     value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
@@ -423,19 +423,19 @@ rb_mgc_get_parameter(VALUE object, VALUE tag)
     MAGIC_SYNCHRONIZED(magic_get_parameter_internal, &ma);
     local_errno = errno;
 
-    if (ma.status < 0)	{
-	switch (local_errno) {
-	case EINVAL:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
-				local_errno,
-				E_PARAM_INVALID_TYPE);
-	case ENOSYS:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-				local_errno,
-				E_NOT_IMPLEMENTED);
-	}
+    if (ma.status < 0)  {
+        switch (local_errno) {
+        case EINVAL:
+            MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
+                                local_errno,
+                                E_PARAM_INVALID_TYPE);
+        case ENOSYS:
+            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+                                local_errno,
+                                E_NOT_IMPLEMENTED);
+        }
 
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
     return SIZET2NUM(ma.type.parameter.value);
@@ -467,23 +467,23 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
     MAGIC_SYNCHRONIZED(magic_set_parameter_internal, &ma);
     local_errno = errno;
 
-    if (ma.status < 0)	{
-	switch (local_errno) {
-	case EINVAL:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
-				local_errno,
-				E_PARAM_INVALID_TYPE);
-	case EOVERFLOW:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
-				local_errno,
-				E_PARAM_INVALID_VALUE);
-	case ENOSYS:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-				local_errno,
-				E_NOT_IMPLEMENTED);
-	}
+    if (ma.status < 0)  {
+        switch (local_errno) {
+        case EINVAL:
+            MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
+                                local_errno,
+                                E_PARAM_INVALID_TYPE);
+        case EOVERFLOW:
+            MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
+                                local_errno,
+                                E_PARAM_INVALID_VALUE);
+        case ENOSYS:
+            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+                                local_errno,
+                                E_NOT_IMPLEMENTED);
+        }
 
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
     return Qtrue;
@@ -518,7 +518,7 @@ rb_mgc_get_flags(VALUE object)
     local_errno = errno;
 
     if (ma.flags < 0 && local_errno == ENOSYS)
-	return rb_ivar_get(object, id_at_flags);
+        return rb_ivar_get(object, id_at_flags);
 
     return INT2NUM(ma.flags);
 }
@@ -554,19 +554,19 @@ rb_mgc_set_flags(VALUE object, VALUE value)
     MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
     local_errno = errno;
 
-    if (ma.status < 0)	{
-	switch (local_errno) {
-	case EINVAL:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError,
-				local_errno,
-				E_FLAG_INVALID_VALUE);
-	case ENOSYS:
-	    MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-				local_errno,
-				E_FLAG_NOT_IMPLEMENTED);
-	}
+    if (ma.status < 0)  {
+        switch (local_errno) {
+        case EINVAL:
+            MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError,
+                                local_errno,
+                                E_FLAG_INVALID_VALUE);
+        case ENOSYS:
+            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+                                local_errno,
+                                E_FLAG_NOT_IMPLEMENTED);
+        }
 
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
     return rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
@@ -600,7 +600,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
     VALUE boolean = Qundef;
 
     if (ARRAY_P(RARRAY_FIRST(arguments)))
-	arguments = magic_flatten(arguments);
+        arguments = magic_flatten(arguments);
 
     MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
@@ -609,28 +609,28 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
     boolean = rb_mgc_get_do_not_auto_load_global(object);
     if (RVAL2CBOOL(boolean)) {
-	klass = "Magic";
+        klass = "Magic";
 
-	if (!NIL_P(object))
-	    klass = rb_obj_classname(object);
+        if (!NIL_P(object))
+            klass = rb_obj_classname(object);
 
-	rb_warn("%s::do_not_auto_load is set; using %s#load "
-		"will load Magic database from a file",
-		klass, klass);
+        rb_warn("%s::do_not_auto_load is set; using %s#load "
+                "will load Magic database from a file",
+                klass, klass);
     }
 
     if (!RARRAY_EMPTY_P(arguments)) {
-	value = magic_join(arguments, CSTR2RVAL(":"));
-	ma.type.file.path = RVAL2CSTR(value);
+        value = magic_join(arguments, CSTR2RVAL(":"));
+        ma.type.file.path = RVAL2CSTR(value);
     }
     else
-	ma.type.file.path = magic_getpath_wrapper();
+        ma.type.file.path = magic_getpath_wrapper();
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
 
     MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
     if (ma.status < 0)
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
 
     mo->database_loaded = 1;
 
@@ -670,8 +670,8 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     MAGIC_CHECK_ARGUMENT_MISSING(count, 1);
 
     if (ARRAY_P(RARRAY_FIRST(arguments))) {
-	arguments = magic_flatten(arguments);
-	count = (size_t)RARRAY_LEN(arguments);
+        arguments = magic_flatten(arguments);
+        count = (size_t)RARRAY_LEN(arguments);
     }
 
     MAGIC_CHECK_ARRAY_EMPTY(arguments);
@@ -682,22 +682,22 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 
     buffers = ALLOC_N(void *, count);
     if (!buffers) {
-	local_errno = ENOMEM;
-	goto error;
+        local_errno = ENOMEM;
+        goto error;
     }
 
     sizes = ALLOC_N(size_t, count);
     if (!sizes) {
-	ruby_xfree(buffers);
-	buffers = NULL;
-	local_errno = ENOMEM;
-	goto error;
+        ruby_xfree(buffers);
+        buffers = NULL;
+        local_errno = ENOMEM;
+        goto error;
     }
 
     for (size_t i = 0; i < count; i++) {
-	value = RARRAY_AREF(arguments, (long)i);
-	buffers[i] = (void *)RSTRING_PTR(value);
-	sizes[i] = (size_t)RSTRING_LEN(value);
+        value = RARRAY_AREF(arguments, (long)i);
+        buffers[i] = (void *)RSTRING_PTR(value);
+        sizes[i] = (size_t)RSTRING_LEN(value);
     }
 
     ma.type.buffers.count = count;
@@ -708,8 +708,8 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 
     MAGIC_SYNCHRONIZED(magic_load_buffers_internal, &ma);
     if (ma.status < 0) {
-	local_errno = errno;
-	goto error;
+        local_errno = errno;
+        goto error;
     }
 
     mo->database_loaded = 1;
@@ -722,13 +722,13 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 error:
     switch (local_errno) {
     case ENOMEM:
-	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
-			    local_errno,
-			    E_NOT_ENOUGH_MEMORY);
+        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
+                            local_errno,
+                            E_NOT_ENOUGH_MEMORY);
     case ENOSYS:
-	MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-			    local_errno,
-			    E_NOT_IMPLEMENTED);
+        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+                            local_errno,
+                            E_NOT_IMPLEMENTED);
     }
 
     MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -744,14 +744,14 @@ error:
  *
  * Example:
  *
- *    magic = Magic.new	=> #<Magic:0x00007fa13009af78>
- *    magic.loaded?	=> true
+ *    magic = Magic.new => #<Magic:0x00007fa13009af78>
+ *    magic.loaded?     => true
  *
  * Example:
  *
- *    Magic.do_not_auto_load = true	#=> true
- *    magic = Magic.new			#=> #<Magic:0x00007fa637873068>
- *    magic.loaded?			#=> false
+ *    Magic.do_not_auto_load = true     #=> true
+ *    magic = Magic.new                 #=> #<Magic:0x00007fa637873068>
+ *    magic.loaded?                     #=> false
  *
  * See also: Magic#load and Magic#load_buffers
  */
@@ -788,7 +788,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     VALUE value = Qundef;
 
     if (ARRAY_P(RARRAY_FIRST(arguments)))
-	arguments = magic_flatten(arguments);
+        arguments = magic_flatten(arguments);
 
     MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
@@ -796,16 +796,16 @@ rb_mgc_compile(VALUE object, VALUE arguments)
     MAGIC_COOKIE(mo, ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
-	value = magic_join(arguments, CSTR2RVAL(":"));
+        value = magic_join(arguments, CSTR2RVAL(":"));
     else
-	value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
+        value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
     ma.type.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
     if (ma.status < 0)
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
 
     RB_GC_GUARD(value);
 
@@ -834,7 +834,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
     VALUE value = Qundef;
 
     if (ARRAY_P(RARRAY_FIRST(arguments)))
-	arguments = magic_flatten(arguments);
+        arguments = magic_flatten(arguments);
 
     MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
     MAGIC_CHECK_OPEN(object);
@@ -842,16 +842,16 @@ rb_mgc_check(VALUE object, VALUE arguments)
     MAGIC_COOKIE(mo, ma.cookie);
 
     if (!RARRAY_EMPTY_P(arguments))
-	value = magic_join(arguments, CSTR2RVAL(":"));
+        value = magic_join(arguments, CSTR2RVAL(":"));
     else
-	value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
+        value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
     ma.type.file.path = RVAL2CSTR(value);
 
     MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
     if (ma.status < 0)
-	return Qfalse;
+        return Qfalse;
 
     RB_GC_GUARD(value);
 
@@ -885,7 +885,7 @@ rb_mgc_file(VALUE object, VALUE value)
     VALUE boolean = Qundef;
 
     if (NIL_P(value))
-	goto error;
+        goto error;
 
     MAGIC_CHECK_OPEN(object);
     MAGIC_COOKIE(mo, ma.cookie);
@@ -893,64 +893,64 @@ rb_mgc_file(VALUE object, VALUE value)
     ma.flags = NUM2INT(rb_mgc_get_flags(object));
 
     if (rb_respond_to(value, id_to_io)) {
-	ma.type.file.fd = magic_fileno(value);
-	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
+        ma.type.file.fd = magic_fileno(value);
+        MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
     }
     else {
-	if (rb_respond_to(value, id_to_path))
-	    value = rb_funcall(value, id_to_path, 0, Qundef);
+        if (rb_respond_to(value, id_to_path))
+            value = rb_funcall(value, id_to_path, 0, Qundef);
 
-	if (!STRING_P(value))
-	    goto error;
+        if (!STRING_P(value))
+            goto error;
 
-	ma.type.file.path = RVAL2CSTR(value);
+        ma.type.file.path = RVAL2CSTR(value);
 
-	if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
-	    ma.flags |= MAGIC_ERROR;
-	    rb_mgc_set_flags(object, INT2NUM(ma.flags));
-	    clear_error = 1;
-	}
+        if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
+            ma.flags |= MAGIC_ERROR;
+            rb_mgc_set_flags(object, INT2NUM(ma.flags));
+            clear_error = 1;
+        }
 
-	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+        MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
     }
 
     if (clear_error) {
-	ma.flags &= ~MAGIC_ERROR;
-	rb_mgc_set_flags(object, INT2NUM(ma.flags));
+        ma.flags &= ~MAGIC_ERROR;
+        rb_mgc_set_flags(object, INT2NUM(ma.flags));
     }
 
     if (!ma.result) {
-	rv = magic_version_wrapper();
+        rv = magic_version_wrapper();
 
-	/*
-	 * Handle the case when the "ERROR" flag is set regardless of the
-	 * current version of the underlying Magic library.
-	 *
-	 * Prior to version 5.15 the correct behaviour that concerns the
-	 * following IEEE 1003.1 standards was broken:
-	 *
-	 * http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
-	 * http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
-	 *
-	 * This is an attempt to mitigate the problem and correct it to achieve
-	 * the desired behaviour as per the standards.
-	 */
-	if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
-	    MAGIC_LIBRARY_ERROR(ma.cookie);
-	else {
-	    boolean = rb_mgc_get_do_not_auto_load_global(object);
-	    if (rv < 515 || RVAL2CBOOL(boolean) || ma.flags & MAGIC_EXTENSION) {
-		(void)magic_errno(ma.cookie);
-		ma.result = magic_error(ma.cookie);
-	    }
-	}
+        /*
+         * Handle the case when the "ERROR" flag is set regardless of the
+         * current version of the underlying Magic library.
+         *
+         * Prior to version 5.15 the correct behaviour that concerns the
+         * following IEEE 1003.1 standards was broken:
+         *
+         * http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
+         * http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
+         *
+         * This is an attempt to mitigate the problem and correct it to achieve
+         * the desired behaviour as per the standards.
+         */
+        if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
+            MAGIC_LIBRARY_ERROR(ma.cookie);
+        else {
+            boolean = rb_mgc_get_do_not_auto_load_global(object);
+            if (rv < 515 || RVAL2CBOOL(boolean) || ma.flags & MAGIC_EXTENSION) {
+                (void)magic_errno(ma.cookie);
+                ma.result = magic_error(ma.cookie);
+            }
+        }
     }
 
     if (!ma.result)
-	MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL, E_UNKNOWN);
+        MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL, E_UNKNOWN);
 
     assert(ma.result != NULL && \
-	   "Must be a valid pointer to `const char' type");
+           "Must be a valid pointer to `const char' type");
 
     /*
      * Depending on the version of the underlying Magic library the magic_file()
@@ -959,7 +959,7 @@ rb_mgc_file(VALUE object, VALUE value)
      * Magic library is in use.
      */
     assert(strncmp(ma.result, empty, strlen(empty)) != 0 && \
-		   "Empty or invalid result");
+                   "Empty or invalid result");
 
     return magic_return(&ma);
 
@@ -1001,10 +1001,10 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
     MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
     if (!ma.result)
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
 
     assert(ma.result != NULL && \
-	   "Must be a valid pointer to `const char' type");
+           "Must be a valid pointer to `const char' type");
 
     return magic_return(&ma);
 }
@@ -1041,14 +1041,14 @@ rb_mgc_descriptor(VALUE object, VALUE value)
     local_errno = errno;
 
     if (!ma.result) {
-	if (local_errno == EBADF)
-	    rb_raise(rb_eIOError, "Bad file descriptor");
+        if (local_errno == EBADF)
+            rb_raise(rb_eIOError, "Bad file descriptor");
 
-	MAGIC_LIBRARY_ERROR(ma.cookie);
+        MAGIC_LIBRARY_ERROR(ma.cookie);
     }
 
     assert(ma.result != NULL && \
-	   "Must be a valid pointer to `const char' type");
+           "Must be a valid pointer to `const char' type");
 
     return magic_return(&ma);
 }
@@ -1077,9 +1077,9 @@ rb_mgc_version(RB_UNUSED_VAR(VALUE object))
     local_errno = errno;
 
     if (rv < 0 && local_errno == ENOSYS)
-	MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-			    local_errno,
-			    E_NOT_IMPLEMENTED);
+        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+                            local_errno,
+                            E_NOT_IMPLEMENTED);
 
     return INT2NUM(rv);
 }
@@ -1089,8 +1089,8 @@ nogvl_magic_load(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_load_wrapper(ma->cookie,
-				    ma->type.file.path,
-				    ma->flags);
+                                    ma->type.file.path,
+                                    ma->flags);
     return ma;
 }
 
@@ -1099,8 +1099,8 @@ nogvl_magic_compile(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_compile_wrapper(ma->cookie,
-				       ma->type.file.path,
-				       ma->flags);
+                                       ma->type.file.path,
+                                       ma->flags);
     return ma;
 }
 
@@ -1109,8 +1109,8 @@ nogvl_magic_check(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_check_wrapper(ma->cookie,
-				     ma->type.file.path,
-				     ma->flags);
+                                     ma->type.file.path,
+                                     ma->flags);
     return ma;
 }
 
@@ -1119,8 +1119,8 @@ nogvl_magic_file(void *data)
 {
     magic_arguments_t *ma = data;
     ma->result = magic_file_wrapper(ma->cookie,
-				    ma->type.file.path,
-				    ma->flags);
+                                    ma->type.file.path,
+                                    ma->flags);
     return ma;
 }
 
@@ -1129,8 +1129,8 @@ nogvl_magic_descriptor(void *data)
 {
     magic_arguments_t *ma = data;
     ma->result = magic_descriptor_wrapper(ma->cookie,
-					  ma->type.file.fd,
-					  ma->flags);
+                                          ma->type.file.fd,
+                                          ma->flags);
     return ma;
 }
 
@@ -1139,8 +1139,8 @@ magic_get_parameter_internal(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_getparam_wrapper(ma->cookie,
-					ma->type.parameter.tag,
-					&ma->type.parameter.value);
+                                        ma->type.parameter.tag,
+                                        &ma->type.parameter.value);
     return (VALUE)ma;
 }
 
@@ -1149,8 +1149,8 @@ magic_set_parameter_internal(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_setparam_wrapper(ma->cookie,
-					ma->type.parameter.tag,
-					&ma->type.parameter.value);
+                                        ma->type.parameter.tag,
+                                        &ma->type.parameter.value);
     return (VALUE)ma;
 }
 
@@ -1188,10 +1188,10 @@ magic_load_buffers_internal(void *data)
 {
     magic_arguments_t *ma = data;
     ma->status = magic_load_buffers_wrapper(ma->cookie,
-					    ma->type.buffers.buffers,
-					    ma->type.buffers.sizes,
-					    ma->type.buffers.count,
-					    ma->flags);
+                                            ma->type.buffers.buffers,
+                                            ma->type.buffers.sizes,
+                                            ma->type.buffers.count,
+                                            ma->flags);
     return (VALUE)ma;
 }
 
@@ -1218,9 +1218,9 @@ magic_buffer_internal(void *data)
 {
     magic_arguments_t *ma = data;
     ma->result = magic_buffer_wrapper(ma->cookie,
-				      (const void *)ma->type.buffers.buffers,
-				      (size_t)ma->type.buffers.sizes,
-				      ma->flags);
+                                      (const void *)ma->type.buffers.buffers,
+                                      (size_t)ma->type.buffers.sizes,
+                                      ma->flags);
     return (VALUE)ma;
 }
 
@@ -1237,10 +1237,10 @@ magic_allocate(VALUE klass)
 
     mo = (magic_object_t *)ruby_xmalloc(sizeof(magic_object_t));
     if (!mo) {
-	errno = ENOMEM;
-	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
-			    errno,
-			    E_NOT_ENOUGH_MEMORY);
+        errno = ENOMEM;
+        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
+                            errno,
+                            E_NOT_ENOUGH_MEMORY);
     }
 
     mo->cookie = NULL;
@@ -1248,12 +1248,12 @@ magic_allocate(VALUE klass)
 
     mo->cookie = magic_open_wrapper(MAGIC_NONE);
     if (!mo->cookie) {
-	ruby_xfree(mo);
-	mo = NULL;
-	errno = ENOMEM;
-	MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
-			    errno,
-			    E_MAGIC_LIBRARY_INITIALIZE);
+        ruby_xfree(mo);
+        mo = NULL;
+        errno = ENOMEM;
+        MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
+                            errno,
+                            E_MAGIC_LIBRARY_INITIALIZE);
     }
 
     return Data_Wrap_Struct(klass, magic_mark, magic_free, mo);
@@ -1265,10 +1265,10 @@ magic_library_close(void *data)
     magic_object_t *mo = data;
 
     assert(mo != NULL && \
-	   "Must be a valid pointer to `magic_object_t' type");
+           "Must be a valid pointer to `magic_object_t' type");
 
     if (mo->cookie)
-	magic_close_wrapper(mo->cookie);
+        magic_close_wrapper(mo->cookie);
     
     mo->cookie = NULL;
 }
@@ -1279,7 +1279,7 @@ magic_mark(void *data)
     magic_object_t *mo = data;
 
     assert(mo != NULL && \
-	   "Must be a valid pointer to `magic_object_t' type");
+           "Must be a valid pointer to `magic_object_t' type");
 
     rb_gc_mark(mo->mutex);
 }
@@ -1290,10 +1290,10 @@ magic_free(void *data)
     magic_object_t *mo = data;
 
     assert(mo != NULL && \
-	   "Must be a valid pointer to `magic_object_t' type");
+           "Must be a valid pointer to `magic_object_t' type");
 
     if (mo->cookie)
-	magic_library_close(data);
+        magic_library_close(data);
 
     mo->cookie = NULL;
     mo->mutex = Qundef;
@@ -1318,12 +1318,12 @@ magic_exception(void *data)
     magic_exception_t *e = data;
 
     assert(e != NULL && \
-	   "Must be a valid pointer to `magic_exception_t' type");
+           "Must be a valid pointer to `magic_exception_t' type");
 
     object = rb_protect(magic_exception_wrapper, (VALUE)e, &exception);
 
     if (exception)
-	rb_jump_tag(exception);
+        rb_jump_tag(exception);
 
     rb_iv_set(object, "@errno", INT2NUM(e->magic_errno));
 
@@ -1354,7 +1354,7 @@ magic_library_error(VALUE klass, void *data)
     magic_t cookie = data;
 
     assert(cookie != NULL && \
-	   "Must be a valid pointer to `magic_t' type");
+           "Must be a valid pointer to `magic_t' type");
 
     e.magic_errno = -1;
     e.magic_error = error(E_UNKNOWN);
@@ -1362,12 +1362,12 @@ magic_library_error(VALUE klass, void *data)
 
     message = magic_error(cookie);
     if (message) {
-	e.magic_errno = magic_errno(cookie);
-	e.magic_error = message;
+        e.magic_errno = magic_errno(cookie);
+        e.magic_error = message;
     }
 
     assert(strncmp(e.magic_error, empty, strlen(empty)) != 0 && \
-		   "Empty or invalid error message");
+                   "Empty or invalid error message");
 
     return magic_exception(&e);
 }
@@ -1408,20 +1408,20 @@ magic_return(void *data)
     value = CSTR2RVAL(ma->result);
 
     if (ma->flags & MAGIC_EXTENSION) {
-	/*
-	 * A number of Magic flags that support primarily files e.g.,
-	 * MAGIC_EXTENSION, etc., would not return a meaningful value for
-	 * directories and special files, and such.  Thus, it's better to
-	 * return a nil value, to indicate lack of results, rather than a
-	 * confusing string consisting of three questions marks.
-	 */
-	if (strncmp(ma->result, empty, strlen(empty)) == 0)
-	    return Qnil;
+        /*
+         * A number of Magic flags that support primarily files e.g.,
+         * MAGIC_EXTENSION, etc., would not return a meaningful value for
+         * directories and special files, and such.  Thus, it's better to
+         * return a nil value, to indicate lack of results, rather than a
+         * confusing string consisting of three questions marks.
+         */
+        if (strncmp(ma->result, empty, strlen(empty)) == 0)
+            return Qnil;
 
-	array = magic_split(value, CSTR2RVAL("\x5c"));
+        array = magic_split(value, CSTR2RVAL("\x5c"));
 
-	RB_GC_GUARD(array);
-	return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+        RB_GC_GUARD(array);
+        return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
     /*
@@ -1430,10 +1430,10 @@ magic_return(void *data)
      * Magic library to be returned.
      */
     if (ma->flags & MAGIC_CONTINUE) {
-	array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
+        array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
 
-	RB_GC_GUARD(array);
-	return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+        RB_GC_GUARD(array);
+        return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
     }
 
     RB_GC_GUARD(value);
