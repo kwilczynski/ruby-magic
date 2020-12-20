@@ -337,6 +337,11 @@ inline int
 magic_setparam_wrapper(magic_t magic, int parameter, const void *value)
 {
 #if defined(HAVE_MAGIC_PARAM)
+    if (*(const int *)value < 0 || *(const size_t *)value > UINT_MAX) {
+        errno = EOVERFLOW;
+        return -EOVERFLOW;
+    }
+
     if (parameter == MAGIC_PARAM_BYTES_MAX)
 	return magic_setparam(magic, parameter, value);
 

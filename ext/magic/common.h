@@ -19,6 +19,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -44,10 +45,6 @@ extern "C" {
 
 #if !defined(T_INTEGER)
 # define T_INTEGER rb_cInteger
-#endif
-
-#if !defined(USHRT_MAX)
-# define USHRT_MAX ((uint16_t)(~0U))
 #endif
 
 #if !defined(ANYARGS)
