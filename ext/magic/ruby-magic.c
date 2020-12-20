@@ -940,8 +940,8 @@ rb_mgc_file(VALUE object, VALUE value)
         else {
             boolean = rb_mgc_get_do_not_auto_load_global(object);
             if (rv < 515 || RVAL2CBOOL(boolean) || ma.flags & MAGIC_EXTENSION) {
-                (void)magic_errno(ma.cookie);
-                ma.result = magic_error(ma.cookie);
+                (void)magic_errno_wrapper(ma.cookie);
+                ma.result = magic_error_wrapper(ma.cookie);
             }
         }
     }
@@ -1360,9 +1360,9 @@ magic_library_error(VALUE klass, void *data)
     e.magic_error = error(E_UNKNOWN);
     e.klass = klass;
 
-    message = magic_error(cookie);
+    message = magic_error_wrapper(cookie);
     if (message) {
-        e.magic_errno = magic_errno(cookie);
+        e.magic_errno = magic_errno_wrapper(cookie);
         e.magic_error = message;
     }
 

@@ -65,6 +65,9 @@ extern int safe_close(int fd);
 extern magic_t magic_open_wrapper(int flags);
 extern void magic_close_wrapper(magic_t magic);
 
+extern const char* magic_error_wrapper(magic_t magic);
+extern int magic_errno_wrapper(magic_t magic);
+
 extern const char* magic_getpath_wrapper(void);
 
 extern int magic_getparam_wrapper(magic_t magic, int parameter, void *value);

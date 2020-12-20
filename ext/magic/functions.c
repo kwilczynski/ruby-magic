@@ -313,6 +313,19 @@ magic_close_wrapper(magic_t magic)
 }
 
 inline const char*
+magic_error_wrapper(magic_t magic)
+{
+    return magic_error(magic);
+}
+
+inline int
+magic_errno_wrapper(magic_t magic)
+{
+    return magic_errno(magic);
+
+}
+
+inline const char*
 magic_getpath_wrapper(void)
 {
     return magic_getpath(NULL, 0);
