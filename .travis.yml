@@ -4,7 +4,7 @@ dist: xenial
 cache:
   bundler: true
   directories:
-    - $HOME/cache
+    - "${HOME}/cache"
 
 bundler_args: --jobs 1 --retry 5 --without development --path vendor/bundle
 
@@ -16,14 +16,6 @@ rvm:
 
 env:
   matrix:
-    - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=gcc
-    - VERSION=5.09 SHA1=9d905f9e50033c3f5be3728473cbb709a41550fb COMPILER=clang
-    - VERSION=5.14 SHA1=064c8f17a5f7ae1e336a9285131e046d3b2d04d7 COMPILER=gcc
-    - VERSION=5.14 SHA1=064c8f17a5f7ae1e336a9285131e046d3b2d04d7 COMPILER=clang
-    - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=gcc
-    - VERSION=5.18 SHA1=8753e72097f2cc935608e3b1c57c4c4e31bd8d21 COMPILER=clang
-    - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=gcc
-    - VERSION=5.25 SHA1=fea78106dd0b7a09a61714cdbe545135563e84bd COMPILER=clang
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=gcc
     - VERSION=5.32 SHA1=c2858a8043387d1229d8768ad42762a803d017db COMPILER=clang
     - VERSION=5.37 SHA1=891176efa3006eff222bd364cd96135aad171941 COMPILER=gcc
@@ -47,9 +39,9 @@ notifications:
 
 before_install:
   - gem install bundler
-  - export CC=$(which $COMPILER)
+  - export CC="$(which $COMPILER)"
   - export PREFIX='/tmp/travis'
-  - sudo -H -E -n VERSION=$VERSION SHA1=$SHA1 CC=$CC PREFIX=$PREFIX PATH=$PATH scripts/libmagic.sh
+  - sudo -H -E -n "VERSION=${VERSION}" "SHA1=${SHA1}" "CC=${CC}" "PREFIX=${PREFIX}" "PATH=${PATH}" scripts/libmagic.sh
 
 before_script:
   - export CFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib"
