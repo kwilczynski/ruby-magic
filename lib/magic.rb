@@ -242,9 +242,16 @@ class Magic
   private
 
   def flags_as_map
-    self.class.constants.each_with_object({}) do |constant, flags|
-      value = self.class.const_get(constant)
-      flags[value] = constant.to_s if value.is_a?(Integer)
+    klass = self.class
+
+    klass.constants.each_with_object({}) do |constant, flags|
+      next if constant.start_with?('PARAM_')
+
+      value = klass.const_get(constant)
+
+      if value.is_a?(Integer) && (value & (value - 1)) == 0
+        flags[value] = constant.to_s
+      end
     end
   end
 end
