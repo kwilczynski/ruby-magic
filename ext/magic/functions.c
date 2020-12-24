@@ -271,7 +271,7 @@ magic_setflags_wrapper(magic_t magic, int flags)
 		return -EINVAL;
 	}
 
-#if !(defined(HAVE_UTIME) || defined(HAVE_UTIMES))
+#if !defined(HAVE_UTIME) && !defined(HAVE_UTIMES)
 	if (flags & MAGIC_PRESERVE_ATIME) {
 		errno = ENOSYS;
 		return -ENOSYS;

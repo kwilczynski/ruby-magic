@@ -40,6 +40,18 @@ unless have_header('ruby.h')
 
         yum install ruby-devel or dnf install ruby-devel
 
+    - Mac OS X (Darwin)
+
+        brew install ruby (for Homebrew, see http://brew.sh/)
+        port install ruby2.6 (for MacPorts, see http://www.macports.org/)
+
+    - OpenBSD / NetBSD
+
+        pkg_add ruby (for pkgsrc, see https://www.pkgsrc.org/)
+
+    - FreeBSD
+
+        pkg install ruby (for FreeBSD Ports, see https://www.freebsd.org/ports/)
 
     Alternatively, you can use either of the following Ruby version
     managers in order to install Ruby locally (for your user only)
@@ -48,6 +60,9 @@ unless have_header('ruby.h')
     - Ruby Version Manager (for RVM, see http://rvm.io/)
     - Ruby Environment (for rbenv, see http://github.com/sstephenson/rbenv)
     - Change Ruby (for chruby, see https://github.com/postmodern/chruby)
+
+    More information about how to install Ruby on various platforms
+    available at https://www.ruby-lang.org/en/documentation/installation.
   EOS
 end
 
@@ -75,6 +90,13 @@ unless have_header('magic.h')
         brew install libmagic (for Homebrew, see http://brew.sh/)
         port install libmagic (for MacPorts, see http://www.macports.org/)
 
+    - OpenBSD / NetBSD
+
+        pkg_add file (for pkgsrc, see https://www.pkgsrc.org/)
+
+    - FreeBSD
+
+        pkg install file (for FreeBSD Ports, see https://www.freebsd.org/ports/)
 
     Alternatively, you can download recent release of the file(1) package
     from the following web site and attempt to compile libmagic(3) manually:
