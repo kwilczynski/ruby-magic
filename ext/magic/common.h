@@ -59,6 +59,15 @@ extern "C" {
 # define HAVE_POSIX_CLOSE_RESTART 1
 #endif
 
+#if defined(MAGIC_VERSION) && MAGIC_VERSION < 530
+# if !defined(MAGIC_NO_CHECK_CSV)
+#  define MAGIC_NO_CHECK_CSV -1
+# endif
+# if !defined(MAGIC_NO_CHECK_JSON)
+#  define MAGIC_NO_CHECK_JSON -1
+# endif
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
