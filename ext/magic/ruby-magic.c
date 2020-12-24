@@ -498,6 +498,7 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
 VALUE
 rb_mgc_get_flags(VALUE object)
 {
+	int local_errno;
 	magic_object_t *mo;
 	magic_arguments_t ma;
 
@@ -505,10 +506,12 @@ rb_mgc_get_flags(VALUE object)
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	MAGIC_SYNCHRONIZED(magic_get_flags_internal, &ma);
+	local_errno = errno;
 
-	rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
+	if (ma.flags < 0 && local_errno == ENOSYS)
+		return rb_ivar_get(object, id_at_flags);
 
-	return rb_ivar_get(object, id_at_flags);
+	return INT2NUM(ma.flags);
 }
 
 /*

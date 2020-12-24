@@ -29,21 +29,6 @@ end
 have_ruby_h = have_header('ruby.h')
 have_magic_h = have_header('magic.h')
 
-%w[
-  utime.h
-  sys/types.h
-  sys/time.h
-].each do |h|
-  have_header(h)
-end
-
-%w[
-  utime
-  utimes
-].each do |f|
-  have_func(f)
-end
-
 unless have_ruby_h
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
     You appear to be missing Ruby development libraries and/or header
@@ -68,6 +53,8 @@ unless have_ruby_h
     - Change Ruby (for chruby, see https://github.com/postmodern/chruby)
   EOS
 end
+
+have_library('ruby')
 
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
@@ -100,6 +87,23 @@ unless have_magic_h
 end
 
 have_library('magic')
+
+have_func('magic_getflags')
+
+%w[
+  utime.h
+  sys/types.h
+  sys/time.h
+].each do |h|
+  have_header(h)
+end
+
+%w[
+  utime
+  utimes
+].each do |f|
+  have_func(f)
+end
 
 dir_config('magic')
 

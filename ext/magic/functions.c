@@ -253,7 +253,14 @@ magic_setparam_wrapper(magic_t magic, int parameter, const void *value)
 inline int
 magic_getflags_wrapper(magic_t magic)
 {
+#if defined(HAVE_MAGIC_GETFLAGS)
 	return magic_getflags(magic);
+#else
+	UNUSED(magic);
+
+	errno = ENOSYS;
+	return -ENOSYS;
+#endif
 }
 
 inline int

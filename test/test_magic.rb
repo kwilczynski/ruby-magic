@@ -11,11 +11,7 @@ class MagicTest < Test::Unit::TestCase
 
   def setup
     @flags_limit = 0xfffffff
-    @version = Magic.version rescue nil
     @magic = Magic.new
-
-    @magic_load_buffers = @version && @version > 519
-    @magic_parameters = @version && @version > 520
   end
 
   def test_magic_alias
@@ -184,50 +180,15 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_paths_with_MAGIC_environment_variable
   end
 
-  def test_magic_get_parameter_error
-    if @magic_parameters
-      @magic.stubs(:get_parameter).with(0).raises(Magic::NotImplementedError)
-    end
-
-    assert_raise Magic::NotImplementedError do
-      @magic.get_parameter(0)
-    end
-  end
-
-  def test_magic_get_parameter_error_message
-    if @magic_parameters
-      @magic.stubs(:get_parameter).with(0).raises(Magic::NotImplementedError, 'function is not implemented')
-    end
-
-    error = assert_raise Magic::NotImplementedError do
-      @magic.get_parameter(0)
-    end
-
-    assert_equal('function is not implemented', error.message)
-  end
-
   def test_magic_get_parameter_with_PARAM_INDIR_MAX
-    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
-      omit('Magic library is too old')
-    end
-
-    # Older versions of libmagic will have lower value.
-    expected = @version < 526 ? 15 : 50
-
-    assert_equal(expected, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
+    assert_equal(50, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
   end
 
   def test_magic_get_parameter_with_PARAM_BYTES_MAX
-    unless @magic_parameters && Magic::PARAM_BYTES_MAX > -1
-      omit('Magic library is too old')
-    end
-
     assert_equal(1024 * 1024, @magic.get_parameter(Magic::PARAM_BYTES_MAX))
   end
 
   def test_magic_get_parameter_lower_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     error = assert_raise Magic::ParameterError do
       @magic.get_parameter(-1)
     end
@@ -236,8 +197,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_get_parameter_upper_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     error = assert_raise Magic::ParameterError do
       @magic.get_parameter(128)
     end
@@ -245,42 +204,12 @@ class MagicTest < Test::Unit::TestCase
     assert_equal('unknown or invalid parameter specified', error.message)
   end
 
-  def test_magic_set_parameter_error
-    if @magic_parameters
-      @magic.stubs(:set_parameter).with(0, 0).raises(Magic::NotImplementedError)
-    end
-
-    assert_raise Magic::NotImplementedError do
-      @magic.set_parameter(0, 0)
-    end
-  end
-
-  def test_magic_set_parameter_error_message
-    if @magic_parameters
-      @magic.stubs(:set_parameter).with(0, 0).raises(Magic::NotImplementedError, 'function is not implemented')
-    end
-
-    error = assert_raise Magic::NotImplementedError do
-      @magic.set_parameter(0, 0)
-    end
-
-    assert_equal('function is not implemented', error.message)
-  end
-
   def test_magic_set_parameter_with_PARAM_INDIR_MAX
-    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
-      omit('Magic library is too old')
-    end
-
     @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128)
     assert_equal(128, @magic.get_parameter(Magic::PARAM_INDIR_MAX))
   end
 
   def test_magic_set_parameter_with_PARAM_BYTES_MAX
-    unless @magic_parameters && Magic::PARAM_BYTES_MAX > -1
-      omit('Magic library is too old')
-    end
-
     assert_nothing_raised do
       @magic.set_parameter(Magic::PARAM_BYTES_MAX, 1024 * 1024 * 10)
     end
@@ -289,8 +218,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_set_parameter_lower_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     error = assert_raise Magic::ParameterError do
       @magic.set_parameter(-1, 0)
     end
@@ -300,8 +227,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_set_parameter_upper_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     error = assert_raise Magic::ParameterError do
       @magic.set_parameter(128, 0)
     end
@@ -311,16 +236,12 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_set_parameter_value_lower_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     assert_nothing_raised do
       @magic.set_parameter(0, 0)
     end
   end
 
   def test_magic_set_parameter_value_upper_boundary
-    omit('Magic library is too old') unless @magic_parameters
-
     error = assert_raise Magic::ParameterError do
       @magic.set_parameter(0, -1)
     end
@@ -330,10 +251,6 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_set_parameter_overflow_with_PARAM_INDIR_MAX
-    unless @magic_parameters && Magic::PARAM_INDIR_MAX > -1
-      omit('Magic library is too old')
-    end
-
     error = assert_raise Magic::ParameterError do
       @magic.set_parameter(Magic::PARAM_INDIR_MAX, 128 * 1024)
     end
@@ -343,28 +260,28 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_flags_with_NONE_flag
-    @magic.flags = 0x000000 # Flag: NONE
+    @magic.flags = 0x000000
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::NONE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
-    @magic.flags = 0x000010 # Flag: MIME_TYPE
+    @magic.flags = 0x000010
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::MIME_TYPE, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
-    @magic.flags = 0x000400 # Flag: MIME_ENCODING
+    @magic.flags = 0x000400
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::MIME_ENCODING, @magic.flags)
   end
 
   def test_magic_flags_with_MIME_flag
-    @magic.flags = 0x000410 # Flag: MIME_TYPE, MIME_ENCODING
+    @magic.flags = 0x000410
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::MIME, @magic.flags)
@@ -474,8 +391,8 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_file_with_IO_like_argument
-    with_fixtures do |_, format|
-      @magic.load(File.join(format, 'png-fake.magic'))
+    with_fixtures do
+      @magic.load('png-fake.magic')
       File.open('ruby.png') do |file|
         assert_match(%r{^Ruby Gem image}, @magic.file(file))
         assert_false(file.closed?)
@@ -497,8 +414,8 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_file_with_String_like_argument
     require 'pathname'
 
-    with_fixtures do |_, format|
-      @magic.load(File.join(format, 'png-fake.magic'))
+    with_fixtures do
+      @magic.load('png-fake.magic')
 
       assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
     end
@@ -537,8 +454,8 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_descriptor
-    with_fixtures do |_, format|
-      @magic.load(File.join(format, 'png-fake.magic'))
+    with_fixtures do
+      @magic.load('png-fake.magic')
 
       File.open('ruby.png') do |file|
         assert_match(%r{^Ruby Gem image}, @magic.descriptor(file.fileno))
@@ -626,15 +543,12 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_buffers
-    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_load_buffers_with_array_argument
-    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_load_buffers_with_DEBUG_flag
-    omit('Magic library is too old') unless @magic_load_buffers
   end
 
   def test_magic_loaded
@@ -670,53 +584,17 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_version
-    if @version.nil? || @version < 0
-      Magic.stubs(:version).returns(518)
-    end
-
     assert_kind_of(Integer, Magic.version)
     assert(Magic.version > 0)
   end
 
-  def test_magic_version_error
-    if @version
-      Magic.stubs(:version).raises(Magic::NotImplementedError)
-    end
-
-    assert_raise Magic::NotImplementedError do
-      Magic.version
-    end
-  end
-
-  def test_magic_version_error_message
-    if @version
-      Magic.stubs(:version).raises(Magic::NotImplementedError, 'function is not implemented')
-    end
-
-    error = assert_raise Magic::NotImplementedError do
-      Magic.version
-    end
-
-    assert_equal('function is not implemented', error.message)
-  end
-
   def test_magic_version_to_a
-    if @version.nil? || @version < 0
-      Magic.stubs(:version).returns(518)
-    end
-
     expected = [Magic.version / 100, Magic.version % 100]
-
     assert_equal(expected, Magic.version_to_a)
   end
 
   def test_magic_version_to_s
-    if @version.nil? || @version < 0
-      Magic.stubs(:version).returns(518)
-    end
-
     expected = '%d.%02d' % Magic.version_to_a
-
     assert_equal(expected, Magic.version_to_s)
   end
 
@@ -814,7 +692,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_error_attribute_errno
-    @magic.flags = @flags_limit + 1 # Should raise Magic::FlagsError.
+    @magic.flags = @flags_limit + 1
   rescue Magic::Error => error
     assert_kind_of(Magic::FlagsError, error)
     assert_equal(Errno::EINVAL::Errno, error.errno)
