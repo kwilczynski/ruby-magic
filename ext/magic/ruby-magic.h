@@ -248,9 +248,11 @@ magic_fileno(VALUE object)
 static void
 magic_check_type(VALUE object, int type)
 {
-	if (type == T_FIXNUM)
-		if (!RVAL2CBOOL(rb_obj_is_kind_of(object, T_INTEGER)))
-			MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
+	VALUE boolean = Qundef;
+
+	boolean = rb_obj_is_kind_of(object, T_INTEGER);
+	if (type == T_FIXNUM && !RVAL2CBOOL(boolean))
+		MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
 
 	Check_Type(object, type);
 }
