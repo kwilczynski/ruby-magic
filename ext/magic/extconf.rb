@@ -26,10 +26,7 @@ $LDFLAGS << format(' %s', ENV['LDFLAGS']) if ENV['LDFLAGS']
   $CFLAGS << format(' %s', ENV[variable]) if ENV[variable]
 end
 
-have_ruby_h = have_header('ruby.h')
-have_magic_h = have_header('magic.h')
-
-unless have_ruby_h
+unless have_header('ruby.h')
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
     You appear to be missing Ruby development libraries and/or header
     files. You can install missing compile-time dependencies in one of
@@ -59,7 +56,7 @@ have_library('ruby')
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
 
-unless have_magic_h
+unless have_header('magic.h')
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
     You appear to be missing libmagic(3) library and/or necessary header
     files. You can install missing compile-time dependencies in one of
