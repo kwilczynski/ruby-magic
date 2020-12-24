@@ -130,6 +130,7 @@ enum error {
 	E_MAGIC_LIBRARY_CLOSED,
 	E_PARAM_INVALID_TYPE,
 	E_PARAM_INVALID_VALUE,
+	E_FLAG_NOT_IMPLEMENTED,
 	E_FLAG_INVALID_TYPE
 };
 
@@ -185,6 +186,7 @@ static const char *errors[] = {
 	[E_MAGIC_LIBRARY_CLOSED]	= "Magic library is not open",
 	[E_PARAM_INVALID_TYPE]		= "unknown or invalid parameter specified",
 	[E_PARAM_INVALID_VALUE]		= "invalid parameter value specified",
+	[E_FLAG_NOT_IMPLEMENTED]	= "flag is not implemented",
 	[E_FLAG_INVALID_TYPE]		= "unknown or invalid flag specified",
 	NULL
 };

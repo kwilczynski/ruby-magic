@@ -543,10 +543,16 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 	local_errno = errno;
 
 	if (ma.status < 0)  {
-		if (local_errno == EINVAL)
+		switch (local_errno) {
+		case EINVAL:
 			MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError,
 					    local_errno,
 					    E_FLAG_INVALID_TYPE);
+		case ENOSYS:
+			MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
+					    local_errno,
+					    E_FLAG_NOT_IMPLEMENTED);
+		}
 
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 	}

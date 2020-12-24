@@ -99,27 +99,7 @@ unless have_magic_h
   EOS
 end
 
-unless have_library('magic', 'magic_getpath')
-  abort "\n" + (<<-EOS).gsub(/^[ ]+/, '') + "\n"
-    Your version of libmagic(3) appears to be too old.  Please, consider
-    upgrading to at least version 5.09 or newer, if possible.
-
-    For more information about file(1) command and libmagic(3) please
-    visit the following web site:
-
-      http://www.darwinsys.com/file/
-    EOS
-end
-
-%w(
-  magic_getflags
-  magic_version
-  magic_load_buffers
-  magic_getparam
-  magic_setparam
-).each do |f|
-  have_func(f, 'magic.h')
-end
+have_library('magic')
 
 dir_config('magic')
 
