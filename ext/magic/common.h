@@ -35,14 +35,6 @@ extern "C" {
 # include <rubyio.h>
 #endif
 
-#if defined(HAVE_LOCALE_H)
-# include <locale.h>
-#endif
-
-#if defined(HAVE_XLOCALE_H)
-# include <xlocale.h>
-#endif
-
 #if !defined(T_INTEGER)
 # define T_INTEGER rb_cInteger
 #endif
@@ -83,9 +75,6 @@ extern "C" {
 # define HAVE_POSIX_CLOSE_RESTART 1
 #endif
 
-#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
-# define HAVE_SAFE_LOCALE 1
-#endif
 
 #if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
 # define HAVE_MAGIC_VERSION 1

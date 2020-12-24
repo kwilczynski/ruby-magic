@@ -29,36 +29,20 @@ end
 have_ruby_h = have_header('ruby.h')
 have_magic_h = have_header('magic.h')
 
-headers = {
-  'locale' => [],
-  'utime'  => [],
-}
-
-%w(
-  locale.h
-  xlocale.h
-).each do |h|
-  if have_header(h)
-    headers['locale'] << h
-  end
-end
-
-%w(
+%w[
   utime.h
   sys/types.h
   sys/time.h
-).each do |h|
-  if have_header(h)
-    headers['utime'] << h
-  end
+].each do |h|
+  have_header(h)
 end
 
-have_func('newlocale', headers['locale'])
-have_func('uselocale',headers['locale'])
-have_func('freelocale',headers['locale'])
-
-have_func('utime', headers['utime'])
-have_func('utimes', headers['utime'])
+%w[
+  utime
+  utimes
+].each do |f|
+  have_func(f)
+end
 
 unless have_ruby_h
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
