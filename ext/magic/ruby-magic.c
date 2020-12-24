@@ -424,16 +424,10 @@ rb_mgc_get_parameter(VALUE object, VALUE tag)
     local_errno = errno;
 
     if (ma.status < 0)  {
-        switch (local_errno) {
-        case EINVAL:
+        if (local_errno == EINVAL)
             MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
                                 local_errno,
                                 E_PARAM_INVALID_TYPE);
-        case ENOSYS:
-            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-                                local_errno,
-                                E_NOT_IMPLEMENTED);
-        }
 
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
@@ -477,10 +471,6 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
             MAGIC_GENERIC_ERROR(rb_mgc_eParameterError,
                                 local_errno,
                                 E_PARAM_INVALID_VALUE);
-        case ENOSYS:
-            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-                                local_errno,
-                                E_NOT_IMPLEMENTED);
         }
 
         MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -507,7 +497,6 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
 VALUE
 rb_mgc_get_flags(VALUE object)
 {
-    int local_errno;
     magic_object_t *mo;
     magic_arguments_t ma;
 
@@ -515,12 +504,10 @@ rb_mgc_get_flags(VALUE object)
     MAGIC_COOKIE(mo, ma.cookie);
 
     MAGIC_SYNCHRONIZED(magic_get_flags_internal, &ma);
-    local_errno = errno;
 
-    if (ma.flags < 0 && local_errno == ENOSYS)
-        return rb_ivar_get(object, id_at_flags);
+    rb_ivar_set(object, id_at_flags, INT2NUM(ma.flags));
 
-    return INT2NUM(ma.flags);
+    return rb_ivar_get(object, id_at_flags);
 }
 
 /*
@@ -555,16 +542,10 @@ rb_mgc_set_flags(VALUE object, VALUE value)
     local_errno = errno;
 
     if (ma.status < 0)  {
-        switch (local_errno) {
-        case EINVAL:
+        if (local_errno == EINVAL)
             MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError,
                                 local_errno,
-                                E_FLAG_INVALID_VALUE);
-        case ENOSYS:
-            MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-                                local_errno,
-                                E_FLAG_NOT_IMPLEMENTED);
-        }
+                                E_FLAG_INVALID_TYPE);
 
         MAGIC_LIBRARY_ERROR(ma.cookie);
     }
@@ -720,16 +701,10 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
     return Qtrue;
 
 error:
-    switch (local_errno) {
-    case ENOMEM:
+    if (local_errno == ENOMEM)
         MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
                             local_errno,
                             E_NOT_ENOUGH_MEMORY);
-    case ENOSYS:
-        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-                            local_errno,
-                            E_NOT_IMPLEMENTED);
-    }
 
     MAGIC_LIBRARY_ERROR(ma.cookie);
 }
@@ -1071,15 +1046,8 @@ VALUE
 rb_mgc_version(RB_UNUSED_VAR(VALUE object))
 {
     int rv;
-    int local_errno;
 
     rv = magic_version_wrapper();
-    local_errno = errno;
-
-    if (rv < 0 && local_errno == ENOSYS)
-        MAGIC_GENERIC_ERROR(rb_mgc_eNotImplementedError,
-                            local_errno,
-                            E_NOT_IMPLEMENTED);
 
     return INT2NUM(rv);
 }
@@ -1269,7 +1237,7 @@ magic_library_close(void *data)
 
     if (mo->cookie)
         magic_close_wrapper(mo->cookie);
-    
+
     mo->cookie = NULL;
 }
 

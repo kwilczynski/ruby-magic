@@ -39,22 +39,6 @@ extern "C" {
 # define T_INTEGER rb_cInteger
 #endif
 
-#if !defined(ANYARGS)
-# if defined(__cplusplus)
-#  define ANYARGS ...
-# else
-#  define ANYARGS
-# endif
-#endif
-
-#if !defined(RB_UNUSED_VAR)
-# if defined(__GNUC__)
-#  define RB_UNUSED_VAR(x) (x) __attribute__ ((unused))
-# else
-#  define RB_UNUSED_VAR(x) (x)
-# endif
-#endif
-
 #if !defined(UNUSED)
 # define UNUSED(x) (void)(x)
 #endif
@@ -73,63 +57,6 @@ extern "C" {
 
 #if defined(POSIX_CLOSE_RESTART)
 # define HAVE_POSIX_CLOSE_RESTART 1
-#endif
-
-
-#if defined(MAGIC_VERSION) && MAGIC_VERSION >= 513
-# define HAVE_MAGIC_VERSION 1
-#endif
-
-#if !defined(HAVE_MAGIC_VERSION) || MAGIC_VERSION < 518
-# define HAVE_BROKEN_MAGIC 1
-#endif
-
-#if defined(HAVE_MAGIC_GETPARAM) && defined(HAVE_MAGIC_SETPARAM)
-# define HAVE_MAGIC_PARAM 1
-#endif
-
-#if !defined(MAGIC_PARAM_INDIR_MAX)
-# define MAGIC_PARAM_INDIR_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_NAME_MAX)
-# define MAGIC_PARAM_NAME_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_ELF_PHNUM_MAX)
-# define MAGIC_PARAM_ELF_PHNUM_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_ELF_SHNUM_MAX)
-# define MAGIC_PARAM_ELF_SHNUM_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_ELF_NOTES_MAX)
-# define MAGIC_PARAM_ELF_NOTES_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_REGEX_MAX)
-# define MAGIC_PARAM_REGEX_MAX -1
-#endif
-
-#if !defined(MAGIC_PARAM_BYTES_MAX)
-# define MAGIC_PARAM_BYTES_MAX -1
-#endif
-
-#if !defined(MAGIC_EXTENSION)
-# define MAGIC_EXTENSION -1
-#endif
-
-#if !defined(MAGIC_NO_CHECK_CSV)
-# define MAGIC_NO_CHECK_CSV -1
-#endif
-
-#if !defined(MAGIC_NO_CHECK_JSON)
-# define MAGIC_NO_CHECK_JSON -1
-#endif
-
-#if !defined(MAGIC_COMPRESS_TRANSP)
-# define MAGIC_COMPRESS_TRANSP -1
 #endif
 
 #if defined(__cplusplus)
