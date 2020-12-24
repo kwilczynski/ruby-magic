@@ -61,17 +61,23 @@ class MagicConstantsTest < Test::Unit::TestCase
   end
 
   def test_NO_CHECK_BUILTIN_flag_constat
-    expected =
-      Magic::NO_CHECK_COMPRESS |
-      Magic::NO_CHECK_TAR      |
-      Magic::NO_CHECK_APPTYPE  |
-      Magic::NO_CHECK_ELF      |
-      Magic::NO_CHECK_TEXT     |
-      Magic::NO_CHECK_CSV      |
-      Magic::NO_CHECK_CDF      |
-      Magic::NO_CHECK_TOKENS   |
-      Magic::NO_CHECK_ENCODING |
+    expected = 0
+
+    # A flag with value of -1 indicates that the underlying version
+    # of the Magic library does not include this particular flag,
+    # thus we skip such flag.
+    [
+      Magic::NO_CHECK_COMPRESS,
+      Magic::NO_CHECK_TAR,
+      Magic::NO_CHECK_APPTYPE,
+      Magic::NO_CHECK_ELF,
+      Magic::NO_CHECK_TEXT,
+      Magic::NO_CHECK_CSV,
+      Magic::NO_CHECK_CDF,
+      Magic::NO_CHECK_TOKENS,
+      Magic::NO_CHECK_ENCODING,
       Magic::NO_CHECK_JSON
+    ].each {|i| expected |= i if i > -1 }
 
     assert_equal(Magic::NO_CHECK_BUILTIN, expected)
   end

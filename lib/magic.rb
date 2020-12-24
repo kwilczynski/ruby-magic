@@ -241,16 +241,22 @@ class Magic
 
   private
 
+  def is_power_of_two?(number)
+    number > 0 && Math.log2(number) % 1 == 0
+  end
+
   def flags_as_map
     klass = self.class
 
     klass.constants.each_with_object({}) do |constant, flags|
+      constant = constant.to_s
+
       next if constant.start_with?('PARAM_')
 
       value = klass.const_get(constant)
 
-      if value.is_a?(Integer) && (value & (value - 1)) == 0
-        flags[value] = constant.to_s
+      if value.is_a?(Integer) && is_power_of_two?(value)
+        flags[value] = constant
       end
     end
   end
