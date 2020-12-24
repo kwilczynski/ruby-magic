@@ -74,29 +74,7 @@ tar -zxf "$ARCHIVE_NAME"
 
 pushd "file-${VERSION}" &> /dev/null
 
-if [[ $VERSION != '5.09' ]]; then
-    rm -f src/magic.h
-fi
-
-if [[ $VERSION == '5.14' ]]; then
-    PATCH_URL='https://gist.githubusercontent.com/kwilczynski/6583179/raw/8c5fbac07472a0a4b68d4028fc9031647ba50876/file-5.14.diff'
-    PATCH_LEVEL=1
-fi
-
-if [[ $VERSION == "5.18" ]]; then
-    PATCH_URL='https://gist.githubusercontent.com/kwilczynski/9925996/raw/483a877749c925a8dcc068de8e3ce5b92f5ea826/338-341-342.diff'
-    PATCH_LEVEL=1
-fi
-
-if [[ -n $PATCH_URL ]]; then
-    curl -sL "$PATCH_URL" > patch.diff
-
-    for option in '--dry-run -s -i' '-i'; do
-        if ! patch -l -t -p${PATCH_LEVEL} $option patch.diff; then
-            break
-        fi
-    done
-fi
+rm -f src/magic.h
 
 for action in clean distclean; do
     make "$action" || true
