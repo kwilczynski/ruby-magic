@@ -23,6 +23,8 @@ extern "C" {
 #define CSTR2RVAL(x) ((x) == NULL ? Qnil : rb_str_new2(x))
 
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
+
+#define RARRAY_EMPTY	   rb_ary_new()
 #define RARRAY_EMPTY_P(a)  (RARRAY_LEN(a) == 0)
 #define RARRAY_FIRST(a)    (RARRAY_EMPTY_P(a) ? Qnil : rb_ary_entry((a), 0))
 

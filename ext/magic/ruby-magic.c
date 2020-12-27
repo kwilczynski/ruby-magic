@@ -57,6 +57,7 @@ static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
 static VALUE magic_flags(VALUE object);
+static VALUE magic_set_paths(VALUE object, VALUE value);
 
 /*
  * call-seq:
@@ -101,7 +102,7 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
  *    Magic.do_not_auto_load = true                            #=> true
  *    magic = Magic.new                                        #=> #<Magic:0x00007fcc33070c90>
  *    magic.loaded?                                            #=> false
- *    magic.load_buffers(File.read(magic.paths[0] + ".mgc"))   #=> true
+ *    magic.load_buffers(File.read(magic.paths[0] + ".mgc"))   #=> nil
  *    magic.loaded?                                            #=> true
  *
  * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
@@ -195,9 +196,8 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
 	if (rb_block_given_p()) {
 		klass = "Magic";
-
 		if (!NIL_P(object))
-		klass = rb_obj_classname(object);
+			klass = rb_obj_classname(object);
 
 		rb_warn("%s::new() does not take block; use %s::open() instead",
 			klass, klass);
@@ -205,12 +205,11 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
 	MAGIC_OBJECT(mo);
 
+	mo->stop_on_errors = 1;
 	mo->mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
 					  rb_intern("Mutex")));
 
-	rb_ivar_set(object, id_at_paths, rb_ary_new());
-
-	mo->stop_on_errors = 1;
+	magic_set_paths(object, RARRAY_EMPTY);
 
 	boolean = rb_mgc_get_do_not_stop_on_error_global(object);
 	if (RVAL2CBOOL(boolean))
@@ -219,10 +218,8 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 	rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
 
 	boolean = rb_mgc_get_do_not_auto_load_global(object);
-	if (RVAL2CBOOL(boolean)) {
-		rb_mgc_get_paths(object);
+	if (RVAL2CBOOL(boolean))
 		return object;
-	}
 
 	rb_mgc_load(object, arguments);
 
@@ -326,7 +323,6 @@ rb_mgc_close(VALUE object)
 
 	if (mo) {
 		MAGIC_SYNCHRONIZED(magic_close_internal, mo);
-
 		if (DATA_P(object))
 			DATA_PTR(object) = NULL;
 	}
@@ -394,10 +390,9 @@ rb_mgc_get_paths(VALUE object)
 
 	cstring = magic_getpath_wrapper();
 	value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
-
 	RB_GC_GUARD(value);
 
-	return rb_ivar_set(object, id_at_paths, value);
+	return value;
 }
 
 /*
@@ -473,7 +468,6 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
 					    local_errno,
 					    E_PARAM_INVALID_VALUE);
 		}
-
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 	}
 
@@ -556,7 +550,6 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 					    local_errno,
 					    E_FLAG_NOT_IMPLEMENTED);
 		}
-
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 	}
 
@@ -565,16 +558,11 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 
 /*
  * call-seq:
- *    magic.load              -> array
- *    magic.load( path, ... ) -> array
- *    magic.load( array )     -> array
+ *    magic.load              -> nil
+ *    magic.load( path, ... ) -> nil
+ *    magic.load( array )     -> nil
  *
  * Example:
- *
- *    magic = Magic.new                                    #=> #<Magic:0x007f8fdc012e58>
- *    magic.load                                           #=> ["/etc/magic", "/usr/share/misc/magic"]
- *    magic.load("/usr/share/misc/magic", "/etc/magic")    #=> ["/usr/share/misc/magic", "/etc/magic"]
- *    magic.load                                           #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
  * Will raise <i>Magic::LibraryError</i> exception if, or
  *
@@ -600,7 +588,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	boolean = rb_mgc_get_do_not_auto_load_global(object);
 	if (RVAL2CBOOL(boolean)) {
 		klass = "Magic";
-
 		if (!NIL_P(object))
 			klass = rb_obj_classname(object);
 
@@ -618,23 +605,27 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	else
 		ma.type.file.path = magic_getpath_wrapper();
 
-	MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
-	if (ma.status < 0)
-		MAGIC_LIBRARY_ERROR(ma.cookie);
+	magic_set_paths(object, RARRAY_EMPTY);
 
+	MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
+	if (ma.status < 0) {
+		mo->database_loaded = 0;
+		MAGIC_LIBRARY_ERROR(ma.cookie);
+	}
 	mo->database_loaded = 1;
 
 	value = magic_split(CSTR2RVAL(ma.type.file.path), CSTR2RVAL(":"));
 
+	magic_set_paths(object, value);
 	RB_GC_GUARD(value);
 
-	return rb_ivar_set(object, id_at_paths, value);
+	return Qnil;
 }
 
 /*
  * call-seq:
- *    magic.load_buffers( string ) -> true
- *    magic.load_buffers( array )  -> true
+ *    magic.load_buffers( string ) -> nil
+ *    magic.load_buffers( array )  -> nil
  *
  * Example:
  *
@@ -694,20 +685,22 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	ma.type.buffers.buffers = buffers;
 	ma.type.buffers.sizes = sizes;
 
+	magic_set_paths(object, RARRAY_EMPTY);
+
 	MAGIC_SYNCHRONIZED(magic_load_buffers_internal, &ma);
 	if (ma.status < 0) {
 		local_errno = errno;
 		goto error;
 	}
-
 	mo->database_loaded = 1;
 
 	ruby_xfree(buffers);
 	ruby_xfree(sizes);
 
-	return Qtrue;
-
+	return Qnil;
 error:
+	mo->database_loaded = 0;
+
 	if (local_errno == ENOMEM)
 		MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError,
 				    local_errno,
@@ -940,7 +933,6 @@ rb_mgc_file(VALUE object, VALUE value)
 		       "Empty or invalid result");
 
 	return magic_return(&ma);
-
 error:
 	MAGIC_ARGUMENT_TYPE_ERROR(value, "String or IO-like object");
 }
@@ -1440,6 +1432,12 @@ static VALUE
 magic_flags(VALUE object)
 {
 	return rb_ivar_get(object, id_at_flags);
+}
+
+static VALUE
+magic_set_paths(VALUE object, VALUE value)
+{
+	return rb_ivar_set(object, id_at_paths, value);
 }
 
 void
