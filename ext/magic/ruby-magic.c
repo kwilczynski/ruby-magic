@@ -750,9 +750,9 @@ rb_mgc_load_p(VALUE object)
 
 /*
  * call-seq:
- *    magic.compile              -> true
- *    magic.compile( path, ... ) -> true
- *    magic.compile( array )     -> true
+ *    magic.compile              -> nil
+ *    magic.compile( path, ... ) -> nil
+ *    magic.compile( array )     -> nil
  *
  * Example:
  *
@@ -791,7 +791,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 
 	RB_GC_GUARD(value);
 
-	return Qtrue;
+	return Qnil;
 }
 
 /*
