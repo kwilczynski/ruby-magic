@@ -181,17 +181,15 @@ VALUE
 rb_mgc_initialize(VALUE object, VALUE arguments)
 {
 	magic_object_t *mo;
-	const char *klass = NULL;
+	const char *klass = "Magic";
 	VALUE boolean = Qundef;
 
-	if (rb_block_given_p()) {
-		klass = "Magic";
-		if (!NIL_P(object))
-			klass = rb_obj_classname(object);
+	if (!NIL_P(object))
+		klass = rb_obj_classname(object);
 
+	if (rb_block_given_p())
 		rb_warn("%s::new() does not take block; use %s::open() instead",
 			klass, klass);
-	}
 
 	MAGIC_OBJECT(mo);
 
@@ -208,8 +206,13 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 	rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
 
 	boolean = rb_mgc_get_do_not_auto_load_global(object);
-	if (RVAL2CBOOL(boolean))
+	if (RVAL2CBOOL(boolean)) {
+		if (!RARRAY_EMPTY_P(arguments))
+			rb_warn("%s::do_not_auto_load is set; using %s#new() to load "
+				"Magic database from a file will have no effect",
+				klass, klass);
 		return object;
+	}
 
 	rb_mgc_load(object, arguments);
 
@@ -532,7 +535,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 {
 	magic_object_t *mo;
 	magic_arguments_t ma;
-	const char *klass = NULL;
+	const char *klass = "Magic";
 	VALUE value = Qundef;
 	VALUE boolean = Qundef;
 
@@ -545,7 +548,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 	boolean = rb_mgc_get_do_not_auto_load_global(object);
 	if (RVAL2CBOOL(boolean)) {
-		klass = "Magic";
 		if (!NIL_P(object))
 			klass = rb_obj_classname(object);
 
