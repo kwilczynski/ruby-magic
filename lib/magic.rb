@@ -168,8 +168,8 @@ class Magic
     #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, and Magic::check
     #
-    def compile(path)
-      open {|m| m.compile(path) }
+    def compile(*paths)
+      open {|m| m.compile(paths) }
     end
 
     #
@@ -185,8 +185,8 @@ class Magic
     #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding and Magic::compile
     #
-    def check(path)
-      open {|m| m.check(path) }
+    def check(*paths)
+      open {|m| m.check(paths) }
     end
 
     #
