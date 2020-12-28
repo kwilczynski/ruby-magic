@@ -469,7 +469,7 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 	}
 
-	return Qtrue;
+	return Qnil;
 }
 
 /*
