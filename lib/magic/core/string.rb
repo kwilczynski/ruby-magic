@@ -1,14 +1,9 @@
-#
-#
-#
+# frozen_string_literal: true
+
 class String
   #
   # call-seq:
   #    string.magic -> string or array
-  #
-  # Returns
-  #
-  # Example:
   #
   # See also: String#mime and String#type
   #
@@ -20,10 +15,6 @@ class String
   # call-seq:
   #    string.mime -> string or array
   #
-  # Returns
-  #
-  # Example:
-  #
   # See also: String#magic and String#type
   #
   def mime
@@ -33,10 +24,6 @@ class String
   #
   # call-seq:
   #    string.type -> string or array
-  #
-  # Returns
-  #
-  # Example:
   #
   # See also: String#magic and String#mime
   #

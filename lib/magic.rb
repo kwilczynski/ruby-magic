@@ -15,14 +15,12 @@ class Magic
   # call-seq:
   #    magic.inspect -> string
   #
-  # Returns
-  #
   # Example:
   #
-  #    magic = Magic.new    #=> #<Magic:0x007fd5258a1108>
-  #    magic.inspect        #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"]>"
+  #    magic = Magic.new
+  #    magic.inspect     #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"]>"
   #    magic.close
-  #    magic.inspect        #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"] (closed)>"
+  #    magic.inspect     #=> "#<Magic:0x007fd5258a1108 @flags=0, @paths=[\"/etc/magic\", \"/usr/share/misc/magic\"] (closed)>"
   #
   def inspect
     super.insert(-2, self.closed? ? ' (closed)' : '')
@@ -33,12 +31,6 @@ class Magic
   #    magic.fd( object )  -> string
   #    magic.fd( integer ) -> string
   #
-  # Returns
-  #
-  # Example:
-  #
-  # Will raise <i>Magic::LibraryError</i> exception if, or
-  #
   # See also: Magic#descriptor, Magic#buffer and Magic#file
   #
   def fd(fd)
@@ -47,13 +39,7 @@ class Magic
 
   #
   # call-seq:
-  #    magic.flags_to_a( names ) -> array
-  #
-  # Returns an +array+
-  #
-  # Example:
-  #
-  # Will raise <i>Magic::LibraryError</i> exception if, or
+  #    magic.flags_to_a( boolean ) -> array
   #
   # See also: Magic#flags
   #
@@ -78,14 +64,8 @@ class Magic
   class << self
     #
     # call-seq:
-    #    Magic.open( flags )                  -> self
-    #    Magic.open( flags ) {|magic| block } -> string or array
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.open( integer )                  -> self
+    #    Magic.open( integer ) {|magic| block } -> string or array
     #
     # See also: Magic::mime, Magic::type, Magic::encoding, Magic::compile and Magic::check
     #
@@ -109,12 +89,6 @@ class Magic
     #    Magic.mime                  -> self
     #    Magic.mime {|magic| block } -> string or array
     #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
-    #
     # See also: Magic::open, Magic::type, Magic::encoding, Magic::compile and Magic::check
     #
     def mime(&block)
@@ -125,12 +99,6 @@ class Magic
     # call-seq:
     #    Magic.type                  -> self
     #    Magic.type {|magic| block } -> string or array
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
     #
     # See also: Magic::open, Magic::mime, Magic::encoding, Magic::compile and Magic::check
     #
@@ -143,12 +111,6 @@ class Magic
     #    Magic.encoding                  -> self
     #    Magic.encoding {|magic| block } -> string or array
     #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
-    #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::compile and Magic::check
     #
     def encoding(&block)
@@ -157,14 +119,8 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.compile( path, ... ) -> true
-    #    Magic.compile( array )     -> true
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.compile( string, ... ) -> true
+    #    Magic.compile( array )       -> true
     #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, and Magic::check
     #
@@ -174,14 +130,8 @@ class Magic
 
     #
     # call-seq:
-    #    Magic.check( path, ... ) -> true or false
-    #    Magic.check( array )     -> true or false
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.check( string, ... ) -> true or false
+    #    Magic.check( array )       -> true or false
     #
     # See also: Magic::open, Magic::mime, Magic::type, Magic::encoding and Magic::compile
     #
@@ -191,12 +141,9 @@ class Magic
 
     #
     # call-seq:
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.file( object )          -> string or array
+    #    Magic.file( string )          -> string or array
+    #    Magic.file( string, integer ) -> string or array
     #
     # See also:
     #
@@ -206,12 +153,8 @@ class Magic
 
     #
     # call-seq:
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.buffer( string )          -> string or array
+    #    Magic.buffer( string, integer ) -> string or array
     #
     # See also:
     #
@@ -221,12 +164,9 @@ class Magic
 
     #
     # call-seq:
-    #
-    # Returns
-    #
-    # Example:
-    #
-    # Will raise <i></i>
+    #    Magic.descriptor( object )           -> string or array
+    #    Magic.descriptor( integer )          -> string or array
+    #    Magic.descriptor( integer, integer ) -> string or array
     #
     # See also:
     #

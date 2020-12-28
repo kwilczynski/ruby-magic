@@ -1,15 +1,11 @@
-#
-#
-#
+# frozen_string_literal: true
+
 class File
   class << self
     #
     # call-seq:
-    #    File.magic( path ) -> string or array
-    #
-    # Returns
-    #
-    # Example:
+    #    File.magic( object ) -> string or array
+    #    File.magic( string ) -> string or array
     #
     # See also: File::mime and File::type
     #
@@ -18,16 +14,12 @@ class File
       path ||= path.to_path if path.respond_to?(:to_path)
       path ||= path.to_s
 
-      Magic.open(flags | Magic::ERROR) {|mgc| mgc.file(path) }
+      Magic.open(flags) {|mgc| mgc.file(path) }
     end
 
     #
     # call-seq:
-    #    File.mime( path ) -> string or array
-    #
-    # Returns
-    #
-    # Example:
+    #    File.mime( string ) -> string or array
     #
     # See also: File::magic and File::type
     #
@@ -37,11 +29,7 @@ class File
 
     #
     # call-seq:
-    #    File.type( path ) -> string or array
-    #
-    # Returns
-    #
-    # Example:
+    #    File.type( string ) -> string or array
     #
     # See also: File::magic and File::mime
     #
@@ -52,11 +40,7 @@ class File
 
   #
   # call-seq:
-  #    File.magic( path ) -> string or array
-  #
-  # Returns
-  #
-  # Example:
+  #    File.magic -> string or array
   #
   # See also: File#mime and File#type
   #
@@ -66,11 +50,7 @@ class File
 
   #
   # call-seq:
-  #    File.mime( path ) -> string or array
-  #
-  # Returns
-  #
-  # Example:
+  #    File.mime -> string or array
   #
   # See also: File#magic and File#type
   #
@@ -80,11 +60,7 @@ class File
 
   #
   # call-seq:
-  #    File.type( path ) -> string or array
-  #
-  # Returns
-  #
-  # Example:
+  #    File.type -> string or array
   #
   # See also: File#magic and File#mime
   #

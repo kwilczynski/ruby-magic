@@ -68,9 +68,9 @@ static VALUE magic_set_paths(VALUE object, VALUE value);
  *
  * Example:
  *
- *    Magic.do_not_auto_load          #=> false
- *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load          #=> true
+ *    Magic.do_not_auto_load        #=> false
+ *    Magic.do_not_auto_load = true #=> true
+ *    Magic.do_not_auto_load        #=> true
  *
  * See also: Magic::new, Magic#loaded?, Magic#load and Magic#load_buffers
  */
@@ -82,7 +82,7 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
 
 /*
  * call-seq:
- *    Magic.do_not_auto_load= (boolean) -> boolean
+ *    Magic.do_not_auto_load= ( boolean ) -> boolean
  *
  * Sets the global +do_not_auto_load+ flag for the Magic object and each of the
  * Magic object instances. This flag can be used to disable automatic loading of
@@ -93,20 +93,17 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
  *
  * Example:
  *
- *    Magic.do_not_auto_load          #=> false
- *    Magic.do_not_auto_load = true   #=> true
- *    Magic.do_not_auto_load          #=> true
+ *    Magic.do_not_auto_load        #=> false
+ *    Magic.do_not_auto_load = true #=> true
+ *    Magic.do_not_auto_load        #=> true
  *
  * Example:
  *
- *    Magic.do_not_auto_load = true                            #=> true
- *    magic = Magic.new                                        #=> #<Magic:0x00007fcc33070c90>
- *    magic.loaded?                                            #=> false
- *    magic.load_buffers(File.read(magic.paths[0] + ".mgc"))   #=> nil
- *    magic.loaded?                                            #=> true
- *
- * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
- * or _FalseClass_ type.
+ *    Magic.do_not_auto_load = true                          #=> true
+ *    magic = Magic.new
+ *    magic.loaded?                                          #=> false
+ *    magic.load_buffers(File.read(magic.paths[0] + ".mgc")) #=> nil
+ *    magic.loaded?                                          #=> true
  *
  * See also: Magic::new, Magic#loaded?, Magic#load and Magic#load_buffers
  */
@@ -130,9 +127,9 @@ rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
  *
  * Example:
  *
- *    Magic.do_not_stop_on_error          #=> false
- *    Magic.do_not_stop_on_error = true   #=> true
- *    Magic.do_not_stop_on_error          #=> true
+ *    Magic.do_not_stop_on_error        #=> false
+ *    Magic.do_not_stop_on_error = true #=> true
+ *    Magic.do_not_stop_on_error        #=> true
  *
  * See also: Magic::new, Magic::open and Magic#do_not_stop_on_error
  */
@@ -146,16 +143,11 @@ rb_mgc_get_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object))
  * call-seq:
  *    Magic.do_not_stop_on_error= (boolean) -> boolean
  *
- * Returns
- *
  * Example:
  *
- *    Magic.do_not_stop_on_error          #=> false
- *    Magic.do_not_stop_on_error = true   #=> true
- *    Magic.do_not_stop_on_error          #=> true
- *
- * Will raise a <i>TypeError</i> exception if given value is not an _TrueClass_
- * or _FalseClass_ type.
+ *    Magic.do_not_stop_on_error        #=> false
+ *    Magic.do_not_stop_on_error = true #=> true
+ *    Magic.do_not_stop_on_error        #=> true
  *
  * See also: Magic::new, Magic::open and Magic#do_not_stop_on_error
  */
@@ -172,18 +164,16 @@ rb_mgc_set_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 
 /*
  * call-seq:
- *    Magic.new              -> self
- *    Magic.new( path, ... ) -> self
- *    Magic.new( array )     -> self
+ *    Magic.new                -> self
+ *    Magic.new( string, ... ) -> self
+ *    Magic.new( array )       -> self
  *
  * Opens the underlying _Magic_ database and returns a new _Magic_.
  *
  * Example:
  *
- *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
- * <i>Magic::MagicError</i> exception if
+ *    magic = Magic.new
+ *    magic.class       #=> Magic
  *
  * See also: Magic::open, Magic::mime, Magic::type, Magic::encoding, Magic::compile and Magic::check
  */
@@ -230,10 +220,6 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
  * call-seq:
  *    magic.do_not_stop_on_error -> boolean
  *
- * Returns
- *
- * Example:
- *
  * See also: Magic::new, Magic::open and Magic::do_not_stop_on_error
  */
 VALUE
@@ -249,14 +235,7 @@ rb_mgc_get_do_not_stop_on_error(VALUE object)
 
 /*
  * call-seq:
- *    magic.do_not_stop_on_error= (boolean) -> boolean
- *
- * Returns
- *
- * Example:
- *
- * Will raise a <i>TypeError</i> exception if given value is not
- * an _TrueClass_ or _FalseClass_ type.
+ *    magic.do_not_stop_on_error= ( boolean ) -> boolean
  *
  * See also: Magic::new, Magic::open and Magic::do_not_stop_on_error
  */
@@ -285,10 +264,10 @@ rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
  *
  * Example:
  *
- *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
- *    magic.open?          #=> true
- *    magic.close          #=> nil
- *    magic.open?          #=> false
+ *    magic = Magic.new
+ *    magic.open?       #=> true
+ *    magic.close       #=> nil
+ *    magic.open?       #=> false
  *
  * See also: Magic#close?, Magic#close and Magic#new
  */
@@ -306,8 +285,8 @@ rb_mgc_open_p(VALUE object)
  *
  * Example:
  *
- *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
- *    magic.close          #=> nil
+ *    magic = Magic.new
+ *    magic.close       #=> nil
  *
  * See also: Magic#closed?, Magic#open? and Magic#new
  */
@@ -339,10 +318,10 @@ rb_mgc_close(VALUE object)
  *
  * Example:
  *
- *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
- *    magic.closed?        #=> false
- *    magic.close          #=> nil
- *    magic.closed?        #=> true
+ *    magic = Magic.new
+ *    magic.closed?     #=> false
+ *    magic.close       #=> nil
+ *    magic.closed?     #=> true
  *
  * See also: Magic#close, Magic#open? and #Magic#new
  */
@@ -367,14 +346,11 @@ rb_mgc_close_p(VALUE object)
  * call-seq:
  *    magic.paths -> array
  *
- * Returns an +array+
- *
  * Example:
  *
- *    magic = Magic.new    #=> #<Magic:0x007f8fdc012e58>
- *    magic.paths          #=> ["/etc/magic", "/usr/share/misc/magic"]
+ *    magic = Magic.new
+ *    magic.paths       #=> ["/etc/magic", "/usr/share/misc/magic"]
  *
- * Will raise <i>Magic::LibraryError</i> exception if
  */
 VALUE
 rb_mgc_get_paths(VALUE object)
@@ -397,10 +373,7 @@ rb_mgc_get_paths(VALUE object)
 
 /*
  * call-seq:
- *
- * Example:
- *
- * See also:
+ *    magic.get_parameter( integer ) -> integer
  */
 VALUE
 rb_mgc_get_parameter(VALUE object, VALUE tag)
@@ -432,10 +405,7 @@ rb_mgc_get_parameter(VALUE object, VALUE tag)
 
 /*
  * call-seq:
- *
- * Example:
- *
- * See also:
+ *    magic.set_parameter( integer, integer ) -> nil
  */
 VALUE
 rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
@@ -476,14 +446,12 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
  * call-seq:
  *    magic.flags -> integer
  *
- * Returns
- *
  * Example:
  *
- *    magic = Magic.new            #=> #<Magic:0x007f8fdc012e58>
- *    magic.flags                  #=> 0
- *    magic.flags = Magic::MIME    #=> 1040
- *    magic.flags                  #=> 1040
+ *    magic = Magic.new
+ *    magic.flags               #=> 0
+ *    magic.flags = Magic::MIME #=> 1040
+ *    magic.flags               #=> 1040
  *
  * See also: Magic#flags_to_a
  */
@@ -508,17 +476,13 @@ rb_mgc_get_flags(VALUE object)
 
 /*
  * call-seq:
- *    magic.flags= (integer) -> integer
+ *    magic.flags= ( integer ) -> integer
  *
  * Example:
  *
- *    magic = Magic.new                 #=> #<Magic:0x007f8fdc012e58>
- *    magic.flags = Magic::MIME         #=> 1040
- *    magic.flags = Magic::MIME_TYPE    #=> 16
- *
- * Will raise <i>Magic::FlagsError</i> exception if, or
- * <i>Magic::LibraryError</i> exception if, or
- * <i>Magic::NotImplementedError</i> exception if, or
+ *    magic = Magic.new
+ *    magic.flags = Magic::MIME      #=> 1040
+ *    magic.flags = Magic::MIME_TYPE #=> 16
  */
 VALUE
 rb_mgc_set_flags(VALUE object, VALUE value)
@@ -555,13 +519,11 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 
 /*
  * call-seq:
- *    magic.load              -> nil
- *    magic.load( path, ... ) -> nil
- *    magic.load( array )     -> nil
+ *    magic.load                -> nil
+ *    magic.load( string, ... ) -> nil
+ *    magic.load( array )       -> nil
  *
  * Example:
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
  *
  * See also: Magic#check, Magic#compile, Magic::check and Magic::compile
  */
@@ -620,13 +582,8 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 /*
  * call-seq:
- *    magic.load_buffers( string ) -> nil
- *    magic.load_buffers( array )  -> nil
- *
- * Example:
- *
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
+ *    magic.load_buffers( string, ... ) -> nil
+ *    magic.load_buffers( array )       -> nil
  *
  * See also: Magic#load and Magic::do_not_auto_load
  */
@@ -714,14 +671,14 @@ error:
  *
  * Example:
  *
- *    magic = Magic.new => #<Magic:0x00007fa13009af78>
- *    magic.loaded?     => true
+ *    magic = Magic.new
+ *    magic.loaded?     #=> true
  *
  * Example:
  *
- *    Magic.do_not_auto_load = true     #=> true
- *    magic = Magic.new                 #=> #<Magic:0x00007fa637873068>
- *    magic.loaded?                     #=> false
+ *    Magic.do_not_auto_load = true #=> true
+ *    magic = Magic.new
+ *    magic.loaded?                 #=> false
  *
  * See also: Magic#load and Magic#load_buffers
  */
@@ -738,15 +695,9 @@ rb_mgc_load_p(VALUE object)
 
 /*
  * call-seq:
- *    magic.compile              -> nil
- *    magic.compile( path, ... ) -> nil
- *    magic.compile( array )     -> nil
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
+ *    magic.compile                -> nil
+ *    magic.compile( string, ... ) -> nil
+ *    magic.compile( array )       -> nil
  *
  * See also: Magic#check, Magic::check and Magic::compile
  */
@@ -783,15 +734,9 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 
 /*
  * call-seq:
- *    magic.check              -> true or false
- *    magic.check( path, ... ) -> true or false
- *    magic.check( array )     -> true or false
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
+ *    magic.check                -> true or false
+ *    magic.check( string, ... ) -> true or false
+ *    magic.check( array )       -> true or false
  *
  * See also: Magic#compile, Magic::compile and Magic::check
  */
@@ -828,16 +773,8 @@ rb_mgc_check(VALUE object, VALUE arguments)
 
 /*
  * call-seq:
- *    magic.file( io )   -> string or array
- *    magic.file( path ) -> string or array
- *
- * Returns
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
+ *    magic.file( object ) -> string or array
+ *    magic.file( path )   -> string or array
  *
  * See also: Magic#buffer and Magic#descriptor
  */
@@ -935,14 +872,6 @@ error:
  * call-seq:
  *    magic.buffer( string ) -> string or array
  *
- * Returns
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
- *
  * See also: Magic#file and Magic#descriptor
  */
 VALUE
@@ -975,14 +904,6 @@ rb_mgc_buffer(VALUE object, VALUE value)
 /*
  * call-seq:
  *    magic.descriptor( integer ) -> string or array
- *
- * Returns
- *
- * Example:
- *
- *    magic = Magic.new   #=> #<Magic:0x007f8fdc012e58>
- *
- * Will raise <i>Magic::LibraryError</i> exception if, or
  *
  * See also: Magic#file and Magic#buffer
  */
@@ -1021,13 +942,9 @@ rb_mgc_descriptor(VALUE object, VALUE value)
  * call-seq:
  *    Magic.version -> integer
  *
- * Returns
- *
  * Example:
  *
- *    Magic.version   #=> 517
- *
- * Will raise <i>Magic::NotImplementedError</i> exception if, or
+ *    Magic.version #=> 517
  *
  * See also: Magic::version_to_a and Magic::version_to_s
  */
