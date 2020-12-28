@@ -20,6 +20,8 @@ class MagicConstantsTest < Test::Unit::TestCase
       :MIME_ENCODING,
       :MIME,
       :APPLE,
+      :EXTENSION,
+      :COMPRESS_TRANSP,
       :NO_CHECK_COMPRESS,
       :NO_CHECK_TAR,
       :NO_CHECK_SOFT,
@@ -34,10 +36,10 @@ class MagicConstantsTest < Test::Unit::TestCase
       :NO_CHECK_BUILTIN,
       :NO_CHECK_ASCII,
       :NO_CHECK_FORTRAN,
-      :NO_CHECK_TROFF,
-      :EXTENSION,
-      :COMPRESS_TRANSP
-    ].each {|i| assert_const_defined(Magic, i) }
+      :NO_CHECK_TROFF
+    ].each do |i|
+      assert_const_defined(Magic, i)
+    end
   end
 
   def test_parameters_constants_defiend
@@ -49,11 +51,14 @@ class MagicConstantsTest < Test::Unit::TestCase
       :PARAM_ELF_NOTES_MAX,
       :PARAM_REGEX_MAX,
       :PARAM_BYTES_MAX
-    ].each {|i| assert_const_defined(Magic, i) }
+    ].each do |i|
+      assert_const_defined(Magic, i)
+    end
   end
 
   def test_MIME_flag_constant
-    assert_equal(Magic::MIME, Magic::MIME_TYPE | Magic::MIME_ENCODING)
+    expected = Magic::MIME_TYPE | Magic::MIME_ENCODING
+    assert_equal(Magic::MIME, expected)
   end
 
   def test_NO_CHECK_ASCII_flag_constant
@@ -61,23 +66,16 @@ class MagicConstantsTest < Test::Unit::TestCase
   end
 
   def test_NO_CHECK_BUILTIN_flag_constat
-    expected = 0
-
-    # A flag with value of -1 indicates that the underlying version
-    # of the Magic library does not include this particular flag,
-    # thus we skip such flag.
-    [
-      Magic::NO_CHECK_COMPRESS,
-      Magic::NO_CHECK_TAR,
-      Magic::NO_CHECK_APPTYPE,
-      Magic::NO_CHECK_ELF,
-      Magic::NO_CHECK_TEXT,
-      Magic::NO_CHECK_CSV,
-      Magic::NO_CHECK_CDF,
-      Magic::NO_CHECK_TOKENS,
-      Magic::NO_CHECK_ENCODING,
-      Magic::NO_CHECK_JSON
-    ].each {|i| expected |= i if i > -1 }
+    expected = Magic::NO_CHECK_COMPRESS |
+               Magic::NO_CHECK_TAR      |
+               Magic::NO_CHECK_APPTYPE  |
+               Magic::NO_CHECK_ELF      |
+               Magic::NO_CHECK_TEXT     |
+               Magic::NO_CHECK_CSV      |
+               Magic::NO_CHECK_CDF      |
+               Magic::NO_CHECK_TOKENS   |
+               Magic::NO_CHECK_ENCODING |
+               Magic::NO_CHECK_JSON
 
     assert_equal(Magic::NO_CHECK_BUILTIN, expected)
   end

@@ -48,7 +48,9 @@ class MagicTest < Test::Unit::TestCase
       :version,
       :version_to_a,
       :version_to_s
-    ].each {|i| assert_respond_to(Magic, i) }
+    ].each do |i|
+      assert_respond_to(Magic, i)
+    end
   end
 
   def test_magic_global_singleton_methods
@@ -57,7 +59,9 @@ class MagicTest < Test::Unit::TestCase
       :do_not_auto_load=,
       :do_not_stop_on_error,
       :do_not_stop_on_error=
-    ].each {|i| assert_respond_to(Magic, i) }
+    ].each do |i|
+      assert_respond_to(Magic, i)
+    end
   end
 
   def test_magic_new_instance
@@ -103,7 +107,9 @@ class MagicTest < Test::Unit::TestCase
       :loaded?,
       :compile,
       :check
-    ].each {|i| assert_respond_to(@magic, i) }
+    ].each do |i|
+      assert_respond_to(@magic, i)
+    end
   end
 
   def test_magic_string_integration_methods
@@ -111,7 +117,9 @@ class MagicTest < Test::Unit::TestCase
       :magic,
       :mime,
       :type
-    ].each {|i| assert_respond_to(String.allocate, i) }
+    ].each do |i|
+      assert_respond_to(String.allocate, i)
+    end
   end
 
   def test_magic_file_integration_singleton_methods
@@ -119,7 +127,9 @@ class MagicTest < Test::Unit::TestCase
       :magic,
       :mime,
       :type
-    ].each {|i| assert_respond_to(File, i) }
+    ].each do |i|
+      assert_respond_to(File, i)
+    end
   end
 
   def test_magic_file_integration_instance_methods
@@ -127,7 +137,9 @@ class MagicTest < Test::Unit::TestCase
       :magic,
       :mime,
       :type
-    ].each {|i| assert_respond_to(File.allocate, i) }
+    ].each do |i|
+      assert_respond_to(File.allocate, i)
+    end
   end
 
   def test_magic_open
