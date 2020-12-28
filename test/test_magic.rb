@@ -376,6 +376,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_file_with_do_not_stop_on_error_set_globally
   end
 
+  def test_magic_file_with_magic_library_not_loaded
+  end
+
   def test_magic_file_with_nil_argument
     error = assert_raise TypeError do
       @magic.file nil
@@ -433,6 +436,9 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_buffer
   end
 
+  def test_magic_buffer_with_magic_library_not_loaded
+  end
+
   def test_magic_buffer_with_nil_argument
     error = assert_raise TypeError do
       @magic.buffer nil
@@ -462,6 +468,9 @@ class MagicTest < Test::Unit::TestCase
         assert_false(file.closed?)
       end
     end
+  end
+
+  def test_magic_descriptor_with_magic_library_not_loaded
   end
 
   def test_magic_descriptor_with_nil_argument
@@ -620,8 +629,8 @@ class MagicTest < Test::Unit::TestCase
 
       magic_2.close
 
-      assert_equal('no magic files loaded', error_1.message)
-      assert_equal('no magic files loaded', error_2.message)
+      assert_equal('Magic library not loaded', error_1.message)
+      assert_equal('Magic library not loaded', error_2.message)
 
       assert_true(Magic.do_not_auto_load)
     end

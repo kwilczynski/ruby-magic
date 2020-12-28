@@ -76,6 +76,7 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 	((c) = MAGIC_OBJECT((o))->cookie)
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_close_p((o)))
+#define MAGIC_LOADED_P(o) RTEST(rb_mgc_load_p((o)))
 
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
 	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
@@ -111,6 +112,13 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 					    E_MAGIC_LIBRARY_CLOSED);	  \
 	} while(0)
 
+#define MAGIC_CHECK_LOADED(o)						  \
+	do {								  \
+		if (!MAGIC_LOADED_P(o))					  \
+			MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EFAULT, \
+					    E_MAGIC_LIBRARY_NOT_LOADED);  \
+	} while(0)
+
 #define MAGIC_STRINGIFY(s) #s
 
 #define MAGIC_DEFINE_FLAG(c) \
@@ -130,6 +138,7 @@ enum error {
 	E_ARGUMENT_TYPE_ARRAY_STRINGS,
 	E_MAGIC_LIBRARY_INITIALIZE,
 	E_MAGIC_LIBRARY_CLOSED,
+	E_MAGIC_LIBRARY_NOT_LOADED,
 	E_PARAM_INVALID_TYPE,
 	E_PARAM_INVALID_VALUE,
 	E_FLAG_NOT_IMPLEMENTED,
@@ -186,6 +195,7 @@ static const char *errors[] = {
 	[E_ARGUMENT_TYPE_ARRAY_STRINGS]	= "wrong argument type %s in arguments list (expected String)",
 	[E_MAGIC_LIBRARY_INITIALIZE]	= "failed to initialize Magic library",
 	[E_MAGIC_LIBRARY_CLOSED]	= "Magic library is not open",
+	[E_MAGIC_LIBRARY_NOT_LOADED]	= "Magic library not loaded",
 	[E_PARAM_INVALID_TYPE]		= "unknown or invalid parameter specified",
 	[E_PARAM_INVALID_VALUE]		= "invalid parameter value specified",
 	[E_FLAG_NOT_IMPLEMENTED]	= "flag is not implemented",

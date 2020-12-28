@@ -410,7 +410,6 @@ rb_mgc_get_parameter(VALUE object, VALUE tag)
 	magic_arguments_t ma;
 
 	MAGIC_CHECK_INTEGER_TYPE(tag);
-
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
@@ -447,7 +446,6 @@ rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value)
 
 	MAGIC_CHECK_INTEGER_TYPE(tag);
 	MAGIC_CHECK_INTEGER_TYPE(value);
-
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
@@ -530,7 +528,6 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 	magic_arguments_t ma;
 
 	MAGIC_CHECK_INTEGER_TYPE(value);
-
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
@@ -582,7 +579,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
 	MAGIC_CHECK_OPEN(object);
-
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	boolean = rb_mgc_get_do_not_auto_load_global(object);
@@ -657,7 +653,6 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	MAGIC_CHECK_ARRAY_EMPTY(arguments);
 	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
 	MAGIC_CHECK_OPEN(object);
-
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	buffers = ALLOC_N(void *, count);
@@ -767,7 +762,6 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 
 	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
 	MAGIC_CHECK_OPEN(object);
-
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	if (!RARRAY_EMPTY_P(arguments))
@@ -813,7 +807,6 @@ rb_mgc_check(VALUE object, VALUE arguments)
 
 	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
 	MAGIC_CHECK_OPEN(object);
-
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	if (!RARRAY_EMPTY_P(arguments))
@@ -861,6 +854,7 @@ rb_mgc_file(VALUE object, VALUE value)
 		goto error;
 
 	MAGIC_CHECK_OPEN(object);
+	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	ma.flags = NUM2INT(magic_get_flags(object));
@@ -959,7 +953,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
 	MAGIC_CHECK_STRING_TYPE(value);
 	MAGIC_CHECK_OPEN(object);
-
+	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	StringValue(value);
@@ -1001,6 +995,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 
 	MAGIC_CHECK_INTEGER_TYPE(value);
 	MAGIC_CHECK_OPEN(object);
+	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	ma.flags = NUM2INT(magic_get_flags(object));
