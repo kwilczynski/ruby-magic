@@ -56,7 +56,7 @@ static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
                         void *data);
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
-static VALUE magic_flags(VALUE object);
+static VALUE magic_get_flags(VALUE object);
 static VALUE magic_set_paths(VALUE object, VALUE value);
 
 /*
@@ -596,7 +596,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 			klass, klass);
 	}
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 
 	if (!RARRAY_EMPTY_P(arguments)) {
 		value = magic_join(arguments, CSTR2RVAL(":"));
@@ -680,7 +680,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 		sizes[i] = (size_t)RSTRING_LEN(value);
 	}
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 	ma.type.buffers.count = count;
 	ma.type.buffers.buffers = buffers;
 	ma.type.buffers.sizes = sizes;
@@ -775,7 +775,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 	else
 		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
@@ -821,7 +821,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 	else
 		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
@@ -863,7 +863,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 
 	if (rb_respond_to(value, id_to_io)) {
 		ma.type.file.fd = magic_fileno(value);
@@ -964,7 +964,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
 	StringValue(value);
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 	ma.type.buffers.sizes = (size_t *)RSTRING_LEN(value);
 	ma.type.buffers.buffers = (void **)RSTRING_PTR(value);
 
@@ -1003,7 +1003,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = NUM2INT(magic_flags(object));
+	ma.flags = NUM2INT(magic_get_flags(object));
 	ma.type.file.fd = NUM2INT(value);
 
 	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
@@ -1429,7 +1429,7 @@ magic_return(void *data)
 }
 
 static VALUE
-magic_flags(VALUE object)
+magic_get_flags(VALUE object)
 {
 	return rb_ivar_get(object, id_at_flags);
 }
