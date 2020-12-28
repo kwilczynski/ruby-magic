@@ -59,6 +59,14 @@ extern "C" {
 # define HAVE_POSIX_CLOSE_RESTART 1
 #endif
 
+#if !defined(MAGIC_EXTENSION_SEPARATOR)
+# define MAGIC_EXTENSION_SEPARATOR "/"
+#endif
+
+#if !defined(MAGIC_CONTINUE_SEPARATOR)
+# define MAGIC_CONTINUE_SEPARATOR "\\012- "
+#endif
+
 #if !defined(MAGIC_NO_CHECK_CSV)
 # define MAGIC_NO_CHECK_CSV 0
 #endif

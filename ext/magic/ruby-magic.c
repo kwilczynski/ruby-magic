@@ -859,7 +859,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	/*
 	 * Depending on the version of the underlying Magic library the magic_file()
 	 * function can fail and either yield no results or return the "(null)"
-	 * string instead.  Often this would indicate that an older version of the
+	 * string instead. Often this would indicate that an older version of the
 	 * Magic library is in use.
 	 */
 	assert(strncmp(ma.result, empty, strlen(empty)) != 0 && \
@@ -1312,14 +1312,14 @@ magic_return(void *data)
 		/*
 		 * A number of Magic flags that support primarily files e.g.,
 		 * MAGIC_EXTENSION, etc., would not return a meaningful value for
-		 * directories and special files, and such.  Thus, it's better to
-		 * return a nil value, to indicate lack of results, rather than a
-		 * confusing string consisting of three questions marks.
+		 * directories and special files, and such. Thus, it's better to
+		 * return an empty string, to indicate lack of results, rather
+		 * than a confusing string consisting of three questions marks.
 		 */
 		if (strncmp(ma->result, empty, strlen(empty)) == 0)
-			return Qnil;
+			return CSTR2RVAL("");
 
-		array = magic_split(value, CSTR2RVAL("\x5c"));
+		array = magic_split(value, CSTR2RVAL(MAGIC_EXTENSION_SEPARATOR));
 
 		RB_GC_GUARD(array);
 		return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
@@ -1331,7 +1331,7 @@ magic_return(void *data)
 	 * Magic library to be returned.
 	 */
 	if (ma->flags & MAGIC_CONTINUE) {
-		array = magic_split(value, CSTR2RVAL("\x5c\x30\x31\x32\x2d\x20"));
+		array = magic_split(value, CSTR2RVAL(MAGIC_CONTINUE_SEPARATOR));
 
 		RB_GC_GUARD(array);
 		return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
