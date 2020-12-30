@@ -78,6 +78,14 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_close_p((o)))
 #define MAGIC_LOADED_P(o) RTEST(rb_mgc_load_p((o)))
 
+#define MAGIC_WARNING(i, ...)		       \
+	do {				       \
+		if (!(rb_mgc_warning & (i))) { \
+			rb_mgc_warning |= (i); \
+			rb_warn(__VA_ARGS__);  \
+		}			       \
+	} while(0)
+
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
 	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
 
@@ -112,11 +120,11 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 					    E_MAGIC_LIBRARY_CLOSED);	  \
 	} while(0)
 
-#define MAGIC_CHECK_LOADED(o)						  \
-	do {								  \
-		if (!MAGIC_LOADED_P(o))					  \
-			MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EFAULT, \
-					    E_MAGIC_LIBRARY_NOT_LOADED);  \
+#define MAGIC_CHECK_LOADED(o)						 \
+	do {								 \
+		if (!MAGIC_LOADED_P(o))					 \
+			MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EFAULT,	 \
+					    E_MAGIC_LIBRARY_NOT_LOADED); \
 	} while(0)
 
 #define MAGIC_STRINGIFY(s) #s
@@ -249,6 +257,11 @@ magic_fileno(VALUE object)
 	int fd;
 	rb_io_t *io;
 
+	if (rb_respond_to(object, rb_intern("fileno"))) {
+		object = rb_funcall(object, rb_intern("fileno"), 0, Qundef);
+		return NUM2INT(object);
+	}
+
 	if (!FILE_P(object))
 		object = rb_convert_type(object, T_FILE, "IO", "to_io");
 
@@ -257,6 +270,24 @@ magic_fileno(VALUE object)
 		rb_raise(rb_eIOError, "closed stream");
 
 	return fd;
+}
+
+static VALUE
+magic_path(VALUE object)
+{
+	if (STRING_P(object))
+		return object;
+
+	if (rb_respond_to(object, rb_intern("to_path")))
+		return rb_funcall(object, rb_intern("to_path"), 0, Qundef);
+
+	if (rb_respond_to(object, rb_intern("path")))
+		return rb_funcall(object, rb_intern("path"), 0, Qundef);
+
+	if (rb_respond_to(object, rb_intern("to_s")))
+		return rb_funcall(object, rb_intern("to_s"), 0, Qundef);
+
+	return Qnil;
 }
 
 static void
@@ -288,9 +319,7 @@ magic_check_type_array_of_strings(VALUE object)
 
 RUBY_EXTERN int rb_mgc_do_not_auto_load;
 RUBY_EXTERN int rb_mgc_do_not_stop_on_error;
-
-RUBY_EXTERN ID id_to_io;
-RUBY_EXTERN ID id_to_path;
+RUBY_EXTERN int rb_mgc_warning;
 
 RUBY_EXTERN ID id_at_flags;
 RUBY_EXTERN ID id_at_paths;

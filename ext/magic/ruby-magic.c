@@ -6,9 +6,7 @@ extern "C" {
 
 int rb_mgc_do_not_auto_load = 0;
 int rb_mgc_do_not_stop_on_error = 0;
-
-ID id_to_io;
-ID id_to_path;
+int rb_mgc_warning = 0;
 
 ID id_at_flags;
 ID id_at_paths;
@@ -56,7 +54,7 @@ static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
                         void *data);
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
-static VALUE magic_get_flags(VALUE object);
+static int magic_flags(VALUE object);
 static VALUE magic_set_paths(VALUE object, VALUE value);
 
 /*
@@ -182,14 +180,19 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 {
 	magic_object_t *mo;
 	const char *klass = "Magic";
-	VALUE boolean = Qundef;
+
+	if(RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_STOP_ON_ERROR']")))
+		rb_mgc_do_not_stop_on_error = 1;
+
+	if(RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_AUTOLOAD']")))
+		rb_mgc_do_not_auto_load = 1;
 
 	if (!NIL_P(object))
 		klass = rb_obj_classname(object);
 
 	if (rb_block_given_p())
-		rb_warn("%s::new() does not take block; use %s::open() instead",
-			klass, klass);
+		MAGIC_WARNING(0, "%s::new() does not take block; use %s::open() instead",
+				   klass, klass);
 
 	MAGIC_OBJECT(mo);
 
@@ -199,18 +202,16 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
 	magic_set_paths(object, RARRAY_EMPTY);
 
-	boolean = rb_mgc_get_do_not_stop_on_error_global(object);
-	if (RVAL2CBOOL(boolean))
-		mo->stop_on_errors = 0;
-
 	rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
 
-	boolean = rb_mgc_get_do_not_auto_load_global(object);
-	if (RVAL2CBOOL(boolean)) {
+	if (rb_mgc_do_not_stop_on_error)
+		mo->stop_on_errors = 0;
+
+	if (rb_mgc_do_not_auto_load) {
 		if (!RARRAY_EMPTY_P(arguments))
-			rb_warn("%s::do_not_auto_load is set; using %s#new() to load "
-				"Magic database from a file will have no effect",
-				klass, klass);
+			MAGIC_WARNING(1, "%s::do_not_auto_load is set; using %s#new() to load "
+					 "Magic database from a file will have no effect",
+					 klass, klass);
 		return object;
 	}
 
@@ -537,7 +538,6 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	magic_arguments_t ma;
 	const char *klass = "Magic";
 	VALUE value = Qundef;
-	VALUE boolean = Qundef;
 
 	if (ARRAY_P(RARRAY_FIRST(arguments)))
 		arguments = magic_flatten(arguments);
@@ -546,17 +546,16 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	boolean = rb_mgc_get_do_not_auto_load_global(object);
-	if (RVAL2CBOOL(boolean)) {
+	if (rb_mgc_do_not_auto_load) {
 		if (!NIL_P(object))
 			klass = rb_obj_classname(object);
 
-		rb_warn("%s::do_not_auto_load is set; using %s#load "
-			"will load Magic database from a file",
-			klass, klass);
+		MAGIC_WARNING(2, "%s::do_not_auto_load is set; using %s#load "
+				  "will load Magic database from a file",
+				  klass, klass);
 	}
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 
 	if (!RARRAY_EMPTY_P(arguments)) {
 		value = magic_join(arguments, CSTR2RVAL(":"));
@@ -634,7 +633,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 		sizes[i] = (size_t)RSTRING_LEN(value);
 	}
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 	ma.type.buffers.count = count;
 	ma.type.buffers.buffers = buffers;
 	ma.type.buffers.sizes = sizes;
@@ -722,7 +721,7 @@ rb_mgc_compile(VALUE object, VALUE arguments)
 	else
 		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
@@ -761,7 +760,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 	else
 		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
@@ -776,7 +775,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 /*
  * call-seq:
  *    magic.file( object ) -> string or array
- *    magic.file( path )   -> string or array
+ *    magic.file( string ) -> string or array
  *
  * See also: Magic#buffer and Magic#descriptor
  */
@@ -785,9 +784,8 @@ rb_mgc_file(VALUE object, VALUE value)
 {
 	magic_object_t *mo;
 	magic_arguments_t ma;
-	int clear_error = 0;
 	const char *empty = "(null)";
-	VALUE boolean = Qundef;
+	int old_flags = 0;
 
 	if (NIL_P(value))
 		goto error;
@@ -796,33 +794,27 @@ rb_mgc_file(VALUE object, VALUE value)
 	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	if (rb_respond_to(value, rb_intern("to_io")))
+		return rb_mgc_descriptor(object, value);
 
-	if (rb_respond_to(value, id_to_io)) {
-		ma.type.file.fd = magic_fileno(value);
-		MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
-	}
-	else {
-		if (rb_respond_to(value, id_to_path))
-			value = rb_funcall(value, id_to_path, 0, Qundef);
+	value = magic_path(value);
+	if (NIL_P(value))
+		goto error;
 
-		if (!STRING_P(value))
-			goto error;
+	ma.flags = magic_flags(object);
+	ma.type.file.path = RVAL2CSTR(value);
 
-		ma.type.file.path = RVAL2CSTR(value);
-
-		if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
-			ma.flags |= MAGIC_ERROR;
-			rb_mgc_set_flags(object, INT2NUM(ma.flags));
-			clear_error = 1;
-		}
-
-		MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+	if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
+		old_flags = ma.flags;
+		ma.flags |= MAGIC_ERROR;
+		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
 	}
 
-	if (clear_error) {
-		ma.flags &= ~MAGIC_ERROR;
-		rb_mgc_set_flags(object, INT2NUM(ma.flags));
+	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
+
+	if (mo->stop_on_errors && old_flags) {
+		ma.flags = old_flags;
+		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
 	}
 
 	if (!ma.result) {
@@ -842,11 +834,8 @@ rb_mgc_file(VALUE object, VALUE value)
 		if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
 			MAGIC_LIBRARY_ERROR(ma.cookie);
 		else {
-			boolean = rb_mgc_get_do_not_auto_load_global(object);
-			if (RVAL2CBOOL(boolean) || ma.flags & MAGIC_EXTENSION) {
-				magic_errno_wrapper(ma.cookie);
-				ma.result = magic_error_wrapper(ma.cookie);
-			}
+			magic_errno_wrapper(ma.cookie);
+			ma.result = magic_error_wrapper(ma.cookie);
 		}
 	}
 
@@ -889,7 +878,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
 	StringValue(value);
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 	ma.type.buffers.sizes = (size_t *)RSTRING_LEN(value);
 	ma.type.buffers.buffers = (void **)RSTRING_PTR(value);
 
@@ -905,6 +894,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
 /*
  * call-seq:
+ *    magic.descriptor( object )  -> string or array
  *    magic.descriptor( integer ) -> string or array
  *
  * See also: Magic#file and Magic#buffer
@@ -916,12 +906,15 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 	magic_object_t *mo;
 	magic_arguments_t ma;
 
+	if (rb_respond_to(value, rb_intern("to_io")))
+		value = INT2NUM(magic_fileno(value));
+
 	MAGIC_CHECK_INTEGER_TYPE(value);
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = NUM2INT(magic_get_flags(object));
+	ma.flags = magic_flags(object);
 	ma.type.file.fd = NUM2INT(value);
 
 	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
@@ -1147,6 +1140,8 @@ magic_allocate(VALUE klass)
 
 	mo->cookie = NULL;
 	mo->mutex = Qundef;
+	mo->database_loaded = 0;
+	mo->stop_on_errors = 0;
 
 	mo->cookie = magic_open_wrapper(MAGIC_NONE);
 	local_errno = ENOMEM;
@@ -1342,10 +1337,10 @@ magic_return(void *data)
 	return value;
 }
 
-static VALUE
-magic_get_flags(VALUE object)
+static int
+magic_flags(VALUE object)
 {
-	return rb_ivar_get(object, id_at_flags);
+	return NUM2INT(rb_ivar_get(object, id_at_flags));
 }
 
 static VALUE
@@ -1357,9 +1352,6 @@ magic_set_paths(VALUE object, VALUE value)
 void
 Init_magic(void)
 {
-	id_to_io = rb_intern("to_io");
-	id_to_path = rb_intern("to_path");
-
 	id_at_paths = rb_intern("@paths");
 	id_at_flags = rb_intern("@flags");
 

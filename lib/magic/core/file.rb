@@ -10,10 +10,6 @@ class File
     # See also: File::mime and File::type
     #
     def magic(path, flags = Magic::NONE)
-      path   = path.path    if path.respond_to?(:path)
-      path ||= path.to_path if path.respond_to?(:to_path)
-      path ||= path.to_s
-
       Magic.open(flags) {|mgc| mgc.file(path) }
     end
 

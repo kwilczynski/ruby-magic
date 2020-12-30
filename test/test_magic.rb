@@ -85,6 +85,12 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(expected, output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop)
   end
 
+  def test_magic_new_with_MAGIC_DO_NOT_STOP_ON_ERROR_environment_variable
+  end
+
+  def test_magic_new_with_MAGIC_DO_NOT_AUTOLOAD_environment_variable
+  end
+
   def test_magic_instance_methods
     [
       :do_not_stop_on_error,
