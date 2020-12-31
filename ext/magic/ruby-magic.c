@@ -108,9 +108,6 @@ rb_mgc_get_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object))
 VALUE
 rb_mgc_set_do_not_auto_load_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 {
-	if (!BOOLEAN_P(value))
-		MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
-
 	rb_mgc_do_not_auto_load = RVAL2CBOOL(value);
 
 	return value;
@@ -152,9 +149,6 @@ rb_mgc_get_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object))
 VALUE
 rb_mgc_set_do_not_stop_on_error_global(RB_UNUSED_VAR(VALUE object), VALUE value)
 {
-	if (!BOOLEAN_P(value))
-		MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
-
 	rb_mgc_do_not_stop_on_error = RVAL2CBOOL(value);
 
 	return value;
@@ -247,9 +241,6 @@ VALUE
 rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value)
 {
 	magic_object_t *mo;
-
-	if (!BOOLEAN_P(value))
-		MAGIC_ARGUMENT_TYPE_ERROR(value, "TrueClass or FalseClass");
 
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_OBJECT(mo);
@@ -725,9 +716,8 @@ rb_mgc_compile(VALUE object, VALUE value)
 
 /*
  * call-seq:
- *    magic.check                -> true or false
- *    magic.check( string, ... ) -> true or false
- *    magic.check( array )       -> true or false
+ *    magic.check( string ) -> true or false
+ *    magic.check( array )  -> true or false
  *
  * See also: Magic#compile, Magic::compile and Magic::check
  */
@@ -993,8 +983,8 @@ nogvl_magic_descriptor(void *data)
 	magic_arguments_t *ma = data;
 
 	ma->result = magic_descriptor_wrapper(ma->cookie,
-						ma->type.file.fd,
-						ma->flags);
+					      ma->type.file.fd,
+					      ma->flags);
 
 	return ma;
 }
@@ -1005,7 +995,9 @@ magic_get_parameter_internal(void *data)
 	size_t value;
 	magic_arguments_t *ma = data;
 
-	ma->status = magic_getparam_wrapper(ma->cookie, ma->type.parameter.tag, &value);
+	ma->status = magic_getparam_wrapper(ma->cookie,
+					    ma->type.parameter.tag,
+					    &value);
 
 	ma->type.parameter.value = value;
 
@@ -1020,7 +1012,9 @@ magic_set_parameter_internal(void *data)
 
 	value = ma->type.parameter.value;
 
-	ma->status = magic_setparam_wrapper(ma->cookie, ma->type.parameter.tag, &value);
+	ma->status = magic_setparam_wrapper(ma->cookie,
+					    ma->type.parameter.tag,
+					    &value);
 
 	return (VALUE)ma;
 }
@@ -1408,9 +1402,13 @@ Init_magic(void)
 	rb_define_method(rb_cMagic, "buffer", RUBY_METHOD_FUNC(rb_mgc_buffer), 1);
 	rb_define_method(rb_cMagic, "descriptor", RUBY_METHOD_FUNC(rb_mgc_descriptor), 1);
 
+	rb_alias(rb_cMagic, rb_intern("fd"), rb_intern("descriptor"));
+
 	rb_define_method(rb_cMagic, "load", RUBY_METHOD_FUNC(rb_mgc_load), -2);
 	rb_define_method(rb_cMagic, "load_buffers", RUBY_METHOD_FUNC(rb_mgc_load_buffers), -2);
 	rb_define_method(rb_cMagic, "loaded?", RUBY_METHOD_FUNC(rb_mgc_load_p), 0);
+
+	rb_alias(rb_cMagic, rb_intern("load_files"), rb_intern("load"));
 
 	rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), 1);
 	rb_define_method(rb_cMagic, "check", RUBY_METHOD_FUNC(rb_mgc_check), 1);

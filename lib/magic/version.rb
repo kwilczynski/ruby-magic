@@ -21,6 +21,8 @@ class Magic
       [self.version / 100, self.version % 100]
     end
 
+    alias_method :version_to_a, :version_array
+
     #
     # call-seq:
     #    Magic.version_string -> string
@@ -35,7 +37,6 @@ class Magic
       '%d.%02d' % self.version_array
     end
 
-    alias_method :version_to_a, :version_array
     alias_method :version_to_s, :version_string
   end
 end

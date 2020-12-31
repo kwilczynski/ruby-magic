@@ -28,17 +28,6 @@ class Magic
 
   #
   # call-seq:
-  #    magic.fd( object )  -> string
-  #    magic.fd( integer ) -> string
-  #
-  # See also: Magic#descriptor, Magic#buffer and Magic#file
-  #
-  def fd(fd)
-    descriptor(fd.respond_to?(:fileno) ? fd.fileno : fd)
-  end
-
-  #
-  # call-seq:
   #    magic.flags_list( boolean ) -> array
   #
   # See also: Magic#flags and Magic#flags_names
@@ -60,6 +49,8 @@ class Magic
 
     flags
   end
+
+  alias_method :flags_to_a, :flags_list
 
   # call-seq:
   #    magic.flags_names -> array
@@ -180,13 +171,11 @@ class Magic
     # See also:
     #
     def descriptor(fd, flags = Magic::MIME)
-      open(flags).fd(fd)
+      open(flags).descriptor(fd)
     end
 
     alias_method :fd, :descriptor
   end
-
-  alias_method :flags_to_a, :flags_list
 
   private
 

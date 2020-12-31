@@ -14,26 +14,6 @@ class MagicTest < Test::Unit::TestCase
     @magic = Magic.new
   end
 
-  def test_magic_alias
-    assert_same(FileMagic, Magic)
-  end
-
-  def test_magic_flags_alias
-    assert_alias_method(@magic, :flags_to_a, :flags_list)
-  end
-
-  def test_magic_check_alias
-    assert_alias_method(@magic, :valid?, :check)
-  end
-
-  def test_magic_version_to_a_alias
-    assert_alias_method(Magic, :version_array, :version_to_a)
-  end
-
-  def test_magic_version_to_s_alias
-    assert_alias_method(Magic, :version_string, :version_to_s)
-  end
-
   def test_magic_singleton_methods
     [
       :open,
@@ -45,6 +25,7 @@ class MagicTest < Test::Unit::TestCase
       :file,
       :buffer,
       :descriptor,
+      :fd,
       :version,
       :version_array,
       :version_string,
@@ -64,6 +45,10 @@ class MagicTest < Test::Unit::TestCase
     ].each do |i|
       assert_respond_to(Magic, i)
     end
+  end
+
+  def test_magic_alias
+    assert_same(FileMagic, Magic)
   end
 
   def test_magic_new_instance
@@ -113,10 +98,12 @@ class MagicTest < Test::Unit::TestCase
       :descriptor,
       :fd,
       :load,
+      :load_files,
       :load_buffers,
       :loaded?,
       :compile,
-      :check
+      :check,
+      :valid?
     ].each do |i|
       assert_respond_to(@magic, i)
     end
@@ -281,6 +268,9 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Errno::EOVERFLOW::Errno, error.errno)
   end
 
+  def test_magic_flags
+  end
+
   def test_magic_flags_with_NONE_flag
     @magic.flags = 0x000000
 
@@ -307,6 +297,13 @@ class MagicTest < Test::Unit::TestCase
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::MIME, @magic.flags)
+  end
+
+  def test_magic_flags_list
+  end
+
+  def test_magic_flags_list_alias
+    assert_alias_method(@magic, :flags_to_a, :flags_list)
   end
 
   def test_magic_flags_list_with_NONE_flag
@@ -507,6 +504,9 @@ class MagicTest < Test::Unit::TestCase
     end
   end
 
+  def test_magic_descriptor_alias
+  end
+
   def test_magic_descriptor_with_magic_library_not_loaded
   end
 
@@ -554,6 +554,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load
+  end
+
+  def test_magic_load_alias
   end
 
   def test_magic_load_with_DEBUG_flag
@@ -606,6 +609,10 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_check
   end
 
+  def test_magic_check_alias
+    assert_alias_method(@magic, :valid?, :check)
+  end
+
   def test_magic_check_with_DEBUG_flag
     @magic.flags = Magic::DEBUG
 
@@ -640,6 +647,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_version_array_alias
+    assert_alias_method(Magic, :version_array, :version_to_a)
   end
 
   def test_magic_version_string
@@ -648,6 +656,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_version_string_alias
+    assert_alias_method(Magic, :version_string, :version_to_s)
   end
 
   def test_magic_singleton_do_not_auto_load_global
