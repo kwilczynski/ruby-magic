@@ -39,11 +39,11 @@ class Magic
 
   #
   # call-seq:
-  #    magic.flags_to_a( boolean ) -> array
+  #    magic.flags_list( boolean ) -> array
   #
-  # See also: Magic#flags
+  # See also: Magic#flags and Magic#flags_names
   #
-  def flags_to_a(names = false)
+  def flags_list(names = false)
     raise LibraryError, 'Magic library is not open' if closed?
     return [names ? 'NONE' : 0] if @flags.zero?
 
@@ -59,6 +59,15 @@ class Magic
     end
 
     flags
+  end
+
+  # call-seq:
+  #    magic.flags_names -> array
+  #
+  # See also: Magic#flags and Magic#flags_list
+  #
+  def flags_names
+    flags_list(true)
   end
 
   class << self
@@ -177,7 +186,7 @@ class Magic
     alias_method :fd, :descriptor
   end
 
-  alias_method :flags_array, :flags_to_a
+  alias_method :flags_to_a, :flags_list
 
   private
 

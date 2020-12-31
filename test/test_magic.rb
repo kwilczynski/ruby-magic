@@ -19,7 +19,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_flags_alias
-    assert_alias_method(@magic, :flags_array, :flags_to_a)
+    assert_alias_method(@magic, :flags_to_a, :flags_list)
   end
 
   def test_magic_check_alias
@@ -46,6 +46,8 @@ class MagicTest < Test::Unit::TestCase
       :buffer,
       :descriptor,
       :version,
+      :version_array,
+      :version_string,
       :version_to_a,
       :version_to_s
     ].each do |i|
@@ -103,7 +105,9 @@ class MagicTest < Test::Unit::TestCase
       :set_parameter,
       :flags,
       :flags=,
-      :flags_array,
+      :flags_list,
+      :flags_names,
+      :flags_to_a,
       :file,
       :buffer,
       :descriptor,
@@ -305,60 +309,75 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Magic::MIME, @magic.flags)
   end
 
-  def test_magic_flags_to_a_with_NONE_flag
+  def test_magic_flags_list_with_NONE_flag
     @magic.flags = Magic::NONE
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::NONE], @magic.flags_to_a)
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal([Magic::NONE], @magic.flags_list)
   end
 
-  def test_magic_flags_to_a_with_MIME_TYPE_flag
+  def test_magic_flags_list_with_MIME_TYPE_flag
     @magic.flags = Magic::MIME_TYPE
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_TYPE], @magic.flags_to_a)
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal([Magic::MIME_TYPE], @magic.flags_list)
   end
 
-  def test_magic_flags_to_a_with_MIME_ENCODING_flag
+  def test_magic_flags_list_with_MIME_ENCODING_flag
     @magic.flags = Magic::MIME_ENCODING
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_ENCODING], @magic.flags_to_a)
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal([Magic::MIME_ENCODING], @magic.flags_list)
   end
 
-  def test_magic_flags_to_a_with_MIME_flag
+  def test_magic_flags_list_with_MIME_flag
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_to_a)
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal([Magic::MIME_TYPE, Magic::MIME_ENCODING], @magic.flags_list)
   end
 
-  def test_magic_flags_to_a_with_NONE_flag_and_argument_true
+  def test_magic_flags_list_with_NONE_flag_and_argument_true
     @magic.flags = Magic::NONE
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['NONE'], @magic.flags_to_a(true))
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal(['NONE'], @magic.flags_list(true))
   end
 
-  def test_magic_flags_to_a_with_MIME_TYPE_flag_and_argument_true
+  def test_magic_flags_list_with_MIME_TYPE_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_TYPE'], @magic.flags_to_a(true))
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal(['MIME_TYPE'], @magic.flags_list(true))
   end
 
-  def test_magic_flags_to_a_with_MIME_ENCODING_flag_and_argument_true
+  def test_magic_flags_list_with_MIME_ENCODING_flag_and_argument_true
     @magic.flags = Magic::MIME_ENCODING
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_ENCODING'], @magic.flags_to_a(true))
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal(['MIME_ENCODING'], @magic.flags_list(true))
   end
 
-  def test_magic_flags_to_a_with_MIME_flag_and_argument_true
+  def test_magic_flags_list_with_MIME_flag_and_argument_true
     @magic.flags = Magic::MIME_TYPE | Magic::MIME_ENCODING
 
-    assert_kind_of(Array, @magic.flags_to_a)
-    assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_to_a(true))
+    assert_kind_of(Array, @magic.flags_list)
+    assert_equal(['MIME_TYPE', 'MIME_ENCODING'], @magic.flags_list(true))
+  end
+
+  def test_magic_flags_names
+  end
+
+  def test_magic_flags_names_with_NONE_flag
+  end
+
+  def test_magic_flags_names_with_MIME_TYPE_flag
+  end
+
+  def test_magic_flags_names_with_MIME_ENCODING_flag
+  end
+
+  def test_magic_flags_names_with_MIME_flag
   end
 
   def test_magic_flags_error_lower_boundary
@@ -615,14 +634,20 @@ class MagicTest < Test::Unit::TestCase
     assert(Magic.version > 0)
   end
 
-  def test_magic_version_to_a
+  def test_magic_version_array
     expected = [Magic.version / 100, Magic.version % 100]
-    assert_equal(expected, Magic.version_to_a)
+    assert_equal(expected, Magic.version_array)
   end
 
-  def test_magic_version_to_s
-    expected = '%d.%02d' % Magic.version_to_a
-    assert_equal(expected, Magic.version_to_s)
+  def test_magic_version_array_alias
+  end
+
+  def test_magic_version_string
+    expected = '%d.%02d' % Magic.version_array
+    assert_equal(expected, Magic.version_string)
+  end
+
+  def test_magic_version_string_alias
   end
 
   def test_magic_singleton_do_not_auto_load_global

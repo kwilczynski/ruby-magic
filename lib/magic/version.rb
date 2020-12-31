@@ -9,33 +9,33 @@ class Magic
   class << self
     #
     # call-seq:
-    #    Magic.version_to_a -> array
+    #    Magic.version_array -> array
     #
     # Example:
     #
-    #    Magic.version_to_a #=> [5, 39]
+    #    Magic.version_array #=> [5, 39]
     #
-    # See also: Magic::version_to_s
+    # See also: Magic::version and Magic::version_string
     #
-    def version_to_a
+    def version_array
       [self.version / 100, self.version % 100]
     end
 
     #
     # call-seq:
-    #    Magic.version_to_s -> string
+    #    Magic.version_string -> string
     #
     # Example:
     #
-    #    Magic.version_to_s #=> "5.39"
+    #    Magic.version_string #=> "5.39"
     #
-    # See also: Magic::version_to_a
+    # See also: Magic::version and Magic::version_array
     #
-    def version_to_s
-      '%d.%02d' % self.version_to_a
+    def version_string
+      '%d.%02d' % self.version_array
     end
 
-    alias_method :version_array,  :version_to_a
-    alias_method :version_string, :version_to_s
+    alias_method :version_to_a, :version_array
+    alias_method :version_to_s, :version_string
   end
 end

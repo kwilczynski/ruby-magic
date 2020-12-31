@@ -696,30 +696,20 @@ rb_mgc_load_p(VALUE object)
 
 /*
  * call-seq:
- *    magic.compile                -> nil
- *    magic.compile( string, ... ) -> nil
- *    magic.compile( array )       -> nil
+ *    magic.compile( string ) -> nil
+ *    magic.compile( array )  -> nil
  *
  * See also: Magic#check, Magic::check and Magic::compile
  */
 VALUE
-rb_mgc_compile(VALUE object, VALUE arguments)
+rb_mgc_compile(VALUE object, VALUE value)
 {
 	magic_object_t *mo;
 	magic_arguments_t ma;
-	VALUE value = Qundef;
 
-	if (ARRAY_P(RARRAY_FIRST(arguments)))
-		arguments = magic_flatten(arguments);
-
-	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
+	MAGIC_CHECK_STRING_TYPE(value);
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
-
-	if (!RARRAY_EMPTY_P(arguments))
-		value = magic_join(arguments, CSTR2RVAL(":"));
-	else
-		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
 	ma.flags = magic_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
@@ -742,23 +732,14 @@ rb_mgc_compile(VALUE object, VALUE arguments)
  * See also: Magic#compile, Magic::compile and Magic::check
  */
 VALUE
-rb_mgc_check(VALUE object, VALUE arguments)
+rb_mgc_check(VALUE object, VALUE value)
 {
 	magic_object_t *mo;
 	magic_arguments_t ma;
-	VALUE value = Qundef;
 
-	if (ARRAY_P(RARRAY_FIRST(arguments)))
-		arguments = magic_flatten(arguments);
-
-	MAGIC_CHECK_ARRAY_OF_STRINGS(arguments);
+	MAGIC_CHECK_STRING_TYPE(value);
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
-
-	if (!RARRAY_EMPTY_P(arguments))
-		value = magic_join(arguments, CSTR2RVAL(":"));
-	else
-		value = magic_join(rb_mgc_get_paths(object), CSTR2RVAL(":"));
 
 	ma.flags = magic_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
@@ -782,6 +763,7 @@ rb_mgc_check(VALUE object, VALUE arguments)
 VALUE
 rb_mgc_file(VALUE object, VALUE value)
 {
+	int stop;
 	magic_object_t *mo;
 	magic_arguments_t ma;
 	const char *empty = "(null)";
@@ -804,7 +786,11 @@ rb_mgc_file(VALUE object, VALUE value)
 	ma.flags = magic_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
-	if (mo->stop_on_errors && !(ma.flags & MAGIC_ERROR)) {
+	stop = mo->stop_on_errors;
+	if (ma.flags & MAGIC_ERROR)
+		stop = 0;
+
+	if (stop) {
 		old_flags = ma.flags;
 		ma.flags |= MAGIC_ERROR;
 		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
@@ -812,7 +798,7 @@ rb_mgc_file(VALUE object, VALUE value)
 
 	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
 
-	if (mo->stop_on_errors && old_flags) {
+	if (stop) {
 		ma.flags = old_flags;
 		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
 	}
@@ -1016,11 +1002,12 @@ nogvl_magic_descriptor(void *data)
 static inline VALUE
 magic_get_parameter_internal(void *data)
 {
+	size_t value;
 	magic_arguments_t *ma = data;
 
-	ma->status = magic_getparam_wrapper(ma->cookie,
-					    ma->type.parameter.tag,
-					    &ma->type.parameter.value);
+	ma->status = magic_getparam_wrapper(ma->cookie, ma->type.parameter.tag, &value);
+
+	ma->type.parameter.value = value;
 
 	return (VALUE)ma;
 }
@@ -1028,11 +1015,12 @@ magic_get_parameter_internal(void *data)
 static inline VALUE
 magic_set_parameter_internal(void *data)
 {
+	size_t value;
 	magic_arguments_t *ma = data;
 
-	ma->status = magic_setparam_wrapper(ma->cookie,
-					    ma->type.parameter.tag,
-					    &ma->type.parameter.value);
+	value = ma->type.parameter.value;
+
+	ma->status = magic_setparam_wrapper(ma->cookie, ma->type.parameter.tag, &value);
 
 	return (VALUE)ma;
 }
@@ -1424,8 +1412,8 @@ Init_magic(void)
 	rb_define_method(rb_cMagic, "load_buffers", RUBY_METHOD_FUNC(rb_mgc_load_buffers), -2);
 	rb_define_method(rb_cMagic, "loaded?", RUBY_METHOD_FUNC(rb_mgc_load_p), 0);
 
-	rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), -2);
-	rb_define_method(rb_cMagic, "check", RUBY_METHOD_FUNC(rb_mgc_check), -2);
+	rb_define_method(rb_cMagic, "compile", RUBY_METHOD_FUNC(rb_mgc_compile), 1);
+	rb_define_method(rb_cMagic, "check", RUBY_METHOD_FUNC(rb_mgc_check), 1);
 
 	rb_alias(rb_cMagic, rb_intern("valid?"), rb_intern("check"));
 

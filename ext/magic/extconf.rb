@@ -154,7 +154,19 @@ end
   have_func(f)
 end
 
-dir_config('magic')
+headers = %w[
+  /opt/local/include
+  /usr/local/include
+  /usr/include
+]
+
+libraries = %w[
+  /opt/local/lib
+  /usr/local/lib
+  /usr/lib
+]
+
+dir_config('magic', headers, libraries)
 
 create_header
 create_makefile('magic/magic')
