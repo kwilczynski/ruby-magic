@@ -4,12 +4,10 @@ extern "C" {
 
 #include "functions.h"
 
-static inline int safe_cloexec(int fd);
-
 int check_fd(int fd);
-int safe_dup(int fd);
-int safe_close(int fd);
-
+static int safe_dup(int fd);
+static int safe_close(int fd);
+static int safe_cloexec(int fd);
 int override_error_output(void *data);
 int restore_error_output(void *data);
 
@@ -25,31 +23,7 @@ check_fd(int fd)
 	return 0;
 }
 
-static inline int
-safe_cloexec(int fd)
-{
-	int local_errno;
-	int flags = fcntl(fd, F_GETFD);
-
-	if (flags < 0) {
-		local_errno = errno;
-		goto out;
-	}
-
-	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
-		local_errno = errno;
-		goto out;
-	}
-
-	return 0;
-
-out:
-	errno = local_errno;
-
-	return -1;
-}
-
-int
+static int
 safe_dup(int fd)
 {
 	int new_fd;
@@ -65,24 +39,23 @@ safe_dup(int fd)
 		new_fd = dup(fd);
 		if (new_fd < 0) {
 			local_errno = errno;
-			goto out;
+			goto error;
 		}
 	}
 
 	if (safe_cloexec(new_fd) < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	return new_fd;
-
-out:
+error:
 	errno = local_errno;
 
 	return -1;
 }
 
-int
+static int
 safe_close(int fd)
 {
 	int rv;
@@ -95,6 +68,29 @@ safe_close(int fd)
 #endif
 
 	return rv;
+}
+
+static inline int
+safe_cloexec(int fd)
+{
+	int local_errno;
+	int flags = fcntl(fd, F_GETFD);
+
+	if (flags < 0) {
+		local_errno = errno;
+		goto error;
+	}
+
+	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
+		local_errno = errno;
+		goto error;
+	}
+
+	return 0;
+error:
+	errno = local_errno;
+
+	return -1;
 }
 
 int
@@ -121,7 +117,7 @@ override_error_output(void *data)
 	s->file.old_fd = safe_dup(fileno(stderr));
 	if (s->file.old_fd < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	s->file.new_fd = open("/dev/null", O_WRONLY | O_APPEND, mode);
@@ -130,28 +126,27 @@ override_error_output(void *data)
 
 		if (dup2(s->file.old_fd, fileno(stderr)) < 0) {
 			local_errno = errno;
-			goto out;
+			goto error;
 		}
 
 		safe_close(s->file.old_fd);
-		goto out;
+		goto error;
 	}
 
 	if (safe_cloexec(s->file.new_fd) < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	if (dup2(s->file.new_fd, fileno(stderr)) < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	safe_close(s->file.new_fd);
 
 	return 0;
-
-out:
+error:
 	s->status = local_errno;
 	errno = s->status;
 
@@ -174,7 +169,7 @@ restore_error_output(void *data)
 
 	if (dup2(s->file.old_fd, fileno(stderr)) < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	safe_close(s->file.old_fd);
@@ -183,12 +178,12 @@ restore_error_output(void *data)
 
 	if (setvbuf(stderr, NULL, _IONBF, 0) != 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	return 0;
 
-out:
+error:
 	s->status = local_errno;
 	errno = s->status;
 
@@ -257,7 +252,6 @@ magic_getflags_wrapper(magic_t magic)
 	return magic_getflags(magic);
 #else
 	UNUSED(magic);
-
 	errno = ENOSYS;
 	return -ENOSYS;
 #endif
@@ -349,14 +343,14 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 
 	if (check_fd(fd) < 0) {
 		local_errno = errno;
-		goto out;
+		goto error;
 	}
 
 	MAGIC_FUNCTION(magic_descriptor, cstring, flags, magic, fd);
 
 	return cstring;
 
-out:
+error:
 	errno = local_errno;
 
 	return NULL;

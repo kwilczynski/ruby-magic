@@ -4,9 +4,9 @@ extern "C" {
 
 #include "ruby-magic.h"
 
-int rb_mgc_do_not_auto_load = 0;
-int rb_mgc_do_not_stop_on_error = 0;
-int rb_mgc_warning = 0;
+static int rb_mgc_do_not_auto_load;
+static int rb_mgc_do_not_stop_on_error;
+static int rb_mgc_warning;
 
 ID id_at_flags;
 ID id_at_paths;
@@ -49,9 +49,9 @@ static VALUE magic_exception(void *data);
 static void magic_library_close(void *data);
 static VALUE magic_library_error(VALUE klass, void *data);
 static VALUE magic_generic_error(VALUE klass, int magic_errno,
-                                 const char *magic_error);
+				 const char *magic_error);
 static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
-                        void *data);
+			void *data);
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
 static int magic_flags(VALUE object);
@@ -192,7 +192,7 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 
 	if (rb_block_given_p())
 		MAGIC_WARNING(0, "%s::new() does not take block; use %s::open() instead",
-				   klass, klass);
+				 klass, klass);
 
 	MAGIC_OBJECT(mo);
 

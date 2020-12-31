@@ -7,16 +7,16 @@ extern "C" {
 
 #include "common.h"
 
-#define MAGIC_FUNCTION(f, r, x, ...)			   \
-	do {						   \
-		if ((x) & MAGIC_DEBUG)			   \
-			r = f(__VA_ARGS__);		   \
-		else {					   \
-			save_t __e_##f;			   \
-			override_error_output(&(__e_##f)); \
-			r = f(__VA_ARGS__);		   \
-			restore_error_output(&(__e_##f));  \
-		}					   \
+#define MAGIC_FUNCTION(f, r, x, ...)			 \
+	do {						 \
+		if ((x) & MAGIC_DEBUG)			 \
+			r = f(__VA_ARGS__);		 \
+		else {					 \
+			save_t __##f;			 \
+			override_error_output(&(__##f)); \
+			r = f(__VA_ARGS__);		 \
+			restore_error_output(&(__##f));  \
+		}					 \
 	} while(0)
 
 typedef struct file_data {
@@ -29,9 +29,6 @@ typedef struct save {
 	int status;
 	file_data_t file;
 } save_t;
-
-extern int safe_dup(int fd);
-extern int safe_close(int fd);
 
 extern magic_t magic_open_wrapper(int flags);
 extern void magic_close_wrapper(magic_t magic);

@@ -317,10 +317,6 @@ magic_check_type_array_of_strings(VALUE object)
 	}
 }
 
-RUBY_EXTERN int rb_mgc_do_not_auto_load;
-RUBY_EXTERN int rb_mgc_do_not_stop_on_error;
-RUBY_EXTERN int rb_mgc_warning;
-
 RUBY_EXTERN ID id_at_flags;
 RUBY_EXTERN ID id_at_paths;
 
