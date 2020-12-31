@@ -65,4 +65,5 @@ before_script:
   - bundle exec rake clean
 
 script:
+  - bundle exec rake compile
   - bundle exec rake test
