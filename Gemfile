@@ -8,6 +8,7 @@ gem 'rdoc'
 group :test do
   gem 'mocha'
   gem 'test-unit'
+  gem 'rubocop', require: false
 end
 
 group :development do

@@ -1,2 +1,8 @@
-Metrics/LineLength:
+AllCops:
+  NewCops: enable
+  Include:
+    - '**/*.rb'
+  SuggestExtensions: false
+
+Layout/LineLength:
   Max: 120
