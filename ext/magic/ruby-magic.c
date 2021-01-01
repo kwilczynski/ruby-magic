@@ -1279,11 +1279,21 @@ static VALUE
 magic_return(void *data)
 {
 	magic_arguments_t *ma = data;
-	const char *empty = "???";
-	VALUE value = Qundef;
+	const char *unknown = "???";
+	VALUE separator = Qundef;
 	VALUE array = Qundef;
+	VALUE string = Qundef;
 
-	value = CSTR2RVAL(ma->result);
+	string = CSTR2RVAL(ma->result);
+	RB_GC_GUARD(string);
+
+	/*
+	 * The value below is a field separator that can be used to split results
+	 * when the CONTINUE flag is set causing all valid matches found by the
+	 * Magic library to be returned.
+	 */
+	if (ma->flags & MAGIC_CONTINUE)
+		separator = CSTR2RVAL(MAGIC_CONTINUE_SEPARATOR);
 
 	if (ma->flags & MAGIC_EXTENSION) {
 		/*
@@ -1293,30 +1303,20 @@ magic_return(void *data)
 		 * return an empty string, to indicate lack of results, rather
 		 * than a confusing string consisting of three questions marks.
 		 */
-		if (strncmp(ma->result, empty, strlen(empty)) == 0)
+		if (strncmp(ma->result, unknown, strlen(unknown)) == 0)
 			return CSTR2RVAL("");
 
-		array = magic_split(value, CSTR2RVAL(MAGIC_EXTENSION_SEPARATOR));
-
-		RB_GC_GUARD(array);
-		return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+		separator = CSTR2RVAL(MAGIC_EXTENSION_SEPARATOR);
 	}
 
-	/*
-	 * The value below is a field separator that can be used to split results
-	 * when the CONTINUE flag is set causing all valid matches found by the
-	 * Magic library to be returned.
-	 */
-	if (ma->flags & MAGIC_CONTINUE) {
-		array = magic_split(value, CSTR2RVAL(MAGIC_CONTINUE_SEPARATOR));
-
+	if (ma->flags & (MAGIC_CONTINUE | MAGIC_EXTENSION)) {
+		array = magic_split(string, separator);
 		RB_GC_GUARD(array);
-		return (NUM2INT(magic_size(array)) > 1) ? array : magic_shift(array);
+
+		return (RARRAY_LEN(array) > 1) ? array : magic_shift(array);
 	}
 
-	RB_GC_GUARD(value);
-
-	return value;
+	return string;
 }
 
 static int
