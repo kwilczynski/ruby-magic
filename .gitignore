@@ -1,53 +1,41 @@
 ._*
 *~
 
-[568a].out
+*.[568avq]
+[568avq].out
 core
-
-_cgo_*
-_obj
-_test
-_testmain.go
-
-__pycache__/
 
 *.o
 *.a
-*.ko
 *.obj
 *.elf
 *.dylib
 *.[as]o
 *.[568ao]
 *.bundle
-*.un~
 *.rbc
-*.py[cod]
 *.exe
+*.exe~
+*.com
+*.dll
+*.sw[a-z]
+.*.sw[a-z]
+
+*.[7gx]z
+*.[jrt]ar
+*.zip
+
 *.gem
-*.log
+
 *.rej
 *.orig
-*.class
-*.sqlite
-*.tmproj*
-*.sw[a-z]
-*.cgo*.go
-*.cgo*.c
-.*.sw[a-z]
-.nfs.*
-*.egg-info/
-*.egg
-.installed.cfg
-*.mo
+
+*.log
+
+*.test
+*.out
 
 .git
-.svn
-.cvs
-
-.Python
-pip-log.txt
-pip-*-directory.txt
 
 .bundle
 .config
@@ -61,11 +49,23 @@ Gemfile.lock
 
 .directory
 
+.DS_Store
 .DS_Store?
-.Spotlight*
+.AppleDouble
+.LSOverride
+.Spotlight-*
 .Trash*
 
+.vagrant
+
+.direnv
+.envrc
+
 Icon?
+Icon[]
+
+.idea
+.vscode
 
 tmp
 temp
