@@ -634,6 +634,8 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	MAGIC_SYNCHRONIZED(magic_load_buffers_internal, &ma);
 	if (ma.status < 0) {
 		local_errno = errno;
+		ruby_xfree(buffers);
+		ruby_xfree(sizes);
 		goto error;
 	}
 	mo->database_loaded = 1;
