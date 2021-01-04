@@ -64,7 +64,7 @@ extern "C" {
 #endif
 
 #if !defined(MAGIC_CONTINUE_SEPARATOR)
-# define MAGIC_CONTINUE_SEPARATOR "\\012- "
+# define MAGIC_CONTINUE_SEPARATOR "\n- "
 #endif
 
 #if !defined(MAGIC_NO_CHECK_CSV)

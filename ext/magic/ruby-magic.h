@@ -162,7 +162,7 @@ typedef union file {
 typedef struct buffers {
 	size_t count;
 	size_t *sizes;
-	void **buffers;
+	void **pointers;
 } buffers_t;
 
 typedef struct magic_object {
@@ -174,6 +174,8 @@ typedef struct magic_object {
 
 typedef struct magic_arguments {
 	int flags;
+	int old_flags;
+	int restore_flags:1;
 	magic_t cookie;
 	union {
 		file_t file;

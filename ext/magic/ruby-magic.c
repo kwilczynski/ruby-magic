@@ -26,7 +26,6 @@ static VALUE magic_get_parameter_internal(void *data);
 static VALUE magic_set_parameter_internal(void *data);
 static VALUE magic_get_flags_internal(void *data);
 static VALUE magic_set_flags_internal(void *data);
-static VALUE magic_close_internal(void *data);
 static VALUE magic_load_internal(void *data);
 static VALUE magic_load_buffers_internal(void *data);
 static VALUE magic_compile_internal(void *data);
@@ -34,6 +33,7 @@ static VALUE magic_check_internal(void *data);
 static VALUE magic_file_internal(void *data);
 static VALUE magic_buffer_internal(void *data);
 static VALUE magic_descriptor_internal(void *data);
+static VALUE magic_close_internal(void *data);
 
 static void* nogvl_magic_load(void *data);
 static void* nogvl_magic_compile(void *data);
@@ -586,7 +586,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	int local_errno;
 	magic_object_t *mo;
 	magic_arguments_t ma;
-	void **buffers = NULL;
+	void **pointers = NULL;
 	size_t *sizes = NULL;
 	VALUE value = Qundef;
 
@@ -604,29 +604,28 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	buffers = ALLOC_N(void *, count);
-	if (!buffers) {
+	pointers = ALLOC_N(void *, count);
+	if (!pointers) {
 		local_errno = ENOMEM;
 		goto error;
 	}
 
 	sizes = ALLOC_N(size_t, count);
 	if (!sizes) {
-		ruby_xfree(buffers);
-		buffers = NULL;
+		ruby_xfree(pointers);
 		local_errno = ENOMEM;
 		goto error;
 	}
 
 	for (size_t i = 0; i < count; i++) {
 		value = RARRAY_AREF(arguments, (long)i);
-		buffers[i] = (void *)RSTRING_PTR(value);
+		pointers[i] = (void *)RSTRING_PTR(value);
 		sizes[i] = (size_t)RSTRING_LEN(value);
 	}
 
 	ma.flags = magic_flags(object);
 	ma.type.buffers.count = count;
-	ma.type.buffers.buffers = buffers;
+	ma.type.buffers.pointers = pointers;
 	ma.type.buffers.sizes = sizes;
 
 	magic_set_paths(object, RARRAY_EMPTY);
@@ -634,13 +633,13 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 	MAGIC_SYNCHRONIZED(magic_load_buffers_internal, &ma);
 	if (ma.status < 0) {
 		local_errno = errno;
-		ruby_xfree(buffers);
+		ruby_xfree(pointers);
 		ruby_xfree(sizes);
 		goto error;
 	}
 	mo->database_loaded = 1;
 
-	ruby_xfree(buffers);
+	ruby_xfree(pointers);
 	ruby_xfree(sizes);
 
 	return Qnil;
@@ -755,11 +754,9 @@ rb_mgc_check(VALUE object, VALUE value)
 VALUE
 rb_mgc_file(VALUE object, VALUE value)
 {
-	int stop;
 	magic_object_t *mo;
 	magic_arguments_t ma;
 	const char *empty = "(null)";
-	int old_flags = 0;
 
 	if (NIL_P(value))
 		goto error;
@@ -776,25 +773,22 @@ rb_mgc_file(VALUE object, VALUE value)
 		goto error;
 
 	ma.flags = magic_flags(object);
+
+	if (ma.flags & MAGIC_CONTINUE) {
+		ma.old_flags = ma.flags;
+		ma.flags |= MAGIC_RAW;
+		ma.restore_flags = 1;
+	}
+
+	if (mo->stop_on_errors) {
+		ma.old_flags = ma.flags;
+		ma.flags |= MAGIC_ERROR;
+		ma.restore_flags = 1;
+	}
+
 	ma.type.file.path = RVAL2CSTR(value);
 
-	stop = mo->stop_on_errors;
-	if (ma.flags & MAGIC_ERROR)
-		stop = 0;
-
-	if (stop) {
-		old_flags = ma.flags;
-		ma.flags |= MAGIC_ERROR;
-		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
-	}
-
 	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
-
-	if (stop) {
-		ma.flags = old_flags;
-		MAGIC_SYNCHRONIZED(magic_set_flags_internal, &ma);
-	}
-
 	if (!ma.result) {
 		/*
 		 * Handle the case when the "ERROR" flag is set regardless of the
@@ -857,10 +851,18 @@ rb_mgc_buffer(VALUE object, VALUE value)
 	StringValue(value);
 
 	ma.flags = magic_flags(object);
+
+	if (ma.flags & MAGIC_CONTINUE) {
+		ma.old_flags = ma.flags;
+		ma.flags |= MAGIC_RAW;
+		ma.restore_flags = 1;
+	}
+
 	ma.type.buffers.sizes = (size_t *)RSTRING_LEN(value);
-	ma.type.buffers.buffers = (void **)RSTRING_PTR(value);
+	ma.type.buffers.pointers = (void **)RSTRING_PTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
+
 	if (!ma.result)
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 
@@ -893,6 +895,13 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 	MAGIC_COOKIE(mo, ma.cookie);
 
 	ma.flags = magic_flags(object);
+
+	if (ma.flags & MAGIC_CONTINUE) {
+		ma.old_flags = ma.flags;
+		ma.flags |= MAGIC_RAW;
+		ma.restore_flags = 1;
+	}
+
 	ma.type.file.fd = NUM2INT(value);
 
 	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
@@ -940,7 +949,7 @@ nogvl_magic_load(void *data)
 					ma->type.file.path,
 					ma->flags);
 
-	return ma;
+	return NULL;
 }
 
 static inline void*
@@ -952,7 +961,7 @@ nogvl_magic_compile(void *data)
 					   ma->type.file.path,
 					   ma->flags);
 
-	return ma;
+	return NULL;
 }
 
 static inline void*
@@ -964,7 +973,7 @@ nogvl_magic_check(void *data)
 					 ma->type.file.path,
 					 ma->flags);
 
-	return ma;
+	return NULL;
 }
 
 static inline void*
@@ -976,7 +985,7 @@ nogvl_magic_file(void *data)
 					ma->type.file.path,
 					ma->flags);
 
-	return ma;
+	return NULL;
 }
 
 static inline void*
@@ -988,7 +997,7 @@ nogvl_magic_descriptor(void *data)
 					      ma->type.file.fd,
 					      ma->flags);
 
-	return ma;
+	return NULL;
 }
 
 static inline VALUE
@@ -1003,7 +1012,7 @@ magic_get_parameter_internal(void *data)
 
 	ma->type.parameter.value = value;
 
-	return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1017,8 +1026,7 @@ magic_set_parameter_internal(void *data)
 	ma->status = magic_setparam_wrapper(ma->cookie,
 					    ma->type.parameter.tag,
 					    &value);
-
-	return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1028,7 +1036,7 @@ magic_get_flags_internal(void *data)
 
 	ma->flags = magic_getflags_wrapper(ma->cookie);
 
-	return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1038,7 +1046,7 @@ magic_set_flags_internal(void *data)
 
 	ma->status = magic_setflags_wrapper(ma->cookie, ma->flags);
 
-	return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1061,12 +1069,12 @@ magic_load_buffers_internal(void *data)
 	magic_arguments_t *ma = data;
 
 	ma->status = magic_load_buffers_wrapper(ma->cookie,
-						ma->type.buffers.buffers,
+						ma->type.buffers.pointers,
 						ma->type.buffers.sizes,
 						ma->type.buffers.count,
 						ma->flags);
 
-	return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1081,29 +1089,54 @@ magic_check_internal(void *data)
 	return (VALUE)NOGVL(nogvl_magic_check, data);
 }
 
-static inline VALUE
+static VALUE
 magic_file_internal(void *data)
 {
-	return (VALUE)NOGVL(nogvl_magic_file, data);
+	magic_arguments_t *ma = data;
+
+	if (ma->restore_flags && ma->flags)
+		magic_setflags_wrapper(ma->cookie, ma->flags);
+
+	NOGVL(nogvl_magic_file, ma);
+
+	if (ma->restore_flags && ma->old_flags)
+		magic_setflags_wrapper(ma->cookie, ma->old_flags);
+
+	return (VALUE)NULL;
 }
 
-static inline VALUE
+static VALUE
 magic_buffer_internal(void *data)
 {
-    magic_arguments_t *ma = data;
+	magic_arguments_t *ma = data;
+
+	if (ma->restore_flags && ma->flags)
+		magic_setflags_wrapper(ma->cookie, ma->flags);
 
 	ma->result = magic_buffer_wrapper(ma->cookie,
-					  (const void *)ma->type.buffers.buffers,
+					  (const void *)ma->type.buffers.pointers,
 					  (size_t)ma->type.buffers.sizes,
 					  ma->flags);
+	if (ma->restore_flags && ma->old_flags)
+		magic_setflags_wrapper(ma->cookie, ma->old_flags);
 
-    return (VALUE)ma;
+	return (VALUE)NULL;
 }
 
-static inline VALUE
+static VALUE
 magic_descriptor_internal(void *data)
 {
-	return (VALUE)NOGVL(nogvl_magic_descriptor, data);
+	magic_arguments_t *ma = data;
+
+	if (ma->restore_flags && ma->flags)
+		magic_setflags_wrapper(ma->cookie, ma->flags);
+
+	NOGVL(nogvl_magic_descriptor, ma);
+
+	if (ma->restore_flags && ma->old_flags)
+		magic_setflags_wrapper(ma->cookie, ma->old_flags);
+
+	return (VALUE)NULL;
 }
 
 static VALUE
