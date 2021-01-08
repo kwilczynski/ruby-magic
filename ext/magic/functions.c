@@ -11,7 +11,7 @@ static int safe_cloexec(int fd);
 int override_error_output(void *data);
 int restore_error_output(void *data);
 
-int
+inline int
 check_fd(int fd)
 {
 	errno = 0;
@@ -51,7 +51,6 @@ safe_dup(int fd)
 	return new_fd;
 error:
 	errno = local_errno;
-
 	return -1;
 }
 
@@ -89,7 +88,6 @@ safe_cloexec(int fd)
 	return 0;
 error:
 	errno = local_errno;
-
 	return -1;
 }
 
@@ -149,7 +147,6 @@ override_error_output(void *data)
 error:
 	s->status = local_errno;
 	errno = s->status;
-
 	return -1;
 }
 
@@ -182,11 +179,9 @@ restore_error_output(void *data)
 	}
 
 	return 0;
-
 error:
 	s->status = local_errno;
 	errno = s->status;
-
 	return -1;
 }
 
@@ -352,7 +347,6 @@ magic_descriptor_wrapper(magic_t magic, int fd, int flags)
 
 error:
 	errno = local_errno;
-
 	return NULL;
 }
 

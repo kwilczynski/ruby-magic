@@ -209,7 +209,7 @@ static const char *errors[] = {
 	NULL
 };
 
-static VALUE
+static inline VALUE
 magic_shift(VALUE v)
 {
 	return ARRAY_P(v) ?				       \
@@ -217,7 +217,7 @@ magic_shift(VALUE v)
 		Qnil;
 }
 
-static VALUE
+static inline VALUE
 magic_split(VALUE a, VALUE b)
 {
 	return (STRING_P(a) && STRING_P(b)) ?		  \
@@ -225,7 +225,7 @@ magic_split(VALUE a, VALUE b)
 		Qnil;
 }
 
-static VALUE
+static inline VALUE
 magic_join(VALUE a, VALUE b)
 {
 	return (ARRAY_P(a) && STRING_P(b)) ?		 \
@@ -233,7 +233,7 @@ magic_join(VALUE a, VALUE b)
 		Qnil;
 }
 
-static VALUE
+static inline VALUE
 magic_flatten(VALUE v)
 {
 	return ARRAY_P(v) ?					 \
@@ -262,7 +262,7 @@ magic_fileno(VALUE object)
 	return fd;
 }
 
-static VALUE
+static inline VALUE
 magic_path(VALUE object)
 {
 	if (STRING_P(object))
@@ -280,7 +280,7 @@ magic_path(VALUE object)
 	return Qnil;
 }
 
-static void
+static inline void
 magic_check_type(VALUE object, int type)
 {
 	VALUE boolean = Qundef;
@@ -292,7 +292,7 @@ magic_check_type(VALUE object, int type)
 	Check_Type(object, type);
 }
 
-static void
+static inline void
 magic_check_type_array_of_strings(VALUE object)
 {
 	VALUE value = Qundef;

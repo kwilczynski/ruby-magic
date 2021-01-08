@@ -805,10 +805,8 @@ rb_mgc_file(VALUE object, VALUE value)
 		 */
 		if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
 			MAGIC_LIBRARY_ERROR(ma.cookie);
-		else {
-			magic_errno_wrapper(ma.cookie);
+		else
 			ma.result = magic_error_wrapper(ma.cookie);
-		}
 	}
 
 	if (!ma.result)
