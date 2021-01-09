@@ -20,14 +20,14 @@ extern "C" {
 	} while(0)
 
 typedef struct file_data {
+	fpos_t position;
 	int old_fd;
 	int new_fd;
-	fpos_t position;
 } file_data_t;
 
 typedef struct save {
-	int status;
 	file_data_t file;
+	int status;
 } save_t;
 
 extern magic_t magic_open_wrapper(int flags);

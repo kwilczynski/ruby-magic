@@ -150,13 +150,13 @@ enum error {
 };
 
 typedef struct parameter {
-	int tag;
 	size_t value;
+	int tag;
 } parameter_t;
 
 typedef union file {
-	int fd;
 	const char *path;
+	int fd;
 } file_t;
 
 typedef struct buffers {
@@ -173,23 +173,23 @@ typedef struct magic_object {
 } magic_object_t;
 
 typedef struct magic_arguments {
-	int flags;
-	int old_flags;
-	int restore_flags:1;
-	magic_t cookie;
 	union {
 		file_t file;
 		parameter_t parameter;
 		buffers_t buffers;
 	} type;
-	int status;
+	magic_t cookie;
 	const char *result;
+	int flags;
+	int old_flags;
+	int status;
+	int restore_flags:1;
 } magic_arguments_t;
 
 typedef struct magic_exception {
-	int magic_errno;
 	const char *magic_error;
 	VALUE klass;
+	int magic_errno;
 } magic_exception_t;
 
 static const char *errors[] = {
