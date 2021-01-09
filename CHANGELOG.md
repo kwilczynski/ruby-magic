@@ -28,8 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Renamed the `Magic#flags_array` method to `Magic#flags_to_a`.
 - Changed the `Magic::new` method, so that it accepts an array of paths from which to load the _Magic_ database.
 - Moved integration with _File_ and _String_ core classes into separate namespace.
-- Changed the behaviour not to catch the generic `Magic::Error`, plus always to raise on errors coming from _libmagic_. This is to make it more aligned with the standard library, where _file_ and _I/O_ related errors would raise an appropriate exception.
-- Changed behaviour consistent among various versions of _libmagic_ adhering to the _POSIX_ standard. This concerns the following _IEEE 1003.1_ standards:
+- Changed the behavior not to catch the generic `Magic::Error`, plus always to raise on errors coming from _libmagic_. This is to make it more aligned with the standard library, where _file_ and _I/O_ related errors would raise an appropriate exception.
+- Changed behavior consistent among various versions of _libmagic_ adhering to the _POSIX_ standard. This concerns the following _IEEE 1003.1_ standards:
   - http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
   - http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
 

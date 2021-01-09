@@ -794,14 +794,14 @@ rb_mgc_file(VALUE object, VALUE value)
 		 * Handle the case when the "ERROR" flag is set regardless of the
 		 * current version of the underlying Magic library.
 		 *
-		 * Prior to version 5.15 the correct behaviour that concerns the
+		 * Prior to version 5.15 the correct behavior that concerns the
 		 * following IEEE 1003.1 standards was broken:
 		 *
 		 * http://pubs.opengroup.org/onlinepubs/007904975/utilities/file.html
 		 * http://pubs.opengroup.org/onlinepubs/9699919799/utilities/file.html
 		 *
 		 * This is an attempt to mitigate the problem and correct it to achieve
-		 * the desired behaviour as per the standards.
+		 * the desired behavior as per the standards.
 		 */
 		if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
 			MAGIC_LIBRARY_ERROR(ma.cookie);
@@ -1487,7 +1487,7 @@ Init_magic(void)
 	MAGIC_DEFINE_PARAMETER(BYTES_MAX);
 
 	/*
-	 * No special handling and/or flags specified. Default behaviour.
+	 * No special handling and/or flags specified. Default behavior.
 	 */
 	MAGIC_DEFINE_FLAG(NONE);
 
