@@ -181,9 +181,8 @@ typedef struct magic_arguments {
 	magic_t cookie;
 	const char *result;
 	int flags;
-	int old_flags;
 	int status;
-	int restore_flags:1;
+	int stop_on_errors:1;
 } magic_arguments_t;
 
 typedef struct magic_exception {
@@ -299,7 +298,6 @@ magic_check_type_array_of_strings(VALUE object)
 
 	for (int i = 0; i < RARRAY_LEN(object); i++) {
 		value = RARRAY_AREF(object, (long)i);
-
 		if (NIL_P(value) || !STRING_P(value))
 			rb_raise(rb_eTypeError,
 				 error(E_ARGUMENT_TYPE_ARRAY_STRINGS),
