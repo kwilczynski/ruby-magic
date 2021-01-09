@@ -38,16 +38,13 @@ core
 .git
 
 .bundle
-.config
 Gemfile.lock
 
 .gems
 .rbenv
+.rbenv-gemsets
 .ruby-version
 .ruby-gemset
-.rbenv-gemsets
-
-.directory
 
 .DS_Store
 .DS_Store?
@@ -68,5 +65,3 @@ Icon[]
 .vscode
 
 tmp
-temp
-coverage
