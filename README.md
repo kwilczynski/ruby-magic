@@ -1,4 +1,4 @@
-# File Magic in Ruby.
+# File Magic in Ruby
 
 [![Build Status](https://travis-ci.org/kwilczynski/ruby-magic.svg)](https://travis-ci.org/kwilczynski/ruby-magic)
 [![Documentation Status](https://inch-ci.org/github/kwilczynski/ruby-magic.svg)](https://inch-ci.org/github/kwilczynski/ruby-magic)
