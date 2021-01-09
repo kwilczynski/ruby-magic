@@ -5,6 +5,7 @@
 
 *.rb eol=lf diff=ruby
 *.gemspec eol=lf diff=ruby
+*.sh eol=lf
 
 Guardfile eol=lf diff=ruby
 Rakefile eol=lf diff=ruby
