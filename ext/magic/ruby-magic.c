@@ -55,6 +55,7 @@ static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
 static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
 static int magic_flags(VALUE object);
+static int magic_set_flags(VALUE object, VALUE value);
 static VALUE magic_set_paths(VALUE object, VALUE value);
 
 /*
@@ -191,15 +192,14 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 	MAGIC_OBJECT(mo);
 
 	mo->stop_on_errors = 1;
+	if (rb_mgc_do_not_stop_on_error)
+		mo->stop_on_errors = 0;
+
 	mo->mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
 					  rb_intern("Mutex")));
 
+	magic_set_flags(object, INT2NUM(MAGIC_NONE));
 	magic_set_paths(object, RARRAY_EMPTY);
-
-	rb_mgc_set_flags(object, INT2NUM(MAGIC_NONE));
-
-	if (rb_mgc_do_not_stop_on_error)
-		mo->stop_on_errors = 0;
 
 	if (rb_mgc_do_not_auto_load) {
 		if (!RARRAY_EMPTY_P(arguments))
@@ -1087,7 +1087,7 @@ magic_check_internal(void *data)
 	return (VALUE)NOGVL(nogvl_magic_check, data);
 }
 
-static VALUE
+static inline VALUE
 magic_file_internal(void *data)
 {
 	magic_arguments_t *ma = data;
@@ -1103,7 +1103,7 @@ magic_file_internal(void *data)
 	return (VALUE)NULL;
 }
 
-static VALUE
+static inline VALUE
 magic_buffer_internal(void *data)
 {
 	magic_arguments_t *ma = data;
@@ -1121,7 +1121,7 @@ magic_buffer_internal(void *data)
 	return (VALUE)NULL;
 }
 
-static VALUE
+static inline VALUE
 magic_descriptor_internal(void *data)
 {
 	magic_arguments_t *ma = data;
@@ -1173,7 +1173,7 @@ magic_allocate(VALUE klass)
 	return Data_Wrap_Struct(klass, magic_mark, magic_free, mo);
 }
 
-static void
+static inline void
 magic_library_close(void *data)
 {
 	magic_object_t *mo = data;
@@ -1187,7 +1187,7 @@ magic_library_close(void *data)
 	mo->cookie = NULL;
 }
 
-static void
+static inline void
 magic_mark(void *data)
 {
 	magic_object_t *mo = data;
@@ -1198,7 +1198,7 @@ magic_mark(void *data)
 	rb_gc_mark(mo->mutex);
 }
 
-static void
+static inline void
 magic_free(void *data)
 {
 	magic_object_t *mo = data;
@@ -1215,7 +1215,7 @@ magic_free(void *data)
 	ruby_xfree(mo);
 }
 
-static VALUE
+static inline VALUE
 magic_exception_wrapper(VALUE value)
 {
 	magic_exception_t *e = (struct magic_exception *)value;
@@ -1245,7 +1245,7 @@ magic_exception(void *data)
 	return object;
 }
 
-static VALUE
+static inline VALUE
 magic_generic_error(VALUE klass, int magic_errno, const char *magic_error)
 {
 	magic_exception_t e;
@@ -1352,13 +1352,19 @@ magic_return(void *data)
 	return string;
 }
 
-static int
+static inline int
 magic_flags(VALUE object)
 {
 	return NUM2INT(rb_ivar_get(object, id_at_flags));
 }
 
-static VALUE
+static inline int
+magic_set_flags(VALUE object, VALUE value)
+{
+	return NUM2INT(rb_ivar_set(object, id_at_flags, value));
+}
+
+static inline VALUE
 magic_set_paths(VALUE object, VALUE value)
 {
 	return rb_ivar_set(object, id_at_paths, value);

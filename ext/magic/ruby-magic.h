@@ -74,12 +74,12 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_close_p((o)))
 #define MAGIC_LOADED_P(o) RTEST(rb_mgc_load_p((o)))
 
-#define MAGIC_WARNING(i, ...)		       \
-	do {				       \
-		if (!(rb_mgc_warning & (i))) { \
-			rb_mgc_warning |= (i); \
-			rb_warn(__VA_ARGS__);  \
-		}			       \
+#define MAGIC_WARNING(i, ...)				  \
+	do {						  \
+		if (!(i) || !(rb_mgc_warning & BIT(i))) { \
+			rb_mgc_warning |= BIT(i);	  \
+			rb_warn(__VA_ARGS__);		  \
+		}					  \
 	} while(0)
 
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \

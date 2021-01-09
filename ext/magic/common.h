@@ -35,12 +35,16 @@ extern "C" {
 # include <rubyio.h>
 #endif
 
-#if !defined(T_INTEGER)
-# define T_INTEGER rb_cInteger
+#if !defined(BIT)
+# define BIT(n) (1 << (n))
 #endif
 
 #if !defined(UNUSED)
 # define UNUSED(x) (void)(x)
+#endif
+
+#if !defined(T_INTEGER)
+# define T_INTEGER rb_cInteger
 #endif
 
 #if !defined(RUBY_METHOD_FUNC)
