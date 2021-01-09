@@ -42,7 +42,6 @@ safe_dup(int fd)
 			goto error;
 		}
 	}
-
 	if (safe_cloexec(new_fd) < 0) {
 		local_errno = errno;
 		goto error;
@@ -79,7 +78,6 @@ safe_cloexec(int fd)
 		local_errno = errno;
 		goto error;
 	}
-
 	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
 		local_errno = errno;
 		goto error;
@@ -130,12 +128,10 @@ override_error_output(void *data)
 		safe_close(s->file.old_fd);
 		goto error;
 	}
-
 	if (safe_cloexec(s->file.new_fd) < 0) {
 		local_errno = errno;
 		goto error;
 	}
-
 	if (dup2(s->file.new_fd, fileno(stderr)) < 0) {
 		local_errno = errno;
 		goto error;
