@@ -1078,6 +1078,7 @@ magic_buffer_internal(void *data)
 	if (ma->flags & MAGIC_CONTINUE) {
 		old_flags = ma->flags;
 		ma->flags |= MAGIC_RAW;
+		restore_flags = 1;
 	}
 	if (restore_flags && ma->flags)
 		magic_setflags_wrapper(ma->cookie, ma->flags);
@@ -1102,6 +1103,7 @@ magic_descriptor_internal(void *data)
 	if (ma->flags & MAGIC_CONTINUE) {
 		old_flags = ma->flags;
 		ma->flags |= MAGIC_RAW;
+		restore_flags = 1;
 	}
 	if (restore_flags && ma->flags)
 		magic_setflags_wrapper(ma->cookie, ma->flags);
