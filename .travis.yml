@@ -46,7 +46,7 @@ matrix:
 
 branches:
   only:
-    - master
+    - main
 
 notifications:
   email:
