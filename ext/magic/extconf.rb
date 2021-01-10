@@ -20,7 +20,7 @@ $CFLAGS += ' -std=c99 -fPIC'
 $CFLAGS += ' -Wall -Wextra -pedantic'
 
 if RbConfig::CONFIG['CC'] =~ /gcc/
-  $CFLAGS += ' -O2' unless $CFLAGS =~ /-O\d/
+  $CFLAGS += ' -O3' unless $CFLAGS =~ /-O\d/
   $CFLAGS += ' -Wcast-qual -Wwrite-strings -Wconversion -Wmissing-noreturn -Winline'
 end
 
