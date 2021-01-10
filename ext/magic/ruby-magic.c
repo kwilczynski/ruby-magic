@@ -1359,37 +1359,30 @@ Init_magic(void)
 
 	rb_cMagic = rb_define_class("Magic", rb_cObject);
 	rb_define_alloc_func(rb_cMagic, magic_allocate);
-
 	/*
 	 * Raised when _Magic_ encounters an error.
 	 */
 	rb_mgc_eError = rb_define_class_under(rb_cMagic, "Error", rb_eStandardError);
-
 	/*
 	 * Stores current value of +errno+
 	 */
 	rb_define_attr(rb_mgc_eError, "errno", 1, 0);
-
 	/*
 	 * Raised when
 	 */
 	rb_mgc_eMagicError = rb_define_class_under(rb_cMagic, "MagicError", rb_mgc_eError);
-
 	/*
 	 * Raised when
 	 */
 	rb_mgc_eLibraryError = rb_define_class_under(rb_cMagic, "LibraryError", rb_mgc_eError);
-
 	/*
 	 * Raised when
 	 */
 	rb_mgc_eParameterError = rb_define_class_under(rb_cMagic, "ParameterError", rb_mgc_eError);
-
 	/*
 	 * Raised when
 	 */
 	rb_mgc_eFlagsError = rb_define_class_under(rb_cMagic, "FlagsError", rb_mgc_eError);
-
 	/*
 	 * Raised when
 	 */
@@ -1442,192 +1435,155 @@ Init_magic(void)
 	 * indirect magic entries.
 	 */
 	MAGIC_DEFINE_PARAMETER(INDIR_MAX);
-
 	/*
 	 * Controls the maximum number of calls for name or use magic.
 	 */
 	MAGIC_DEFINE_PARAMETER(NAME_MAX);
-
 	/*
 	 * Controls how many ELF program sections will be processed.
 	 */
 	MAGIC_DEFINE_PARAMETER(ELF_PHNUM_MAX);
-
 	/*
 	 * Controls how many ELF sections will be processed.
 	 */
 	MAGIC_DEFINE_PARAMETER(ELF_SHNUM_MAX);
-
 	/*
 	 * Controls how many ELF notes will be processed.
 	 */
 	MAGIC_DEFINE_PARAMETER(ELF_NOTES_MAX);
-
 	/*
 	 * Controls the length limit for regular expression searches.
 	 */
 	MAGIC_DEFINE_PARAMETER(REGEX_MAX);
-
 	/*
 	 * Controls the maximum number of bytes to read from a file.
 	 */
 	MAGIC_DEFINE_PARAMETER(BYTES_MAX);
-
 	/*
 	 * No special handling and/or flags specified. Default behavior.
 	 */
 	MAGIC_DEFINE_FLAG(NONE);
-
 	/*
 	 * Print debugging messages to standard error output.
 	 */
 	MAGIC_DEFINE_FLAG(DEBUG);
-
 	/*
 	 * If the file queried is a symbolic link, follow it.
 	 */
 	MAGIC_DEFINE_FLAG(SYMLINK);
-
 	/*
 	 * If the file is compressed, unpack it and look at the contents.
 	 */
 	MAGIC_DEFINE_FLAG(COMPRESS);
-
 	/*
 	 * If the file is a block or character special device, then open
 	 * the device and try to look at the contents.
 	 */
 	MAGIC_DEFINE_FLAG(DEVICES);
-
 	/*
 	 * Return a MIME type string, instead of a textual description.
 	 */
 	MAGIC_DEFINE_FLAG(MIME_TYPE);
-
 	/*
 	 * Return all matches, not just the first.
 	 */
 	MAGIC_DEFINE_FLAG(CONTINUE);
-
 	/*
 	 * Check the Magic database for consistency and print warnings to
 	 * standard error output.
 	 */
 	MAGIC_DEFINE_FLAG(CHECK);
-
 	/*
 	 * Attempt to preserve access time (atime, utime or utimes) of the
 	 * file queried on systems that support such system calls.
 	 */
 	MAGIC_DEFINE_FLAG(PRESERVE_ATIME);
-
 	/*
 	 * Do not convert unprintable characters to an octal representation.
 	 */
 	MAGIC_DEFINE_FLAG(RAW);
-
 	/*
 	 * Treat operating system errors while trying to open files and follow
 	 * symbolic links as first class errors, instead of storing them in the
 	 * Magic library error buffer for retrieval later.
 	 */
 	MAGIC_DEFINE_FLAG(ERROR);
-
 	/*
 	 * Return a MIME encoding, instead of a textual description.
 	 */
 	MAGIC_DEFINE_FLAG(MIME_ENCODING);
-
 	/*
 	 * A shorthand for using MIME_TYPE and MIME_ENCODING flags together.
 	 */
 	MAGIC_DEFINE_FLAG(MIME);
-
 	/*
 	 * Return the Apple creator and type.
 	 */
 	MAGIC_DEFINE_FLAG(APPLE);
-
 	/*
 	 * Do not look for, or inside compressed files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_COMPRESS);
-
 	/*
 	 * Do not look for, or inside tar archive files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_TAR);
-
 	/*
 	 * Do not consult Magic files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_SOFT);
-
 	/*
 	 * Check for EMX application type (only supported on EMX).
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_APPTYPE);
-
 	/*
 	 * Do not check for ELF files (do not examine ELF file details).
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_ELF);
-
 	/*
 	 * Do not check for various types of text files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_TEXT);
-
 	/*
 	 * Do not check for CDF files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_CDF);
-
 	/*
 	 * Do not check for CSV files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_CSV);
-
 	/*
 	 * Do not look for known tokens inside ASCII files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_TOKENS);
-
 	/*
 	 * Return a MIME encoding, instead of a textual description.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_ENCODING);
-
 	/*
 	 * Do not check for JSON files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_JSON);
-
 	/*
 	 * Do not use built-in tests; only consult the Magic file.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_BUILTIN);
-
 	/*
 	 * Do not check for various types of text files, same as NO_CHECK_TEXT.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_ASCII);
-
 	/*
 	 * Do not look for Fortran sequences inside ASCII files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_FORTRAN);
-
 	/*
 	 * Do not look for troff sequences inside ASCII files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_TROFF);
-
 	/*
 	 * Return a slash-separated list of extensions for this file type.
 	 */
 	MAGIC_DEFINE_FLAG(EXTENSION);
-
 	/*
 	 * Do not report on compression, only report about the uncompressed data.
 	 */
