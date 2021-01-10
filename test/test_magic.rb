@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'test/unit'
-require "mocha/test_unit"
 require 'magic'
 
 require_relative 'helpers/magic_test_helper'
@@ -72,6 +71,9 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(expected, output.split(/\.rb:\d+\:\s+?|warning:\s+?/).pop)
   end
 
+  def test_magic_new_with_do_not_auto_load_set
+  end
+
   def test_magic_new_with_MAGIC_DO_NOT_STOP_ON_ERROR_environment_variable
   end
 
@@ -139,7 +141,7 @@ class MagicTest < Test::Unit::TestCase
     end
   end
 
-  def test_magic_open
+  def test_magic_open?
     assert_true(@magic.open?)
     @magic.close
     assert_false(@magic.open?)
@@ -166,7 +168,7 @@ class MagicTest < Test::Unit::TestCase
     assert_equal('Magic library is not open', error.message)
   end
 
-  def test_magic_closed
+  def test_magic_closed?
     assert_false(@magic.closed?)
     @magic.close
     assert_true(@magic.closed?)
@@ -395,6 +397,9 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
+  def test_magic_do_not_stop_on_error_with_truthy_values
+  end
+
   def test_magic_do_not_stop_on_error
   end
 
@@ -425,6 +430,9 @@ class MagicTest < Test::Unit::TestCase
     assert_raise ArgumentError do
       @magic.file "string\0value"
     end
+  end
+
+  def test_magic_file_with_path_like_argument
   end
 
   def test_magic_file_with_IO_like_argument
@@ -505,6 +513,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_descriptor_alias
+    assert_alias_method(@magic, :fd, :descriptor)
   end
 
   def test_magic_descriptor_with_magic_library_not_loaded
@@ -557,6 +566,7 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_alias
+    assert_alias_method(@magic, :load_files, :load)
   end
 
   def test_magic_load_with_DEBUG_flag
@@ -600,10 +610,16 @@ class MagicTest < Test::Unit::TestCase
   def test_magic_load_buffers_with_DEBUG_flag
   end
 
-  def test_magic_loaded
+  def test_magic_loaded?
   end
 
   def test_magic_loaded_with_do_not_auto_load_set
+  end
+
+  def test_magic_compile
+  end
+
+  def test_magic_compile_with_DEBUG_flag
   end
 
   def test_magic_check
@@ -630,12 +646,6 @@ class MagicTest < Test::Unit::TestCase
     assert_match(%r{^.+Not a valid Magic file!}, output)
   end
 
-  def test_magic_compile
-  end
-
-  def test_magic_compile_with_DEBUG_flag
-  end
-
   def test_magic_version
     assert_kind_of(Integer, Magic.version)
     assert(Magic.version > 0)
@@ -659,10 +669,22 @@ class MagicTest < Test::Unit::TestCase
     assert_alias_method(Magic, :version_string, :version_to_s)
   end
 
-  def test_magic_singleton_do_not_auto_load_global
+  def test_magic_singleton_do_not_auto_load_global_with_truthy_values
+    assert_false(Magic.do_not_auto_load)
+
+    Magic.do_not_auto_load = 1
+    Magic.do_not_auto_load = 0
+
+    assert_true(Magic.do_not_auto_load)
+
+    Magic.do_not_auto_load = false
+
+    assert_false(Magic.do_not_auto_load)
   end
 
-  def test_magic_singleton_do_not_auto_load
+  def test_magic_singleton_do_not_auto_load_global
+    assert_false(Magic.do_not_auto_load)
+
     fork do
       Magic.do_not_auto_load = true
 
@@ -690,6 +712,9 @@ class MagicTest < Test::Unit::TestCase
     Process.waitpid rescue Errno::ECHILD
 
     assert_false(Magic.do_not_auto_load)
+  end
+
+  def test_magic_singleton_do_not_stop_on_error_with_truthy_values
   end
 
   def test_magic_singleton_do_not_stop_on_error_global

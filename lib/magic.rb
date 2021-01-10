@@ -179,7 +179,7 @@ class Magic
 
   private
 
-  def is_power_of_two?(number)
+  def power_of_two?(number)
     number > 0 && Math.log2(number) % 1 == 0
   end
 
@@ -193,7 +193,7 @@ class Magic
 
       value = klass.const_get(constant)
 
-      if value.is_a?(Integer) && is_power_of_two?(value)
+      if value.is_a?(Integer) && power_of_two?(value)
         flags[value] = constant
       end
     end
