@@ -182,7 +182,7 @@ typedef struct magic_arguments {
 	const char *result;
 	int flags;
 	int status;
-	int stop_on_errors:1;
+	unsigned int stop_on_errors:1;
 } magic_arguments_t;
 
 typedef struct magic_exception {
