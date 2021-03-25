@@ -19,7 +19,7 @@ filename = "#{workdir}/file.tar.gz"
 
 unless File.exist?(filename)
   File.open(filename, 'wb') do |target_file|
-    URI.open("https://fossies.org/linux/misc/file-#{LIBMAGIC_TAG}.tar.gz", 'rb') do |read_file|
+    URI.open("https://fossies.org/linux/misc/file-#{LIBMAGIC_TAG}.tar.gz", "User-Agent" => "RubyMagic/#{RUBY_DESCRIPTION}") do |read_file|
       target_file.write(read_file.read)
     end
   end
