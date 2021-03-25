@@ -1,42 +1,101 @@
 # frozen_string_literal: true
 
 require 'mkmf'
-require 'digest'
-require 'open-uri'
 
-LIBMAGIC_TAG = '5.39'.freeze
+LIBMAGIC_TAG = '5.39'
+LIBIMAGE_SHA256 = 'f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1'
 
-workdir = Dir.pwd
-libdir = File.join(workdir, 'file-' + LIBMAGIC_TAG)
-gemdir = File.expand_path(File.join(__dir__, '../..'))
-gem_ext_dir = File.join(gemdir, 'lib', 'ext')
-gem_include_dir = File.join(gem_ext_dir, 'include')
-gem_lib_dir = File.join(gem_ext_dir, 'lib')
-build_lib_dir = File.join(libdir, 'src', '.libs')
+# helpful constants
+PACKAGE_ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
-expected_sha256 = 'f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1'
-filename = "#{workdir}/file.tar.gz"
+# The gem version constraint in the Rakefile is not respected at install time.
+# Keep this version in sync with the one in the Rakefile !
+REQUIRED_MINI_PORTILE_VERSION = "~> 2.5.0"
 
-unless File.exist?(filename)
-  File.open(filename, 'wb') do |target_file|
-    URI.open("https://fossies.org/linux/misc/file-#{LIBMAGIC_TAG}.tar.gz", "User-Agent" => "RubyMagic/#{RUBY_DESCRIPTION}") do |read_file|
-      target_file.write(read_file.read)
+def process_recipe(name, version, static_p, cross_p)
+  require 'rubygems'
+  gem('mini_portile2', REQUIRED_MINI_PORTILE_VERSION)
+  require 'mini_portile2'
+  message("Using mini_portile version #{MiniPortile::VERSION}\n")
+
+  MiniPortile.new(name, version).tap do |recipe|
+    # Prefer host_alias over host in order to use i586-mingw32msvc as
+    # correct compiler prefix for cross build, but use host if not set.
+    recipe.host = RbConfig::CONFIG["host_alias"].empty? ? RbConfig::CONFIG["host"] : RbConfig::CONFIG["host_alias"]
+    recipe.target = File.join(PACKAGE_ROOT_DIR, "ports")
+    recipe.configure_options << "--libdir=#{File.join(recipe.path, 'lib')}"
+
+    yield recipe
+
+    env = Hash.new do |hash, key|
+      hash[key] = (ENV[key]).to_s
     end
-  end
 
-  checksum = Digest::SHA256.hexdigest(File.read(filename))
+    recipe.configure_options.flatten!
 
-  if checksum != expected_sha256
-    raise "SHA256 of #{filename} does not match: got #{checksum}, expected #{expected_sha256}"
+    if static_p
+      recipe.configure_options += [
+        "--disable-shared",
+        "--enable-static",
+      ]
+      env["CFLAGS"] = concat_flags(env["CFLAGS"], "-fPIC")
+    else
+      recipe.configure_options += [
+        "--enable-shared",
+        "--disable-static",
+      ]
+    end
+
+    if cross_p
+      recipe.configure_options += [
+        "--target=#{recipe.host}",
+        "--host=#{recipe.host}",
+      ]
+>>>>>>> 6ec2828 (Use mini_portile2 to build libmagic)
+    end
+
+    recipe.configure_options += env.map do |key, value|
+      "#{key}=#{value.strip}"
+    end
+
+    recipe.cook
+    recipe.activate
   end
 end
 
-system("tar -xzf #{filename}") || raise('ERROR')
-system("cd #{libdir} && ./configure --prefix=#{gem_ext_dir} && make install") || raise('ERROR')
+def truffle?
+  ::RUBY_ENGINE == 'truffleruby'
+end
 
-$LOCAL_LIBS << '-lmagic'
-$LIBPATH << gem_lib_dir
-$CFLAGS << " -I #{libdir}/src"
+def concat_flags(*args)
+  args.compact.join(" ")
+end
+
+def config_static?
+  default_static = !truffle?
+  enable_config("static", default_static)
+end
+
+def config_cross_build?
+  enable_config("cross-build")
+end
+
+message "Building ruby-magic using packaged libraries.\n"
+
+static_p = config_static?
+message "Static linking is #{static_p ? 'enabled' : 'disabled'}.\n"
+cross_build_p = config_cross_build?
+message "Cross build is #{cross_build_p ? 'enabled' : 'disabled'}.\n"
+
+process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
+  recipe.files = [{
+    url: "https://fossies.org/linux/misc/file-#{recipe.version}.tar.gz",
+    sha256: LIBIMAGE_SHA256
+  }]
+
+  $LDFLAGS += " -L#{recipe.path}/lib -lz -lbz2 "
+  $CFLAGS << " -I#{recipe.path}/include"
+end
 
 def darwin?
   RbConfig::CONFIG['target_os'] =~ /darwin/
@@ -188,7 +247,7 @@ end
   have_func(f)
 end
 
-dir_config('magic', [gem_include_dir], [gem_lib_dir])
+dir_config('magic')
 
 create_header
 create_makefile('magic/magic')
