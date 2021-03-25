@@ -84,8 +84,6 @@ unless have_header('ruby.h')
   EOS
 end
 
-have_library('ruby')
-
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
 
