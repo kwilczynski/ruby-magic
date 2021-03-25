@@ -1,6 +1,42 @@
 # frozen_string_literal: true
 
 require 'mkmf'
+require 'digest'
+require 'open-uri'
+
+LIBMAGIC_TAG = '5.39'.freeze
+
+workdir = Dir.pwd
+libdir = File.join(workdir, 'file-' + LIBMAGIC_TAG)
+gemdir = File.expand_path(File.join(__dir__, '../..'))
+gem_ext_dir = File.join(gemdir, 'lib', 'ext')
+gem_include_dir = File.join(gem_ext_dir, 'include')
+gem_lib_dir = File.join(gem_ext_dir, 'lib')
+build_lib_dir = File.join(libdir, 'src', '.libs')
+
+expected_sha256 = 'f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1'
+filename = "#{workdir}/file.tar.gz"
+
+unless File.exist?(filename)
+  File.open(filename, 'wb') do |target_file|
+    URI.open("https://fossies.org/linux/misc/file-#{LIBMAGIC_TAG}.tar.gz", 'rb') do |read_file|
+      target_file.write(read_file.read)
+    end
+  end
+
+  checksum = Digest::SHA256.hexdigest(File.read(filename))
+
+  if checksum != expected_sha256
+    raise "SHA256 of #{filename} does not match: got #{checksum}, expected #{expected_sha256}"
+  end
+end
+
+system("tar -xzf #{filename}") || raise('ERROR')
+system("cd #{libdir} && ./configure --prefix=#{gem_ext_dir} && make install") || raise('ERROR')
+
+$LOCAL_LIBS << '-lmagic'
+$LIBPATH << gem_lib_dir
+$CFLAGS << " -I #{libdir}/src"
 
 def darwin?
   RbConfig::CONFIG['target_os'] =~ /darwin/
@@ -152,19 +188,7 @@ end
   have_func(f)
 end
 
-headers = %w[
-  /opt/local/include
-  /usr/local/include
-  /usr/include
-]
-
-libraries = %w[
-  /opt/local/lib
-  /usr/local/lib
-  /usr/lib
-]
-
-dir_config('magic', headers, libraries)
+dir_config('magic', [gem_include_dir], [gem_lib_dir])
 
 create_header
 create_makefile('magic/magic')
