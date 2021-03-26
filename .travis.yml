@@ -18,6 +18,8 @@ env:
   matrix:
     - COMPILER=gcc
     - COMPILER=clang
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --disable-static"
 
 matrix:
   fast_finish: true
@@ -45,5 +47,5 @@ before_script:
   - bundle exec rake clean
 
 script:
-  - bundle exec rake compile
+  - bundle exec rake compile $RAKE_COMPILER_OPTIONS
   - bundle exec rake test
