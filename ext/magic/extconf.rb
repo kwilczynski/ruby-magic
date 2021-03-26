@@ -70,14 +70,20 @@ def process_recipe(name, version, static_p, cross_p)
 
     recipe.configure_options.flatten!
 
+    recipe.configure_options = [
+      "--disable-silent-rules",
+      "--disable-dependency-tracking",
+      "--enable-fsect-man5"
+    ]
+
     if static_p
-      recipe.configure_options = [
+      recipe.configure_options += [
         "--disable-shared",
         "--enable-static",
       ]
       env["CFLAGS"] = concat_flags(env["CFLAGS"], "-fPIC")
     else
-      recipe.configure_options = [
+      recipe.configure_options += [
         "--enable-shared",
         "--disable-static",
       ]
