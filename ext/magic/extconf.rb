@@ -19,6 +19,15 @@ MAGIC_HELP_MESSAGE = <<~HELP
 
     Flags that are always valid:
 
+      --use-system-libraries
+      --enable-system-libraries
+          Use system libraries instead of building and using the packaged libraries.
+
+      --disable-system-libraries
+          Use the packaged libraries, and ignore the system libraries. This is the default on most
+          platforms, and overrides `--use-system-libraries` and the environment variable
+          `RB_MAGIC_USE_SYSTEM_LIBRARIES`.
+
       --disable-clean
           Do not clean out intermediate files after successful build.
 
@@ -30,6 +39,18 @@ MAGIC_HELP_MESSAGE = <<~HELP
       --enable-cross-build
           Enable cross-build mode. (You probably do not want to set this manually.)
 
+    Flags only used when using system libraries:
+
+      Related to libmagic:
+
+        --with-magic-dir=DIRECTORY
+            Look for libmagic headers and library in DIRECTORY.
+
+        --with-magic-lib=DIRECTORY
+            Look for libmagic library in DIRECTORY.
+
+        --with-magic-include=DIRECTORY
+            Look for libmagic headers in DIRECTORY.
 
     Environment variables used:
 
@@ -121,6 +142,12 @@ def config_cross_build?
   enable_config("cross-build")
 end
 
+def config_system_libraries?
+  enable_config("system-libraries", ENV.key?("RB_MAGIC_USE_SYSTEM_LIBRARIES")) do |_, default|
+    arg_config('--use-system-libraries', default)
+  end
+end
+
 def darwin?
   RbConfig::CONFIG['target_os'] =~ /darwin/
 end
@@ -177,30 +204,36 @@ end
 do_help if arg_config('--help')
 do_clean if arg_config('--clean')
 
-message "Building ruby-magic using packaged libraries.\n"
+if config_system_libraries?
+  message "Building ruby-magic using system libraries.\n"
 
-static_p = config_static?
-message "Static linking is #{static_p ? 'enabled' : 'disabled'}.\n"
-cross_build_p = config_cross_build?
-message "Cross build is #{cross_build_p ? 'enabled' : 'disabled'}.\n"
+  dir_config('magic')
+else
+  message "Building ruby-magic using packaged libraries.\n"
 
-libmagic_recipe = process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
-  recipe.files = [{
-    url: "https://ruby-magic.s3.eu-central-1.amazonaws.com/file-#{recipe.version}.tar.gz",
-    sha256: LIBIMAGE_SHA256
-  }]
-end
+  static_p = config_static?
+  message "Static linking is #{static_p ? 'enabled' : 'disabled'}.\n"
+  cross_build_p = config_cross_build?
+  message "Cross build is #{cross_build_p ? 'enabled' : 'disabled'}.\n"
 
-$LIBPATH = [File.join(libmagic_recipe.path, 'lib')]
-$CFLAGS << " -I#{File.join(libmagic_recipe.path, 'include')} "
+  libmagic_recipe = process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
+    recipe.files = [{
+                      url: "https://ruby-magic.s3.eu-central-1.amazonaws.com/file-#{recipe.version}.tar.gz",
+                      sha256: LIBIMAGE_SHA256
+                    }]
+  end
 
-if static_p
-  ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
-  # mkmf appends -- to the first option
-  $LIBS += " " + pkg_config('libmagic', 'libs --static')
-  $LDFLAGS.gsub!('-lmagic', '')
-  $LIBS.gsub!('-lmagic', '')
-  $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
+  $LIBPATH = [File.join(libmagic_recipe.path, 'lib')]
+  $CFLAGS << " -I#{File.join(libmagic_recipe.path, 'include')} "
+
+  if static_p
+    ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
+    # mkmf appends -- to the first option
+    $LIBS += " " + pkg_config('libmagic', 'libs --static')
+    $LDFLAGS.gsub!('-lmagic', '')
+    $LIBS.gsub!('-lmagic', '')
+    $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
+  end
 end
 
 if ENV['CC']
@@ -344,8 +377,6 @@ end
 ].each do |f|
   have_func(f)
 end
-
-dir_config('magic')
 
 create_header
 create_makefile('magic/magic')
