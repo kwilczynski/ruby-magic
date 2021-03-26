@@ -34,13 +34,13 @@ def process_recipe(name, version, static_p, cross_p)
     recipe.configure_options.flatten!
 
     if static_p
-      recipe.configure_options += [
+      recipe.configure_options = [
         "--disable-shared",
         "--enable-static",
       ]
       env["CFLAGS"] = concat_flags(env["CFLAGS"], "-fPIC")
     else
-      recipe.configure_options += [
+      recipe.configure_options = [
         "--enable-shared",
         "--disable-static",
       ]
@@ -51,7 +51,6 @@ def process_recipe(name, version, static_p, cross_p)
         "--target=#{recipe.host}",
         "--host=#{recipe.host}",
       ]
->>>>>>> 6ec2828 (Use mini_portile2 to build libmagic)
     end
 
     recipe.configure_options += env.map do |key, value|
@@ -80,6 +79,14 @@ def config_cross_build?
   enable_config("cross-build")
 end
 
+def darwin?
+  RbConfig::CONFIG['target_os'] =~ /darwin/
+end
+
+def windows?
+  RbConfig::CONFIG['target_os'] =~ /mswin|mingw32|windows/
+end
+
 message "Building ruby-magic using packaged libraries.\n"
 
 static_p = config_static?
@@ -87,22 +94,23 @@ message "Static linking is #{static_p ? 'enabled' : 'disabled'}.\n"
 cross_build_p = config_cross_build?
 message "Cross build is #{cross_build_p ? 'enabled' : 'disabled'}.\n"
 
-process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
+libmagic_recipe = process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
   recipe.files = [{
-    url: "https://fossies.org/linux/misc/file-#{recipe.version}.tar.gz",
+    url: "https://ruby-magic.s3.eu-central-1.amazonaws.com/file-#{recipe.version}.tar.gz",
     sha256: LIBIMAGE_SHA256
   }]
-
-  $LDFLAGS += " -L#{recipe.path}/lib -lz -lbz2 "
-  $CFLAGS << " -I#{recipe.path}/include"
 end
 
-def darwin?
-  RbConfig::CONFIG['target_os'] =~ /darwin/
-end
+$LIBPATH = [File.join(libmagic_recipe.path, 'lib')]
+$CFLAGS << " -I#{File.join(libmagic_recipe.path, 'include')} "
 
-def windows?
-  RbConfig::CONFIG['target_os'] =~ /mswin|mingw32|windows/
+if static_p
+  ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
+  # mkmf appends -- to the first option
+  $LIBS += " " + pkg_config('libmagic', 'libs --static')
+  $LDFLAGS.gsub!('-lmagic', '')
+  $LIBS.gsub!('-lmagic', '')
+  $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
 end
 
 if ENV['CC']
