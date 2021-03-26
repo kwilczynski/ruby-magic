@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'find'
 require 'mkmf'
+require 'pathname'
 
 LIBMAGIC_TAG = '5.39'
 LIBIMAGE_SHA256 = 'f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1'
@@ -11,6 +13,41 @@ PACKAGE_ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'
 # The gem version constraint in the Rakefile is not respected at install time.
 # Keep this version in sync with the one in the Rakefile !
 REQUIRED_MINI_PORTILE_VERSION = "~> 2.5.0"
+
+MAGIC_HELP_MESSAGE = <<~HELP
+  USAGE: ruby #{$0} [options]
+
+    Flags that are always valid:
+
+      --disable-clean
+          Do not clean out intermediate files after successful build.
+
+    Flags only used when building and using the packaged libraries:
+
+      --disable-static
+          Do not statically link packaged libraries, instead use shared libraries.
+
+      --enable-cross-build
+          Enable cross-build mode. (You probably do not want to set this manually.)
+
+
+    Environment variables used:
+
+      CC
+          Use this path to invoke the compiler instead of `RbConfig::CONFIG['CC']`
+
+      CPPFLAGS
+          If this string is accepted by the C preprocessor, add it to the flags passed to the C preprocessor
+
+      CFLAGS
+          If this string is accepted by the compiler, add it to the flags passed to the compiler
+
+      LDFLAGS
+          If this string is accepted by the linker, add it to the flags passed to the linker
+
+      LIBS
+          Add this string to the flags passed to the linker
+HELP
 
 def process_recipe(name, version, static_p, cross_p)
   require 'rubygems'
@@ -62,12 +99,11 @@ def process_recipe(name, version, static_p, cross_p)
   end
 end
 
-def truffle?
-  ::RUBY_ENGINE == 'truffleruby'
-end
-
-def concat_flags(*args)
-  args.compact.join(" ")
+#
+#  utility functions
+#
+def config_clean?
+  enable_config('clean', true)
 end
 
 def config_static?
@@ -86,6 +122,54 @@ end
 def windows?
   RbConfig::CONFIG['target_os'] =~ /mswin|mingw32|windows/
 end
+
+def truffle?
+  ::RUBY_ENGINE == 'truffleruby'
+end
+
+def concat_flags(*args)
+  args.compact.join(" ")
+end
+
+def do_help
+  print(MAGIC_HELP_MESSAGE)
+  exit!(0)
+end
+
+def do_clean
+  root = Pathname(PACKAGE_ROOT_DIR)
+  pwd  = Pathname(Dir.pwd)
+
+  # Skip if this is a development work tree
+  unless (root + '.git').exist?
+    message("Cleaning files only used during build.\n")
+
+    # (root + 'tmp') cannot be removed at this stage because
+    # libmagic.so is yet to be copied to lib.
+
+    # clean the ports build directory
+    Pathname.glob(pwd.join('tmp', '*', 'ports')) do |dir|
+      FileUtils.rm_rf(dir, verbose: true)
+    end
+
+    FileUtils.rm_rf(root + 'ports' + 'archives', verbose: true)
+
+    if config_static?
+      # Remove everything but share/ directory
+      Find.find(root + 'ports').each do |filename|
+        FileUtils.rm_f(filename, verbose: true) unless filename.include?('/share')
+      end
+    end
+  end
+
+  exit!(0)
+end
+
+#
+#  main
+#
+do_help if arg_config('--help')
+do_clean if arg_config('--clean')
 
 message "Building ruby-magic using packaged libraries.\n"
 
@@ -259,3 +343,15 @@ dir_config('magic')
 
 create_header
 create_makefile('magic/magic')
+
+if config_clean?
+  # Do not clean if run in a development work tree.
+  File.open('Makefile', 'at') do |mk|
+    mk.print(<<~EOF)
+
+      all: clean-ports
+      clean-ports: $(DLLIB)
+      \t-$(Q)$(RUBY) $(srcdir)/extconf.rb --clean --#{static_p ? 'enable' : 'disable'}-static
+    EOF
+  end
+end
