@@ -187,10 +187,14 @@ def do_clean
 
     FileUtils.rm_rf(root + 'ports' + 'archives', verbose: true)
 
-    if config_static?
-      # Remove everything but share/ directory
-      Find.find(root + 'ports').each do |filename|
-        FileUtils.rm_f(filename, verbose: true) unless filename.include?('/share')
+    # Remove everything but share/ directory
+    remove_paths = %w[bin include]
+    remove_paths << 'lib' if config_static?
+
+    Pathname.glob(File.join(root, 'ports', '*', 'libmagic', '*')) do |dir|
+      remove_paths.each do |path|
+        remove_dir = File.join(dir, path)
+        FileUtils.rm_rf(remove_dir, verbose: true)
       end
     end
   end
