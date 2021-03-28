@@ -229,13 +229,12 @@ else
 
   $LIBPATH = [File.join(libmagic_recipe.path, 'lib')]
   $CFLAGS << " -I#{File.join(libmagic_recipe.path, 'include')} "
+  $LDFLAGS += " -Wl,-rpath,#{libmagic_recipe.path}/lib"
 
   if static_p
     ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
     # mkmf appends -- to the first option
     $LIBS += " " + pkg_config('libmagic', 'libs --static')
-    $LDFLAGS.gsub!('-lmagic', '')
-    $LIBS.gsub!('-lmagic', '')
     $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
   end
 end
