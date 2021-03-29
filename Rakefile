@@ -11,7 +11,11 @@ CLEAN.include FileList['**/*{.o,.so,.bundle,.log}'],
               FileList['**/Makefile']
 
 CLOBBER.include FileList['lib/**/*.so'],
-                FileList['doc/**/*']
+                FileList['doc/**/*'],
+                FileList['tmp/'],
+                FileList['ext/magic/extconf.h'],
+                FileList['ext/magic/tmp'],
+                FileList['ports/']
 
 gem = eval File.read('ruby-magic.gemspec')
 
