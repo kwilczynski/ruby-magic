@@ -208,6 +208,14 @@ magic_errno_wrapper(magic_t magic)
 inline const char*
 magic_getpath_wrapper(void)
 {
+	/*
+	 * The second argument translates to same value as the
+	 * FILE_LOAD constant, which when used results in this
+	 * function calling the get_default_magic() internally.
+	 *
+	 * N.B. magic_getpath() also honors the "MAGIC"
+	 * environment variable."
+	 */
 	return magic_getpath(NULL, 0);
 }
 
