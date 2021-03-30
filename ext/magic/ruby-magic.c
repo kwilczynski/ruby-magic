@@ -8,17 +8,17 @@ static int rb_mgc_do_not_auto_load;
 static int rb_mgc_do_not_stop_on_error;
 static int rb_mgc_warning;
 
-ID id_at_flags;
-ID id_at_paths;
+static ID id_at_flags;
+static ID id_at_paths;
 
-VALUE rb_cMagic = Qundef;
+static VALUE rb_cMagic = Qundef;
 
-VALUE rb_mgc_eError = Qundef;
-VALUE rb_mgc_eMagicError = Qundef;
-VALUE rb_mgc_eLibraryError = Qundef;
-VALUE rb_mgc_eParameterError = Qundef;
-VALUE rb_mgc_eFlagsError = Qundef;
-VALUE rb_mgc_eNotImplementedError = Qundef;
+static VALUE rb_mgc_eError = Qundef;
+static VALUE rb_mgc_eMagicError = Qundef;
+static VALUE rb_mgc_eLibraryError = Qundef;
+static VALUE rb_mgc_eParameterError = Qundef;
+static VALUE rb_mgc_eFlagsError = Qundef;
+static VALUE rb_mgc_eNotImplementedError = Qundef;
 
 void Init_magic(void);
 
