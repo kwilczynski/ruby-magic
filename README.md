@@ -14,13 +14,14 @@ Provides simple interface to [libmagic][1] for Ruby Programming Language.
 1. [Contributing](#contributing)
 2. [Versioning](#versioning)
 3. [Author](#author)
+4. [Contributors](#contributors)
 4. [Copyright](#copyright)
 5. [License](#license)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for best practices and instructions on
-setting up your development environment.
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for best practices and instructions
+on setting up your development environment.
 
 ## Versioning
 
@@ -30,6 +31,11 @@ For the versions available, see the tags on this repository.
 ## Author
 
 Krzysztof Wilczyński (<kw@linux.com>)
+
+## Contributors
+
+See the [CONTRIBUTORS.md](CONTRIBUTORS.md) file for a list of contributors to
+the project.
 
 ## Copyright
 
