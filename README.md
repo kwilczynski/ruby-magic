@@ -1,6 +1,6 @@
 # File Magic in Ruby
 
-[![Build Status](https://travis-ci.org/kwilczynski/ruby-magic.svg)](https://travis-ci.org/kwilczynski/ruby-magic)
+[![Build Status](https://travis-ci.com/kwilczynski/ruby-magic.svg)](https://travis-ci.com/kwilczynski/ruby-magic)
 [![Documentation Status](https://inch-ci.org/github/kwilczynski/ruby-magic.svg)](https://inch-ci.org/github/kwilczynski/ruby-magic)
 [![Gem Version](https://badge.fury.io/rb/ruby-magic.svg)](http://badge.fury.io/rb/ruby-magic)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
