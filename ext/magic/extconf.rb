@@ -271,15 +271,11 @@ if windows?
   $LDFLAGS += ' -static-libgcc'
 end
 
-%w[
-  CFLAGS
-  CXXFLAGS
-  CPPFLAGS
-].each do |variable|
-  $CFLAGS += format(' %s', ENV[variable]) if ENV[variable]
-end
+append_cflags(ENV["CFLAGS"].split) if ENV["CFLAGS"]
+append_cppflags(ENV["CPPFLAGS"].split) if ENV["CPPFLAGS"]
+append_ldflags(ENV["LDFLAGS"].split) if ENV["LDFLAGS"]
 
-$LDFLAGS += format(' %s', ENV['LDFLAGS']) if ENV['LDFLAGS']
+$LIBS = concat_flags($LIBS, ENV["LIBS"]) if ENV["LIBS"]
 
 unless have_header('ruby.h')
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
