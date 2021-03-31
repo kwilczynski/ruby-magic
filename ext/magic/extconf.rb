@@ -262,7 +262,7 @@ end
   -Wwrite-strings
   -Wconversion
   -Wmissing-noreturn
-  -Winline'
+  -Winline
 ].select do |flag|
   try_link('int main(void) { return 0; }', flag)
 end.each do |flag|
