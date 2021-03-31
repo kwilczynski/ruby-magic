@@ -7,15 +7,14 @@ require 'rake/testtask'
 require 'rdoc/task'
 require 'rubocop/rake_task'
 
-CLEAN.include FileList['**/*{.o,.so,.bundle,.log}'],
+CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
+              FileList['**/extconf.h'],
               FileList['**/Makefile']
 
-CLOBBER.include FileList['lib/**/*.so'],
-                FileList['doc/**/*'],
-                FileList['tmp/'],
-                FileList['ext/magic/extconf.h'],
-                FileList['ext/magic/tmp'],
-                FileList['ports/']
+CLOBBER.include FileList['**/tmp'],
+                FileList['doc/**'],
+                FileList['ports/'],
+                FileList['tmp/']
 
 gem = eval File.read('ruby-magic.gemspec')
 
