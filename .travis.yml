@@ -45,8 +45,6 @@ before_install:
   - if [[ $RAKE_COMPILER_OPTIONS =~ use-system-libraries ]]; then sudo apt update && sudo apt install libmagic1 libmagic-dev; fi
 
 before_script:
-  - export CFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib"
-  - export LD_LIBRARY_PATH="${PREFIX}/lib"
   - bundle exec rake clean
 
 script:
