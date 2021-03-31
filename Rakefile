@@ -12,6 +12,7 @@ CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
               FileList['**/Makefile']
 
 CLOBBER.include FileList['**/tmp'],
+                FileList['**/*.log'],
                 FileList['doc/**'],
                 FileList['ports/'],
                 FileList['tmp/']
