@@ -208,6 +208,18 @@ end
 do_help if arg_config('--help')
 do_clean if arg_config('--clean')
 
+if ENV['CC']
+  RbConfig::CONFIG['CC'] = RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC']
+end
+
+ENV['CC'] = RbConfig::CONFIG['CC']
+
+append_cflags(ENV["CFLAGS"].split) if ENV["CFLAGS"]
+append_cppflags(ENV["CPPFLAGS"].split) if ENV["CPPFLAGS"]
+append_ldflags(ENV["LDFLAGS"].split) if ENV["LDFLAGS"]
+
+$LIBS = concat_flags($LIBS, ENV["LIBS"]) if ENV["LIBS"]
+
 if config_system_libraries?
   message "Building ruby-magic using system libraries.\n"
 
@@ -239,12 +251,6 @@ else
   end
 end
 
-if ENV['CC']
-  RbConfig::CONFIG['CC'] = RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC']
-end
-
-ENV['CC'] = RbConfig::CONFIG['CC']
-
 $CFLAGS += ' -std=c99'
 
 if RbConfig::CONFIG['CC'] =~ /gcc/
@@ -270,12 +276,6 @@ end
 if windows?
   $LDFLAGS += ' -static-libgcc'
 end
-
-append_cflags(ENV["CFLAGS"].split) if ENV["CFLAGS"]
-append_cppflags(ENV["CPPFLAGS"].split) if ENV["CPPFLAGS"]
-append_ldflags(ENV["LDFLAGS"].split) if ENV["LDFLAGS"]
-
-$LIBS = concat_flags($LIBS, ENV["LIBS"]) if ENV["LIBS"]
 
 unless have_header('ruby.h')
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"
