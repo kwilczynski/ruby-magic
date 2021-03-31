@@ -245,12 +245,22 @@ end
 
 ENV['CC'] = RbConfig::CONFIG['CC']
 
-$CFLAGS += ' -std=c99 -fPIC'
-$CFLAGS += ' -Wall -Wextra -pedantic'
+$CFLAGS += ' -std=c99'
 
 if RbConfig::CONFIG['CC'] =~ /gcc/
   $CFLAGS += ' -O3' unless $CFLAGS =~ /-O\d/
-  $CFLAGS += ' -Wcast-qual -Wwrite-strings -Wconversion -Wmissing-noreturn -Winline'
+end
+
+%w[
+  -Wcast-qual
+  -Wwrite-strings
+  -Wconversion
+  -Wmissing-noreturn
+  -Winline'
+].select do |flag|
+  try_link('int main(void) { return 0; }', flag)
+end.each do |flag|
+  $CFLAGS += " " + flag
 end
 
 unless darwin?
