@@ -1,5 +1,5 @@
 language: ruby
-dist: xenial
+dist: bionic
 
 cache:
   bundler: true
@@ -18,6 +18,10 @@ env:
   matrix:
     - COMPILER=gcc
     - COMPILER=clang
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
 
 matrix:
   fast_finish: true
@@ -38,12 +42,11 @@ before_install:
   - bundle config set --local path 'vendor/bundle'
   - bundle config set --local without 'development'
   - export CC="$(which $COMPILER)"
+  - if [[ $RAKE_COMPILER_OPTIONS =~ use-system-libraries ]]; then sudo apt update && sudo apt install libmagic1 libmagic-dev; fi
 
 before_script:
-  - export CFLAGS="-I${PREFIX}/include" LDFLAGS="-L${PREFIX}/lib"
-  - export LD_LIBRARY_PATH="${PREFIX}/lib"
   - bundle exec rake clean
 
 script:
-  - bundle exec rake compile
+  - bundle exec rake compile $RAKE_COMPILER_OPTIONS
   - bundle exec rake test

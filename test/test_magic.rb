@@ -55,7 +55,13 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_new_instance_default_flags
-    assert_equal(0, @magic.flags)
+    # If libmagic needs to search more than one path, it will enable the CHECK flag.
+    # See https://github.com/kwilczynski/ruby-magic/pull/5#issuecomment-808686480
+    if @magic.paths.length > 1
+      assert_equal(Magic::CHECK, @magic.flags)
+    else
+      assert_equal(Magic::NONE, @magic.flags)
+    end
   end
 
   def test_magic_new_with_block
