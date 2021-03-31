@@ -29,7 +29,9 @@ RDoc::Task.new do |d|
     AUTHORS
     COPYRIGHT
     LICENSE
+    NOTICE
     CHANGELOG.md
+    CONTRIBUTORS.md
     README.md
   ])
 end
