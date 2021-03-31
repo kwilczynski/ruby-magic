@@ -1268,7 +1268,7 @@ magic_lock(VALUE object, VALUE(*function)(ANYARGS), void *data)
 	magic_object_t *mo;
 
 	MAGIC_OBJECT(mo);
-	rb_funcall(mo->mutex, rb_intern("lock"), 0, Qundef);
+	rb_funcall(mo->mutex, rb_intern("lock"), 0);
 
 	return rb_ensure(function, (VALUE)data, magic_unlock, object);
 }
@@ -1279,7 +1279,7 @@ magic_unlock(VALUE object)
 	magic_object_t *mo;
 
 	MAGIC_OBJECT(mo);
-	rb_funcall(mo->mutex, rb_intern("unlock"), 0, Qundef);
+	rb_funcall(mo->mutex, rb_intern("unlock"), 0);
 
 	return Qnil;
 }

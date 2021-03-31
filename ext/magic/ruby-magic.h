@@ -156,8 +156,8 @@ static const char *errors[] = {
 static inline VALUE
 magic_shift(VALUE v)
 {
-	return ARRAY_P(v) ?				       \
-		rb_funcall(v, rb_intern("shift"), 0, Qundef) : \
+	return ARRAY_P(v) ?			       \
+		rb_funcall(v, rb_intern("shift"), 0) : \
 		Qnil;
 }
 
@@ -180,8 +180,8 @@ magic_join(VALUE a, VALUE b)
 static inline VALUE
 magic_flatten(VALUE v)
 {
-	return ARRAY_P(v) ?					 \
-		rb_funcall(v, rb_intern("flatten"), 0, Qundef) : \
+	return ARRAY_P(v) ?				 \
+		rb_funcall(v, rb_intern("flatten"), 0) : \
 		Qnil;
 }
 
@@ -192,7 +192,7 @@ magic_fileno(VALUE object)
 	rb_io_t *io;
 
 	if (rb_respond_to(object, rb_intern("fileno"))) {
-		object = rb_funcall(object, rb_intern("fileno"), 0, Qundef);
+		object = rb_funcall(object, rb_intern("fileno"), 0);
 		return NUM2INT(object);
 	}
 
@@ -213,13 +213,13 @@ magic_path(VALUE object)
 		return object;
 
 	if (rb_respond_to(object, rb_intern("to_path")))
-		return rb_funcall(object, rb_intern("to_path"), 0, Qundef);
+		return rb_funcall(object, rb_intern("to_path"), 0);
 
 	if (rb_respond_to(object, rb_intern("path")))
-		return rb_funcall(object, rb_intern("path"), 0, Qundef);
+		return rb_funcall(object, rb_intern("path"), 0);
 
 	if (rb_respond_to(object, rb_intern("to_s")))
-		return rb_funcall(object, rb_intern("to_s"), 0, Qundef);
+		return rb_funcall(object, rb_intern("to_s"), 0);
 
 	return Qnil;
 }
