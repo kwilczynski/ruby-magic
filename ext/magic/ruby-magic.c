@@ -742,6 +742,8 @@ rb_mgc_file(VALUE object, VALUE value)
 	magic_arguments_t ma;
 	const char *empty = "(null)";
 
+	UNUSED(empty);
+
 	if (NIL_P(value))
 		goto error;
 
@@ -1242,6 +1244,8 @@ magic_library_error(VALUE klass, void *data)
 	const char *message = NULL;
 	const char *empty = "(null)";
 	magic_t cookie = data;
+
+	UNUSED(empty);
 
 	assert(cookie != NULL && \
 	       "Must be a valid pointer to `magic_t' type");
