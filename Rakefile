@@ -48,8 +48,8 @@ RuboCop::RakeTask.new('lint') do |t|
 end
 
 Gem::PackageTask.new(gem) do |p|
-  p.need_zip = true
-  p.need_tar = true
+  p.need_zip = false
+  p.need_tar = false
 end
 
 Rake::ExtensionTask.new('magic', gem) do |e|
