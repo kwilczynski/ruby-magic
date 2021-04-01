@@ -250,41 +250,9 @@ magic_check_type_array_of_strings(VALUE object)
 	}
 }
 
-VALUE rb_mgc_get_do_not_auto_load_global(VALUE object);
-VALUE rb_mgc_set_do_not_auto_load_global(VALUE object, VALUE value);
-
-VALUE rb_mgc_get_do_not_stop_on_error_global(VALUE object);
-VALUE rb_mgc_set_do_not_stop_on_error_global(VALUE object, VALUE value);
-
-VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
-
-VALUE rb_mgc_get_do_not_stop_on_error(VALUE object);
-VALUE rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value);
-
-VALUE rb_mgc_open_p(VALUE object);
-VALUE rb_mgc_close(VALUE object);
 VALUE rb_mgc_close_p(VALUE object);
-
-VALUE rb_mgc_get_paths(VALUE object);
-
-VALUE rb_mgc_get_parameter(VALUE object, VALUE tag);
-VALUE rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value);
-
-VALUE rb_mgc_get_flags(VALUE object);
-VALUE rb_mgc_set_flags(VALUE object, VALUE value);
-
 VALUE rb_mgc_load(VALUE object, VALUE arguments);
-VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
-VALUE rb_mgc_load_p(VALUE object);
-
-VALUE rb_mgc_compile(VALUE object, VALUE arguments);
-VALUE rb_mgc_check(VALUE object, VALUE arguments);
-
-VALUE rb_mgc_file(VALUE object, VALUE value);
-VALUE rb_mgc_buffer(VALUE object, VALUE value);
 VALUE rb_mgc_descriptor(VALUE object, VALUE value);
-
-VALUE rb_mgc_version(VALUE object);
 
 #if defined(__cplusplus)
 }
