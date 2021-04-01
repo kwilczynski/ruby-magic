@@ -37,8 +37,7 @@ RDoc::Task.new do |d|
 end
 
 Rake::TestTask.new do |t|
-  t.test_files = Dir['test/**/test_*']
-  t.verbose = true
+  t.test_files = FileList['test/**/test_*']
   t.warning = true
 end
 
