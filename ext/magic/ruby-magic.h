@@ -225,7 +225,7 @@ magic_path(VALUE object)
 }
 
 static inline void
-magic_check_type(VALUE object, int type)
+magic_check_type(VALUE object, RVALUE_TYPE type)
 {
 	VALUE boolean = Qundef;
 

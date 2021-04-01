@@ -26,8 +26,11 @@ extern "C" {
 #include <errno.h>
 #include <assert.h>
 #include <sys/stat.h>
+
 #include <magic.h>
+
 #include <ruby.h>
+#include <ruby/version.h>
 
 #if defined(HAVE_RUBY_IO_H)
 # include <ruby/io.h>
@@ -81,6 +84,12 @@ extern "C" {
 #define RARRAY_EMPTY	  rb_ary_new()
 #define RARRAY_EMPTY_P(a) (RARRAY_LEN(a) == 0)
 #define RARRAY_FIRST(a)   (RARRAY_EMPTY_P(a) ? Qnil : rb_ary_entry((a), 0))
+
+#if RUBY_API_VERSION_CODE > 20700
+# define RVALUE_TYPE enum ruby_value_type
+#else
+# define RVALUE_TYPE int
+#endif
 
 #define CLASS_NAME(o) (NIL_P((o)) ? "nil" : rb_obj_classname((o)))
 
