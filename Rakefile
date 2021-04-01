@@ -7,6 +7,8 @@ require 'rake/testtask'
 require 'rdoc/task'
 require 'rubocop/rake_task'
 
+RakeFileUtils.verbose_flag = false
+
 CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
               FileList['**/extconf.h'],
               FileList['**/Makefile']
