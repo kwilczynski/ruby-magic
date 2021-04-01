@@ -52,6 +52,7 @@ Gem::PackageTask.new(gem) do |p|
 end
 
 Rake::ExtensionTask.new('magic', gem) do |e|
+  e.source_pattern = '*.{c,h}'
   e.ext_dir = 'ext/magic'
   e.lib_dir = 'lib/magic'
 end
