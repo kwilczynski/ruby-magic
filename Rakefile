@@ -17,7 +17,7 @@ CLOBBER.include FileList['**/tmp'],
                 FileList['ports/'],
                 FileList['tmp/']
 
-gem = eval File.read('ruby-magic.gemspec')
+gem = Gem::Specification.load('ruby-magic.gemspec')
 
 RDoc::Task.new do |d|
   d.title = 'File Magic in Ruby'
