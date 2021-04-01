@@ -64,5 +64,6 @@ Icon[]
 .idea
 .vscode
 
-tmp
+pkg
 ports
+tmp
