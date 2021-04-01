@@ -36,11 +36,11 @@ Gem::Specification.new do |s|
             Dir['lib/**/*.rb'] + %w(
               AUTHORS
               CHANGELOG.md
+              CONTRIBUTORS.md
               COPYRIGHT
               LICENSE
               NOTICE
               README.md
-              VERSION
               kwilczynski-public.pem
             )
 
