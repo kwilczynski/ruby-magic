@@ -763,7 +763,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
-	if (!ma.result) {
+	if (ma.status < 0 && !ma.result) {
 		/*
 		 * Handle the case when the "ERROR" flag is set regardless of the
 		 * current version of the underlying Magic library.
@@ -779,8 +779,8 @@ rb_mgc_file(VALUE object, VALUE value)
 		 */
 		if (mo->stop_on_errors || (ma.flags & MAGIC_ERROR))
 			MAGIC_LIBRARY_ERROR(ma.cookie);
-		else
-			ma.result = magic_error_wrapper(ma.cookie);
+
+		ma.result = magic_error_wrapper(ma.cookie);
 	}
 	if (!ma.result)
 		MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL, E_UNKNOWN);
@@ -826,7 +826,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 	ma.type.buffers.sizes = (size_t *)RSTRING_LEN(value);
 
 	MAGIC_SYNCHRONIZED(magic_buffer_internal, &ma);
-	if (!ma.result)
+	if (ma.status < 0)
 		MAGIC_LIBRARY_ERROR(ma.cookie);
 
 	assert(ma.result != NULL && \
@@ -863,7 +863,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
 	local_errno = errno;
 
-	if (!ma.result) {
+	if (ma.status < 0) {
 		if (local_errno == EBADF)
 			rb_raise(rb_eIOError, "Bad file descriptor");
 
@@ -933,6 +933,8 @@ nogvl_magic_file(void *data)
 	ma->result = magic_file_wrapper(ma->cookie,
 					ma->type.file.path,
 					ma->flags);
+
+	ma->status = !ma->result ? -1 : 0;
 	return NULL;
 }
 
@@ -944,6 +946,8 @@ nogvl_magic_descriptor(void *data)
 	ma->result = magic_descriptor_wrapper(ma->cookie,
 					      ma->type.file.fd,
 					      ma->flags);
+
+	ma->status = !ma->result ? -1 : 0;
 	return NULL;
 }
 
@@ -1001,7 +1005,14 @@ magic_close_internal(void *data)
 static inline VALUE
 magic_load_internal(void *data)
 {
-	return (VALUE)NOGVL(nogvl_magic_load, data);
+	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+
+	NOGVL(nogvl_magic_load, ma);
+	if (ma->status < 0)
+		magic_setflags_wrapper(ma->cookie, old_flags);
+
+	return (VALUE)NULL;
 }
 
 static inline VALUE
@@ -1020,34 +1031,46 @@ magic_load_buffers_internal(void *data)
 static inline VALUE
 magic_compile_internal(void *data)
 {
-	return (VALUE)NOGVL(nogvl_magic_compile, data);
+	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+
+	NOGVL(nogvl_magic_compile, ma);
+	if (ma->status < 0)
+		magic_setflags_wrapper(ma->cookie, old_flags);
+
+	return (VALUE)NULL;
 }
 
 static inline VALUE
 magic_check_internal(void *data)
 {
-	return (VALUE)NOGVL(nogvl_magic_check, data);
+	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+
+	NOGVL(nogvl_magic_check, ma);
+	if (ma->status < 0)
+		magic_setflags_wrapper(ma->cookie, old_flags);
+
+	return (VALUE)NULL;
 }
 
 static VALUE
 magic_file_internal(void *data)
 {
-	int local_errno;
-	int old_flags = 0;
-	int restore_flags = 0;
 	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+	int restore_flags;
+	int local_errno;
 
-	if (ma->stop_on_errors) {
-		old_flags = ma->flags;
+	if (ma->stop_on_errors)
 		ma->flags |= MAGIC_ERROR;
-		restore_flags = 1;
-	}
-	if (ma->flags & MAGIC_CONTINUE) {
-		old_flags = ma->flags;
+
+	if (ma->flags & MAGIC_CONTINUE)
 		ma->flags |= MAGIC_RAW;
-		restore_flags = 1;
-	}
-	if (restore_flags && ma->flags)
+
+	restore_flags = old_flags != ma->flags;
+
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, ma->flags);
 
 	NOGVL(nogvl_magic_file, ma);
@@ -1059,12 +1082,10 @@ magic_file_internal(void *data)
 	 * Magic library itself, and if that does not work, then from
 	 * the saved errno value.
 	 */
-	if (magic_errno_wrapper(ma->cookie))
-		ma->status = -1;
-	else if (local_errno)
+	if (magic_errno_wrapper(ma->cookie) || local_errno)
 		ma->status = -1;
 
-	if (restore_flags && old_flags)
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;
@@ -1073,23 +1094,26 @@ magic_file_internal(void *data)
 static VALUE
 magic_buffer_internal(void *data)
 {
-	int old_flags = 0;
-	int restore_flags = 0;
 	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+	int restore_flags;
 
-	if (ma->flags & MAGIC_CONTINUE) {
-		old_flags = ma->flags;
+	if (ma->flags & MAGIC_CONTINUE)
 		ma->flags |= MAGIC_RAW;
-		restore_flags = 1;
-	}
-	if (restore_flags && ma->flags)
+
+	restore_flags = old_flags != ma->flags;
+
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, ma->flags);
 
 	ma->result = magic_buffer_wrapper(ma->cookie,
 					  (const void *)ma->type.buffers.pointers,
 					  (size_t)ma->type.buffers.sizes,
 					  ma->flags);
-	if (restore_flags && old_flags)
+
+	ma->status = !ma->result ? -1 : 0;
+
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;
@@ -1098,21 +1122,21 @@ magic_buffer_internal(void *data)
 static VALUE
 magic_descriptor_internal(void *data)
 {
-	int old_flags = 0;
-	int restore_flags = 0;
 	magic_arguments_t *ma = data;
+	int old_flags = ma->flags;
+	int restore_flags;
 
-	if (ma->flags & MAGIC_CONTINUE) {
-		old_flags = ma->flags;
+	if (ma->flags & MAGIC_CONTINUE)
 		ma->flags |= MAGIC_RAW;
-		restore_flags = 1;
-	}
-	if (restore_flags && ma->flags)
+
+	restore_flags = old_flags != ma->flags;
+
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, ma->flags);
 
 	NOGVL(nogvl_magic_descriptor, ma);
 
-	if (restore_flags && old_flags)
+	if (restore_flags)
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;
