@@ -1009,7 +1009,7 @@ magic_load_internal(void *data)
 	int old_flags = ma->flags;
 
 	NOGVL(nogvl_magic_load, ma);
-	if (ma->status < 0)
+	if (MAGIC_STATUS_CHECK(ma->status < 0))
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;
@@ -1035,7 +1035,7 @@ magic_compile_internal(void *data)
 	int old_flags = ma->flags;
 
 	NOGVL(nogvl_magic_compile, ma);
-	if (ma->status < 0)
+	if (MAGIC_STATUS_CHECK(ma->status < 0))
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;
@@ -1048,7 +1048,7 @@ magic_check_internal(void *data)
 	int old_flags = ma->flags;
 
 	NOGVL(nogvl_magic_check, ma);
-	if (ma->status < 0)
+	if (MAGIC_STATUS_CHECK(ma->status < 0))
 		magic_setflags_wrapper(ma->cookie, old_flags);
 
 	return (VALUE)NULL;

@@ -61,6 +61,12 @@ extern "C" {
 #define MAGIC_EXTENSION_SEPARATOR "/"
 #define MAGIC_CONTINUE_SEPARATOR "\n- "
 
+#if !defined(MAGIC_SYSTEM_LIBRARIES)
+# define MAGIC_STATUS_CHECK(x) x
+#else
+# define MAGIC_STATUS_CHECK(x) 1
+#endif
+
 #if !defined(MAGIC_NO_CHECK_CSV)
 # define MAGIC_NO_CHECK_CSV 0
 #endif

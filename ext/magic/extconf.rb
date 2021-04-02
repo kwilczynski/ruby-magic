@@ -26,7 +26,7 @@ MAGIC_HELP_MESSAGE = <<~HELP
       --disable-system-libraries
           Use the packaged libraries, and ignore the system libraries. This is the default on most
           platforms, and overrides `--use-system-libraries` and the environment variable
-          `RB_MAGIC_USE_SYSTEM_LIBRARIES`.
+          `MAGIC_USE_SYSTEM_LIBRARIES`.
 
       --disable-clean
           Do not clean out intermediate files after successful build.
@@ -143,7 +143,7 @@ def config_cross_build?
 end
 
 def config_system_libraries?
-  enable_config("system-libraries", ENV.key?("RB_MAGIC_USE_SYSTEM_LIBRARIES")) do |_, default|
+  enable_config("system-libraries", ENV.key?("MAGIC_USE_SYSTEM_LIBRARIES")) do |_, default|
     arg_config('--use-system-libraries', default)
   end
 end
@@ -222,6 +222,8 @@ $LIBS = concat_flags($LIBS, ENV["LIBS"]) if ENV["LIBS"]
 
 if config_system_libraries?
   message "Building ruby-magic using system libraries.\n"
+
+  $CPPFLAGS += " -DMAGIC_SYSTEM_LIBRARIES"
 
   dir_config('magic')
 else
