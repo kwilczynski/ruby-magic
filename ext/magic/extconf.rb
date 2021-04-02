@@ -272,7 +272,7 @@ end.each do |flag|
 end
 
 unless darwin?
-  $LDFLAGS += ' -Wl,--as-needed -Wl,--no-undefined -Wl,--exclude-libs,ALL'
+  $LDFLAGS += ' -Wl,--as-needed -Wl,--exclude-libs,ALL'
 end
 
 if windows?
