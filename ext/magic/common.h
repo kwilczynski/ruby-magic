@@ -36,27 +36,27 @@ extern "C" {
 # include <ruby/io.h>
 #else
 # include <rubyio.h>
-#endif
+#endif /* HAVE_RUBY_IO_H */
 
-#if !defined(BIT)
-# define BIT(n) (1 << (n))
-#endif
+#define BIT(n) (1 << (n))
 
 #if !defined(UNUSED)
 # define UNUSED(x) (void)(x)
-#endif
+#endif /* UNUSED */
+
+#define ARRAY_SIZE(a) (int)(sizeof(a) / sizeof((a)[0]))
 
 #if defined(F_DUPFD_CLOEXEC)
 # define HAVE_F_DUPFD_CLOEXEC 1
-#endif
+#endif /* F_DUPFD_CLOEXEC */
 
 #if defined(O_CLOEXEC)
 # define HAVE_O_CLOEXEC 1
-#endif
+#endif /* O_CLOEXEC */
 
 #if defined(POSIX_CLOSE_RESTART)
 # define HAVE_POSIX_CLOSE_RESTART 1
-#endif
+#endif /* POSIX_CLOSE_RESTART */
 
 #define MAGIC_EXTENSION_SEPARATOR "/"
 #define MAGIC_CONTINUE_SEPARATOR "\n- "
@@ -65,15 +65,21 @@ extern "C" {
 # define MAGIC_STATUS_CHECK(x) x
 #else
 # define MAGIC_STATUS_CHECK(x) 1
-#endif
+#endif /* MAGIC_SYSTEM_LIBRARIES */
+
+#if !defined(MAGIC_CUSTOM_CHECK_TYPE)
+# define MAGIC_CHECK_RUBY_TYPE(o, t) Check_Type((o), (t))
+#else
+# define MAGIC_CHECK_RUBY_TYPE(o, t) magic_check_ruby_type((o), (t))
+#endif /* MAGIC_CUSTOM_CHECK_TYPE */
 
 #if !defined(MAGIC_NO_CHECK_CSV)
 # define MAGIC_NO_CHECK_CSV 0
-#endif
+#endif /* MAGIC_NO_CHECK_CSV */
 
 #if !defined(MAGIC_NO_CHECK_JSON)
 # define MAGIC_NO_CHECK_JSON 0
-#endif
+#endif /* MAGIC_NO_CHECK_JSON */
 
 #define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
 #define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
@@ -95,23 +101,23 @@ extern "C" {
 # define RVALUE_TYPE enum ruby_value_type
 #else
 # define RVALUE_TYPE int
-#endif
+#endif /* RUBY_API_VERSION_CODE > 20700 */
 
 #define CLASS_NAME(o) (NIL_P((o)) ? "nil" : rb_obj_classname((o)))
 
 #if !defined(T_INTEGER)
 # define T_INTEGER rb_cInteger
-#endif
+#endif /* T_INTEGER */
 
 #if !defined(HAVE_RB_IO_T)
 # define rb_io_t OpenFile
-#endif
+#endif /* HAVE_RB_IO_T */
 
 #if !defined(GetReadFile)
 # define FPTR_TO_FD(p) ((p)->fd)
 #else
 # define FPTR_TO_FD(p) (fileno(GetReadFile(p)))
-#endif
+#endif /* GetReadFile */
 
 #define NOGVL_FUNCTION (VALUE (*)(void *))
 
@@ -138,7 +144,8 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 }
 # define NOGVL(f, d) \
 	fake_blocking_region(NOGVL_FUNCTION(f), (d))
-#endif
+#endif /* HAVE_RB_THREAD_CALL_WITHOUT_GVL
+	  HAVE_RUBY_THREAD_H */
 
 #if defined(__cplusplus)
 }

@@ -11,14 +11,18 @@ static int rb_mgc_warning;
 static ID id_at_flags;
 static ID id_at_paths;
 
-static VALUE rb_cMagic = Qundef;
+static VALUE rb_cMagic;
 
-static VALUE rb_mgc_eError = Qundef;
-static VALUE rb_mgc_eMagicError = Qundef;
-static VALUE rb_mgc_eLibraryError = Qundef;
-static VALUE rb_mgc_eParameterError = Qundef;
-static VALUE rb_mgc_eFlagsError = Qundef;
-static VALUE rb_mgc_eNotImplementedError = Qundef;
+static VALUE rb_mgc_eError;
+static VALUE rb_mgc_eMagicError;
+static VALUE rb_mgc_eLibraryError;
+static VALUE rb_mgc_eNotImplementedError;
+static VALUE rb_mgc_eParameterError;
+static VALUE rb_mgc_eFlagsError;
+
+VALUE rb_mgc_close_p(VALUE object);
+VALUE rb_mgc_load(VALUE object, VALUE arguments);
+VALUE rb_mgc_descriptor(VALUE object, VALUE value);
 
 void Init_magic(void);
 

@@ -134,7 +134,7 @@ def config_clean?
 end
 
 def config_static?
-  default_static = !truffle?
+  default_static = !java?
   enable_config("static", default_static)
 end
 
@@ -156,8 +156,16 @@ def windows?
   RbConfig::CONFIG['target_os'] =~ /mswin|mingw32|windows/
 end
 
+def jruby?
+  ::RUBY_ENGINE == 'jruby'
+end
+
 def truffle?
   ::RUBY_ENGINE == 'truffleruby'
+end
+
+def java?
+  truffle? || jruby?
 end
 
 def concat_flags(*args)
@@ -219,6 +227,10 @@ append_cppflags(ENV["CPPFLAGS"].split) if ENV["CPPFLAGS"]
 append_ldflags(ENV["LDFLAGS"].split) if ENV["LDFLAGS"]
 
 $LIBS = concat_flags($LIBS, ENV["LIBS"]) if ENV["LIBS"]
+
+if java?
+  $CPPFLAGS += " -DMAGIC_CUSTOM_CHECK_TYPE"
+end
 
 if config_system_libraries?
   message "Building ruby-magic using system libraries.\n"

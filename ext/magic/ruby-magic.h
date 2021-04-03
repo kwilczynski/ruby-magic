@@ -83,6 +83,7 @@ enum error {
 	E_NOT_ENOUGH_MEMORY,
 	E_ARGUMENT_MISSING,
 	E_ARGUMENT_TYPE_INVALID,
+	E_ARGUMENT_TYPE_UNKNOWN,
 	E_ARGUMENT_TYPE_ARRAY_EMPTY,
 	E_ARGUMENT_TYPE_ARRAY_STRINGS,
 	E_MAGIC_LIBRARY_INITIALIZE,
@@ -141,6 +142,7 @@ static const char *errors[] = {
 	[E_NOT_ENOUGH_MEMORY]		= "cannot allocate memory",
 	[E_ARGUMENT_MISSING]		= "wrong number of arguments (given %d, expected %d)",
 	[E_ARGUMENT_TYPE_INVALID]	= "wrong argument type %s (expected %s)",
+	[E_ARGUMENT_TYPE_UNKNOWN]	= "unknown type 0x%x (0x%x given)",
 	[E_ARGUMENT_TYPE_ARRAY_EMPTY]	= "arguments list cannot be empty (expected array of String)",
 	[E_ARGUMENT_TYPE_ARRAY_STRINGS]	= "wrong argument type %s in arguments list (expected String)",
 	[E_MAGIC_LIBRARY_INITIALIZE]	= "failed to initialize Magic library",
@@ -152,6 +154,82 @@ static const char *errors[] = {
 	[E_FLAG_INVALID_TYPE]		= "unknown or invalid flag specified",
 	NULL
 };
+
+#if defined(MAGIC_CUSTOM_CHECK_TYPE)
+static const char ruby_types[][10] = {
+	[T_OBJECT]	= "Object",
+	[T_MODULE]	= "Module",
+	[T_CLASS]	= "Class",
+	[T_SYMBOL]	= "Symbol",
+	[T_STRUCT]	= "Struct",
+	[T_FILE]	= "File",
+	[T_ARRAY]	= "Array",
+	[T_HASH]	= "Hash",
+	[T_STRING]	= "String",
+	[T_BIGNUM]	= "Integer",
+	[T_FIXNUM]	= "Integer",
+	[T_FLOAT]	= "Float",
+	[T_COMPLEX]	= "Complex",
+	[T_RATIONAL]	= "Rational",
+	[T_REGEXP]	= "Regexp",
+	[T_MATCH]	= "MatchData",
+	[T_TRUE]	= "true",
+	[T_FALSE]	= "false",
+	[T_NIL]		= "nil"
+};
+
+static const char *
+magic_ruby_type_name(int type)
+{
+	const char *name;
+
+	if (type >= ARRAY_SIZE(ruby_types))
+		return NULL;
+
+	name = ruby_types[type];
+	if (name)
+		return name;
+
+	return NULL;
+}
+
+static const char *
+magic_ruby_class_name(VALUE object)
+{
+	const char *name = NULL;
+
+	if (NIL_P(object))
+		name = "nil";
+	else if (RB_TYPE_P(object, T_TRUE))
+		name = "true";
+	else if (RB_TYPE_P(object, T_FALSE))
+		name = "false";
+	else
+		name = CLASS_NAME(object);
+
+	return name;
+}
+
+void
+magic_check_ruby_type(VALUE object, int type)
+{
+	const char *name;
+	int object_type = TYPE(object);
+
+	if (object_type == type)
+		return;
+
+	name = magic_ruby_type_name(type);
+	if (name)
+		rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID),
+			 magic_ruby_class_name(object),
+			 name);
+
+	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_UNKNOWN),
+		 object_type,
+		 type);
+}
+#endif /* MAGIC_CUSTOM_CHECK_TYPE */
 
 static inline VALUE
 magic_shift(VALUE v)
@@ -233,7 +311,7 @@ magic_check_type(VALUE object, RVALUE_TYPE type)
 	if (type == T_FIXNUM && !RVAL2CBOOL(boolean))
 		MAGIC_ARGUMENT_TYPE_ERROR(object, rb_class2name(T_INTEGER));
 
-	Check_Type(object, type);
+	MAGIC_CHECK_RUBY_TYPE(object, type);
 }
 
 static inline void
@@ -249,10 +327,6 @@ magic_check_type_array_of_strings(VALUE object)
 				 CLASS_NAME(value));
 	}
 }
-
-VALUE rb_mgc_close_p(VALUE object);
-VALUE rb_mgc_load(VALUE object, VALUE arguments);
-VALUE rb_mgc_descriptor(VALUE object, VALUE value);
 
 #if defined(__cplusplus)
 }
