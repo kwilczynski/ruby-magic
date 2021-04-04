@@ -683,35 +683,80 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_singleton_do_not_auto_load_global
+    omit_unless(Process.respond_to?(:fork), "Platform does not support fork")
+
+    saved = Magic.do_not_auto_load
+
+    klass = Class.new(Magic)
+
     assert_false(Magic.do_not_auto_load)
+    assert_false(klass.do_not_auto_load)
 
     fork do
       Magic.do_not_auto_load = true
 
-      magic_1 = Magic.new
-      magic_2 = Magic.new
+      magic = Magic.new
 
       error_1 = assert_raise Magic::MagicError do
-        magic_1.buffer ''
+        magic.buffer ''
       end
-
-      magic_1.close
 
       error_2 = assert_raise Magic::MagicError do
-        magic_2.buffer ''
+        klass.buffer ''
       end
-
-      magic_2.close
 
       assert_equal('Magic library not loaded', error_1.message)
       assert_equal('Magic library not loaded', error_2.message)
 
       assert_true(Magic.do_not_auto_load)
+      assert_true(klass.do_not_auto_load)
     end
 
     Process.waitpid rescue Errno::ECHILD
 
     assert_false(Magic.do_not_auto_load)
+    assert_false(klass.do_not_auto_load)
+
+    Magic.do_not_auto_load = saved
+
+    assert_false(Magic.do_not_auto_load)
+    assert_false(klass.do_not_auto_load)
+  end
+
+  def test_magic_singleton_do_not_auto_load_global_no_fork
+    omit_if(Process.respond_to?(:fork), "Platform supports fork")
+
+    assert_false(Magic.do_not_auto_load)
+
+    saved = Magic.do_not_auto_load
+
+    klass = Class.new(Magic)
+
+    assert_false(Magic.do_not_auto_load)
+    assert_false(klass.do_not_auto_load)
+
+    Magic.do_not_auto_load = true
+
+    magic = Magic.new
+
+    error_1 = assert_raise Magic::MagicError do
+      magic.buffer ''
+    end
+
+    error_2 = assert_raise Magic::MagicError do
+      klass.buffer ''
+    end
+
+    assert_equal('Magic library not loaded', error_1.message)
+    assert_equal('Magic library not loaded', error_2.message)
+
+    assert_true(Magic.do_not_auto_load)
+    assert_true(klass.do_not_auto_load)
+
+    Magic.do_not_auto_load = saved
+
+    assert_false(Magic.do_not_auto_load)
+    assert_false(klass.do_not_auto_load)
   end
 
   def test_magic_singleton_do_not_stop_on_error_with_truthy_values
