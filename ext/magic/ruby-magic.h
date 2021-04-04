@@ -156,26 +156,31 @@ static const char *errors[] = {
 };
 
 #if defined(MAGIC_CUSTOM_CHECK_TYPE)
-static const char ruby_types[][10] = {
+static const char *ruby_types[] = {
+	"", /* Not an object */
 	[T_OBJECT]	= "Object",
-	[T_MODULE]	= "Module",
 	[T_CLASS]	= "Class",
-	[T_SYMBOL]	= "Symbol",
-	[T_STRUCT]	= "Struct",
-	[T_FILE]	= "File",
+	[T_MODULE]	= "Module",
+	[T_FLOAT]	= "Float",
+	[T_STRING]	= "String",
+	[T_REGEXP]	= "Regexp",
 	[T_ARRAY]	= "Array",
 	[T_HASH]	= "Hash",
-	[T_STRING]	= "String",
+	[T_STRUCT]	= "Struct",
 	[T_BIGNUM]	= "Integer",
-	[T_FIXNUM]	= "Integer",
-	[T_FLOAT]	= "Float",
+	[T_FILE]	= "File",
+	"", /* Internal use */
+	[T_MATCH]	= "MatchData",
 	[T_COMPLEX]	= "Complex",
 	[T_RATIONAL]	= "Rational",
-	[T_REGEXP]	= "Regexp",
-	[T_MATCH]	= "MatchData",
+	"", /* Internal use */
+	[T_NIL]		= "nil",
 	[T_TRUE]	= "true",
 	[T_FALSE]	= "false",
-	[T_NIL]		= "nil"
+	[T_SYMBOL]	= "Symbol",
+	[T_FIXNUM]	= "Integer",
+	"", /* Internal use */
+	NULL
 };
 
 static const char *
@@ -216,6 +221,12 @@ magic_check_ruby_type(VALUE object, int type)
 	const char *name;
 	int object_type = TYPE(object);
 
+	if (object == Qundef)
+		rb_bug("invalid type leaked to the Ruby space");
+
+	if (object_type > T_MASK || object_type == T_DATA)
+		goto error;
+
 	if (object_type == type)
 		return;
 
@@ -224,7 +235,7 @@ magic_check_ruby_type(VALUE object, int type)
 		rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID),
 			 magic_ruby_class_name(object),
 			 name);
-
+error:
 	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_UNKNOWN),
 		 object_type,
 		 type);
