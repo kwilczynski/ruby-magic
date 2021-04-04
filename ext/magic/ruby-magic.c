@@ -4,64 +4,6 @@ extern "C" {
 
 #include "ruby-magic.h"
 
-static int rb_mgc_do_not_auto_load;
-static int rb_mgc_do_not_stop_on_error;
-static int rb_mgc_warning;
-
-static ID id_at_flags;
-static ID id_at_paths;
-
-static VALUE rb_cMagic;
-
-static VALUE rb_mgc_eError;
-static VALUE rb_mgc_eMagicError;
-static VALUE rb_mgc_eLibraryError;
-static VALUE rb_mgc_eNotImplementedError;
-static VALUE rb_mgc_eParameterError;
-static VALUE rb_mgc_eFlagsError;
-
-VALUE rb_mgc_close_p(VALUE object);
-VALUE rb_mgc_load(VALUE object, VALUE arguments);
-VALUE rb_mgc_descriptor(VALUE object, VALUE value);
-
-void Init_magic(void);
-
-static VALUE magic_get_parameter_internal(void *data);
-static VALUE magic_set_parameter_internal(void *data);
-static VALUE magic_get_flags_internal(void *data);
-static VALUE magic_set_flags_internal(void *data);
-static VALUE magic_load_internal(void *data);
-static VALUE magic_load_buffers_internal(void *data);
-static VALUE magic_compile_internal(void *data);
-static VALUE magic_check_internal(void *data);
-static VALUE magic_file_internal(void *data);
-static VALUE magic_buffer_internal(void *data);
-static VALUE magic_descriptor_internal(void *data);
-static VALUE magic_close_internal(void *data);
-
-static void* nogvl_magic_load(void *data);
-static void* nogvl_magic_compile(void *data);
-static void* nogvl_magic_check(void *data);
-static void* nogvl_magic_file(void *data);
-static void* nogvl_magic_descriptor(void *data);
-
-static VALUE magic_allocate(VALUE klass);
-static void magic_mark(void *data);
-static void magic_free(void *data);
-static VALUE magic_exception_wrapper(VALUE value);
-static VALUE magic_exception(void *data);
-static void magic_library_close(void *data);
-static VALUE magic_library_error(VALUE klass, void *data);
-static VALUE magic_generic_error(VALUE klass, int magic_errno,
-				 const char *magic_error);
-static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
-			void *data);
-static VALUE magic_unlock(VALUE object);
-static VALUE magic_return(void *data);
-static int magic_flags(VALUE object);
-static int magic_set_flags(VALUE object, VALUE value);
-static VALUE magic_set_paths(VALUE object, VALUE value);
-
 /*
  * call-seq:
  *    Magic.do_not_auto_load -> boolean
@@ -543,7 +485,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 				  klass, klass);
 	}
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 
 	if (!RARRAY_EMPTY_P(arguments)) {
 		value = magic_join(arguments, CSTR2RVAL(":"));
@@ -618,7 +560,7 @@ rb_mgc_load_buffers(VALUE object, VALUE arguments)
 		sizes[i] = (size_t)RSTRING_LEN(value);
 	}
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.buffers.count = count;
 	ma.type.buffers.pointers = pointers;
 	ma.type.buffers.sizes = sizes;
@@ -698,7 +640,7 @@ rb_mgc_compile(VALUE object, VALUE value)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_compile_internal, &ma);
@@ -725,7 +667,7 @@ rb_mgc_check(VALUE object, VALUE value)
 	MAGIC_CHECK_OPEN(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_check_internal, &ma);
@@ -763,7 +705,7 @@ rb_mgc_file(VALUE object, VALUE value)
 		goto error;
 
 	ma.stop_on_errors = mo->stop_on_errors;
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_file_internal, &ma);
@@ -825,7 +767,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 
 	StringValue(value);
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.buffers.pointers = (void **)RSTRING_PTR(value);
 	ma.type.buffers.sizes = (size_t *)RSTRING_LEN(value);
 
@@ -861,7 +803,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 	MAGIC_CHECK_LOADED(object);
 	MAGIC_COOKIE(mo, ma.cookie);
 
-	ma.flags = magic_flags(object);
+	ma.flags = magic_get_flags(object);
 	ma.type.file.fd = NUM2INT(value);
 
 	MAGIC_SYNCHRONIZED(magic_descriptor_internal, &ma);
@@ -1146,6 +1088,34 @@ magic_descriptor_internal(void *data)
 	return (VALUE)NULL;
 }
 
+static inline void*
+magic_library_open(void)
+{
+	magic_t cookie;
+
+	cookie = magic_open_wrapper(MAGIC_NONE);
+	if (!cookie) {
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	return cookie;
+}
+
+static inline void
+magic_library_close(void *data)
+{
+	magic_object_t *mo = data;
+
+	assert(mo != NULL && \
+	       "Must be a valid pointer to `magic_object_t' type");
+
+	if (mo->cookie)
+		magic_close_wrapper(mo->cookie);
+
+	mo->cookie = NULL;
+}
+
 static VALUE
 magic_allocate(VALUE klass)
 {
@@ -1167,8 +1137,8 @@ magic_allocate(VALUE klass)
 	mo->database_loaded = 0;
 	mo->stop_on_errors = 0;
 
-	mo->cookie = magic_open_wrapper(MAGIC_NONE);
-	local_errno = ENOMEM;
+	mo->cookie = magic_library_open();
+	local_errno = errno;
 
 	if (!mo->cookie) {
 		ruby_xfree(mo);
@@ -1179,21 +1149,7 @@ magic_allocate(VALUE klass)
 				    E_MAGIC_LIBRARY_INITIALIZE);
 	}
 
-	return Data_Wrap_Struct(klass, magic_mark, magic_free, mo);
-}
-
-static inline void
-magic_library_close(void *data)
-{
-	magic_object_t *mo = data;
-
-	assert(mo != NULL && \
-	       "Must be a valid pointer to `magic_object_t' type");
-
-	if (mo->cookie)
-		magic_close_wrapper(mo->cookie);
-
-	mo->cookie = NULL;
+	return TypedData_Wrap_Struct(klass, &rb_magic_type, mo);
 }
 
 static inline void
@@ -1204,7 +1160,7 @@ magic_mark(void *data)
 	assert(mo != NULL && \
 	       "Must be a valid pointer to `magic_object_t' type");
 
-	rb_gc_mark(mo->mutex);
+	rb_gc_mark_movable(mo->mutex);
 }
 
 static inline void
@@ -1222,6 +1178,28 @@ magic_free(void *data)
 	mo->mutex = Qundef;
 
 	ruby_xfree(mo);
+}
+
+static inline size_t
+magic_size(const void *data)
+{
+	const magic_object_t *mo = data;
+
+	assert(mo != NULL && \
+	       "Must be a valid pointer to `magic_object_t' type");
+
+	return sizeof(*mo);
+}
+
+static inline void
+magic_compact(void *data)
+{
+	magic_object_t *mo = data;
+
+	assert(mo != NULL && \
+	       "Must be a valid pointer to `magic_object_t' type");
+
+	mo->mutex = rb_gc_location(mo->mutex);
 }
 
 static inline VALUE
@@ -1366,7 +1344,7 @@ magic_return(void *data)
 }
 
 static inline int
-magic_flags(VALUE object)
+magic_get_flags(VALUE object)
 {
 	return NUM2INT(rb_ivar_get(object, id_at_flags));
 }
@@ -1382,6 +1360,17 @@ magic_set_paths(VALUE object, VALUE value)
 {
 	return rb_ivar_set(object, id_at_paths, value);
 }
+
+static const rb_data_type_t rb_magic_type = {
+	.wrap_struct_name = "magic",
+	.function = {
+		.dmark	  = magic_mark,
+		.dfree	  = magic_free,
+		.dsize	  = magic_size,
+		.dcompact = magic_compact,
+	},
+	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 void
 Init_magic(void)

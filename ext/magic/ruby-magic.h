@@ -11,7 +11,7 @@ extern "C" {
 #define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
 #define MAGIC_OBJECT(o) \
-	Data_Get_Struct(object, magic_object_t, (o))
+	TypedData_Get_Struct(object, magic_object_t, &rb_magic_type, (o))
 
 #define MAGIC_COOKIE(o, c) \
 	((c) = MAGIC_OBJECT((o))->cookie)
@@ -338,6 +338,112 @@ magic_check_type_array_of_strings(VALUE object)
 				 CLASS_NAME(value));
 	}
 }
+
+static int rb_mgc_do_not_auto_load;
+static int rb_mgc_do_not_stop_on_error;
+static int rb_mgc_warning;
+
+static ID id_at_flags;
+static ID id_at_paths;
+
+static VALUE rb_cMagic;
+
+static VALUE rb_mgc_eError;
+static VALUE rb_mgc_eMagicError;
+static VALUE rb_mgc_eLibraryError;
+static VALUE rb_mgc_eNotImplementedError;
+static VALUE rb_mgc_eParameterError;
+static VALUE rb_mgc_eFlagsError;
+
+static const rb_data_type_t rb_magic_type;
+
+void Init_magic(void);
+
+VALUE rb_mgc_get_do_not_auto_load_global(VALUE object);
+VALUE rb_mgc_set_do_not_auto_load_global(VALUE object, VALUE value);
+VALUE rb_mgc_get_do_not_stop_on_error_global(VALUE object);
+VALUE rb_mgc_set_do_not_stop_on_error_global(VALUE object, VALUE value);
+
+VALUE rb_mgc_initialize(VALUE object, VALUE arguments);
+
+VALUE rb_mgc_get_do_not_stop_on_error(VALUE object);
+VALUE rb_mgc_set_do_not_stop_on_error(VALUE object, VALUE value);
+
+VALUE rb_mgc_open_p(VALUE object);
+VALUE rb_mgc_close(VALUE object);
+VALUE rb_mgc_close_p(VALUE object);
+
+VALUE rb_mgc_get_paths(VALUE object);
+
+VALUE rb_mgc_get_parameter(VALUE object, VALUE tag);
+VALUE rb_mgc_set_parameter(VALUE object, VALUE tag, VALUE value);
+
+VALUE rb_mgc_get_flags(VALUE object);
+VALUE rb_mgc_set_flags(VALUE object, VALUE value);
+
+VALUE rb_mgc_load(VALUE object, VALUE arguments);
+VALUE rb_mgc_load_buffers(VALUE object, VALUE arguments);
+VALUE rb_mgc_load_p(VALUE object);
+
+VALUE rb_mgc_compile(VALUE object, VALUE arguments);
+VALUE rb_mgc_check(VALUE object, VALUE arguments);
+
+VALUE rb_mgc_file(VALUE object, VALUE value);
+VALUE rb_mgc_buffer(VALUE object, VALUE value);
+VALUE rb_mgc_descriptor(VALUE object, VALUE value);
+
+VALUE rb_mgc_version(VALUE object);
+
+static VALUE magic_get_parameter_internal(void *data);
+static VALUE magic_set_parameter_internal(void *data);
+
+static VALUE magic_get_flags_internal(void *data);
+static VALUE magic_set_flags_internal(void *data);
+
+static VALUE magic_load_internal(void *data);
+static VALUE magic_load_buffers_internal(void *data);
+
+static VALUE magic_compile_internal(void *data);
+static VALUE magic_check_internal(void *data);
+
+static VALUE magic_file_internal(void *data);
+static VALUE magic_buffer_internal(void *data);
+static VALUE magic_descriptor_internal(void *data);
+
+static VALUE magic_close_internal(void *data);
+
+static void* nogvl_magic_load(void *data);
+static void* nogvl_magic_compile(void *data);
+static void* nogvl_magic_check(void *data);
+static void* nogvl_magic_file(void *data);
+static void* nogvl_magic_descriptor(void *data);
+
+static void* magic_library_open(void);
+static void magic_library_close(void *data);
+
+static VALUE magic_allocate(VALUE klass);
+static void magic_mark(void *data);
+static void magic_free(void *data);
+static size_t magic_size(const void *data);
+static void magic_compact(void *data);
+
+static VALUE magic_exception_wrapper(VALUE value);
+static VALUE magic_exception(void *data);
+
+static VALUE magic_library_error(VALUE klass, void *data);
+static VALUE magic_generic_error(VALUE klass, int magic_errno,
+				 const char *magic_error);
+
+static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
+			void *data);
+static VALUE magic_unlock(VALUE object);
+
+static VALUE magic_return(void *data);
+
+static int magic_get_flags(VALUE object);
+static int magic_set_flags(VALUE object, VALUE value);
+
+static VALUE magic_set_paths(VALUE object, VALUE value);
 
 #if defined(__cplusplus)
 }
