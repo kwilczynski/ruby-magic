@@ -425,7 +425,9 @@ static VALUE magic_allocate(VALUE klass);
 static void magic_mark(void *data);
 static void magic_free(void *data);
 static size_t magic_size(const void *data);
+#if defined(HAVE_RUBY_GC_COMPACT)
 static void magic_compact(void *data);
+#endif
 
 static VALUE magic_exception_wrapper(VALUE value);
 static VALUE magic_exception(void *data);

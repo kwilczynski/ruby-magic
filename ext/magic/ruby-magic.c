@@ -1160,7 +1160,7 @@ magic_mark(void *data)
 	assert(mo != NULL && \
 	       "Must be a valid pointer to `magic_object_t' type");
 
-	rb_gc_mark_movable(mo->mutex);
+	MAGIC_GC_MARK(mo->mutex);
 }
 
 static inline void
@@ -1191,6 +1191,7 @@ magic_size(const void *data)
 	return sizeof(*mo);
 }
 
+#if defined(HAVE_RUBY_GC_COMPACT)
 static inline void
 magic_compact(void *data)
 {
@@ -1201,6 +1202,7 @@ magic_compact(void *data)
 
 	mo->mutex = rb_gc_location(mo->mutex);
 }
+#endif /* HAVE_RUBY_GC_COMPACT */
 
 static inline VALUE
 magic_exception_wrapper(VALUE value)
@@ -1367,7 +1369,9 @@ static const rb_data_type_t rb_magic_type = {
 		.dmark	  = magic_mark,
 		.dfree	  = magic_free,
 		.dsize	  = magic_size,
+#if defined(HAVE_RUBY_GC_COMPACT)
 		.dcompact = magic_compact,
+#endif /* HAVE_RUBY_GC_COMPACT */
 	},
 	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
 };

@@ -869,7 +869,10 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_gc_compaction
-    omit_unless(defined?(GC.verify_compaction_references) == 'method')
+    omit_unless(
+      defined?(GC.verify_compaction_references) == 'method',
+      "Platform does not support GC.compact"
+    )
     GC.verify_compaction_references(double_heap: true, toward: :empty)
   end
 end
