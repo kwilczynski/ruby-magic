@@ -829,14 +829,6 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Errno::EINVAL::Errno, error.errno)
   end
 
-  def test_gc_compaction
-    if defined?(GC.verify_compaction_references) == 'method'
-      # This method was added in Ruby 3.0.0. Calling it this way asks the GC to
-      # move objects around, helping to find object movement bugs.
-      GC.verify_compaction_references(double_heap: true, toward: :empty)
-    end
-  end
-
   def test_magic_new_instance_with_arguments
   end
 
@@ -874,5 +866,10 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_string_integration_type
+  end
+
+  def test_gc_compaction
+    omit_unless(defined?(GC.verify_compaction_references) == 'method')
+    GC.verify_compaction_references(double_heap: true, toward: :empty)
   end
 end
