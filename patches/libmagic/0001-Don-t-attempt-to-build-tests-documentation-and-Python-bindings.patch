@@ -1,0 +1,44 @@
+From 0f2752ad4d7ea65c80d76493899aca67e90be524 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>
+Date: Mon, 5 Apr 2021 16:51:59 +0000
+Subject: [PATCH] Don't attempt to build tests, documentation and Python
+ bindings
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Krzysztof Wilczyński <kw@linux.com>
+---
+ Makefile.am | 2 +-
+ Makefile.in | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 2ab67ed..c7fafeb 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
+ 
+ EXTRA_DIST = MAINT
+ 
+-SUBDIRS = src magic tests doc python
++SUBDIRS = src magic
+ 
+ # This variable must have 'exec' in its name, in order to be installed
+ # by 'install-exec' target (instead of default 'install-data')
+diff --git a/Makefile.in b/Makefile.in
+index e19b15e..dcb5ce6 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -358,7 +358,7 @@ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+ EXTRA_DIST = MAINT
+-SUBDIRS = src magic tests doc python
++SUBDIRS = src magic
+ 
+ # This variable must have 'exec' in its name, in order to be installed
+ # by 'install-exec' target (instead of default 'install-data')
+-- 
+2.31.0
+
