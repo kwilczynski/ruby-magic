@@ -81,6 +81,7 @@ def process_recipe(name, version, static_p, cross_p)
     # correct compiler prefix for cross build, but use host if not set.
     recipe.host = RbConfig::CONFIG["host_alias"].empty? ? RbConfig::CONFIG["host"] : RbConfig::CONFIG["host_alias"]
     recipe.target = File.join(PACKAGE_ROOT_DIR, "ports")
+    recipe.patch_files = Dir[File.join(PACKAGE_ROOT_DIR, "patches", name, "*.patch")].sort
     recipe.configure_options << "--libdir=#{File.join(recipe.path, 'lib')}"
 
     yield recipe
@@ -121,7 +122,30 @@ def process_recipe(name, version, static_p, cross_p)
       "#{key}=#{value.strip}"
     end
 
-    recipe.cook
+    checkpoint = "#{recipe.target}/#{recipe.name}-#{recipe.version}-#{recipe.host}.installed"
+
+    if File.exist?(checkpoint)
+      message("Building Ruby Magic with a packaged version of #{name}-#{version}.\n")
+    else
+      message(<<~EOM)
+        ---------- IMPORTANT NOTICE ----------
+        Building Ruby Magic with a packaged version of #{name}-#{version}.
+        Configuration options: #{recipe.configure_options.shelljoin}
+      EOM
+
+      unless recipe.patch_files.empty?
+        message("The following patches are being applied:\n")
+
+        recipe.patch_files.each do |patch|
+          message("  - %s\n" % File.basename(patch))
+        end
+      end
+
+      recipe.cook
+
+      FileUtils.touch(checkpoint)
+    end
+
     recipe.activate
   end
 end
