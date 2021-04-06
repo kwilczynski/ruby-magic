@@ -92,6 +92,20 @@ def process_recipe(name, version, static_p, cross_p)
 
     recipe.configure_options.flatten!
 
+    recipe.configure_options.delete_if do |option|
+      case option
+      when /\A(\w+)=(.*)\z/
+        env[Regexp.last_match(1)] = if env.key?(Regexp.last_match(1))
+          concat_flags(env[Regexp.last_match(1)], Regexp.last_match(2))
+        else
+          Regexp.last_match(2)
+        end
+        true
+      else
+        false
+      end
+    end
+
     recipe.configure_options = [
       "--disable-silent-rules",
       "--disable-dependency-tracking",
@@ -116,6 +130,14 @@ def process_recipe(name, version, static_p, cross_p)
         "--target=#{recipe.host}",
         "--host=#{recipe.host}",
       ]
+    end
+
+    if RbConfig::CONFIG['target_cpu'] == 'universal'
+      %w[CFLAGS LDFLAGS].each do |key|
+        unless env[key].include?('-arch')
+          env[key] = concat_flags(env[key], RbConfig::CONFIG['ARCH_FLAG'])
+        end
+      end
     end
 
     recipe.configure_options += env.map do |key, value|
