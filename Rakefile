@@ -54,10 +54,50 @@ Gem::PackageTask.new(RUBY_MAGIC_GEM_SPEC) do |p|
   p.need_tar = false
 end
 
+CROSS_RUBY_PLATFORMS = ["x86_64-linux", "x86-linux"]
+CROSS_RUBY_VERSIONS = ["2.5.0", "2.6.0", "2.7.0", "3.0.0"].join(":")
+
+require "rake_compiler_dock"
+
+ENV["RUBY_CC_VERSION"] = CROSS_RUBY_VERSIONS
+
 Rake::ExtensionTask.new('magic', RUBY_MAGIC_GEM_SPEC) do |e|
   e.source_pattern = '*.{c,h}'
   e.ext_dir = 'ext/magic'
   e.lib_dir = 'lib/magic'
+
+  e.cross_compile = true
+  e.cross_config_options << "--enable-cross-build"
+  e.cross_platform = CROSS_RUBY_PLATFORMS
+end
+
+namespace "gem" do
+  def gem_builder(platform)
+    # use Task#invoke because the pkg/*gem task is defined at runtime
+    Rake::Task["native:#{platform}"].invoke
+    Rake::Task["pkg/#{RUBY_MAGIC_GEM_SPEC.full_name}-#{Gem::Platform.new(platform).to_s}.gem"].invoke
+  end
+
+  CROSS_RUBY_PLATFORMS.each do |platform|
+    desc "build native gem for #{platform} platform"
+    task platform do
+      RakeCompilerDock.sh <<~EOT, platform: platform
+        gem install bundler --no-document &&
+        bundle &&
+        bundle exec rake gem:#{platform}:builder MAKE='nice make -j`nproc`'
+      EOT
+    end
+
+    namespace platform do
+      desc "build native gem for #{platform} platform (guest container)"
+      task "builder" do
+        gem_builder(platform)
+      end
+    end
+  end
+
+  desc "build all native gems"
+  task "native" => CROSS_RUBY_PLATFORMS
 end
 
 task('default').clear
