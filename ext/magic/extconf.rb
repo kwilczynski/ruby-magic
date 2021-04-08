@@ -4,9 +4,6 @@ require 'find'
 require 'mkmf'
 require 'pathname'
 
-LIBMAGIC_TAG = '5.39'
-LIBIMAGE_SHA256 = 'f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1'
-
 # helpful constants
 PACKAGE_ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
@@ -279,16 +276,19 @@ if config_system_libraries?
 else
   message "Building ruby-magic using packaged libraries.\n"
 
+  require 'yaml'
+  dependencies = YAML.load_file(File.join(PACKAGE_ROOT_DIR, "dependencies.yml"))
+
   static_p = config_static?
   message "Static linking is #{static_p ? 'enabled' : 'disabled'}.\n"
   cross_build_p = config_cross_build?
   message "Cross build is #{cross_build_p ? 'enabled' : 'disabled'}.\n"
 
-  libmagic_recipe = process_recipe('libmagic', LIBMAGIC_TAG, static_p, cross_build_p) do |recipe|
+  libmagic_recipe = process_recipe('libmagic', dependencies["libmagic"]["version"], static_p, cross_build_p) do |recipe|
     recipe.files = [{
-                      url: "https://ruby-magic.s3.eu-central-1.amazonaws.com/file-#{recipe.version}.tar.gz",
-                      sha256: LIBIMAGE_SHA256
-                    }]
+      url: "https://ruby-magic.s3.eu-central-1.amazonaws.com/file-#{recipe.version}.tar.gz",
+      sha256: dependencies["libmagic"]["sha256"],
+    }]
   end
 
   $LIBPATH = [File.join(libmagic_recipe.path, 'lib')]
