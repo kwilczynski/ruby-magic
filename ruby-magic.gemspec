@@ -1,5 +1,8 @@
 signing_key = File.expand_path('~/.gem/kwilczynski-private.pem')
 
+require 'yaml'
+dependencies = YAML.load_file(File.join(File.dirname(__FILE__), "dependencies.yml"))
+
 Gem::Specification.new do |s|
   s.name    = 'ruby-magic'
   s.summary = 'File Magic in Ruby'
@@ -43,7 +46,10 @@ Gem::Specification.new do |s|
               README.md
               dependencies.yml
               kwilczynski-public.pem
-            )
+            ) + [
+              File.join("ports", "archives", "file-#{dependencies["libmagic"]["version"]}.tar.gz"),
+            ]
+
 
   s.require_paths << 'lib'
   s.extensions << 'ext/magic/extconf.rb'
