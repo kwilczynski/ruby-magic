@@ -11,7 +11,8 @@ RakeFileUtils.verbose_flag = false
 
 CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
               FileList['**/extconf.h'],
-              FileList['**/Makefile']
+              FileList['**/Makefile'],
+              FileList['pkg/']
 
 CLOBBER.include FileList['**/tmp'],
                 FileList['**/*.log'],
