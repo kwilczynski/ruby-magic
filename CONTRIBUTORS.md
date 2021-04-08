@@ -8,6 +8,7 @@ Ruby Magic Authors". Copyright is held by the original contributor according to
 the versioning history; see [LICENSE](LICENSE) file.
 
 
+- Mike Dalessio ([@flavorjones](https://github.com/flavorjones))
 - Igor Victor ([@gogainda](https://github.com/gogainda))
 - John Hawthorn ([@jhawthorn](https://github.com/jhawthorn))
 - Shinya Maeda ([@dosuken123](https://github.com/dosuken123))
