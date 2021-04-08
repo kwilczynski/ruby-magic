@@ -19,7 +19,7 @@ CLOBBER.include FileList['**/tmp'],
                 FileList['ports/'],
                 FileList['tmp/']
 
-gem = Gem::Specification.load('ruby-magic.gemspec')
+RUBY_MAGIC_GEM_SPEC = Gem::Specification.load('ruby-magic.gemspec')
 
 RDoc::Task.new do |d|
   d.title = 'File Magic in Ruby'
@@ -48,12 +48,12 @@ RuboCop::RakeTask.new('lint') do |t|
   t.fail_on_error = false
 end
 
-Gem::PackageTask.new(gem) do |p|
+Gem::PackageTask.new(RUBY_MAGIC_GEM_SPEC) do |p|
   p.need_zip = false
   p.need_tar = false
 end
 
-Rake::ExtensionTask.new('magic', gem) do |e|
+Rake::ExtensionTask.new('magic', RUBY_MAGIC_GEM_SPEC) do |e|
   e.source_pattern = '*.{c,h}'
   e.ext_dir = 'ext/magic'
   e.lib_dir = 'lib/magic'
