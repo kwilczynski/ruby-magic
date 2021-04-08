@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
               LICENSE
               NOTICE
               README.md
+              dependencies.yml
               kwilczynski-public.pem
             )
 
