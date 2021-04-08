@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'magic/magic'
+begin
+  ::RUBY_VERSION =~ /(\d+\.\d+)/
+  require_relative "magic/#{Regexp.last_match(1)}/magic"
+rescue LoadError => e
+  require_relative 'magic/magic'
+end
+
 require_relative 'magic/version'
 require_relative 'magic/core/file'
 require_relative 'magic/core/string'
