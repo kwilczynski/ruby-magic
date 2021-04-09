@@ -17,8 +17,9 @@ CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
 CLOBBER.include FileList['**/tmp'],
                 FileList['**/*.log'],
                 FileList['doc/**'],
-                FileList['ports/'],
                 FileList['tmp/']
+
+CLOBBER.add("ports/*").exclude(%r{ports/archives$})
 
 RUBY_MAGIC_GEM_SPEC = Gem::Specification.load('ruby-magic.gemspec')
 
