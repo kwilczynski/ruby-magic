@@ -181,6 +181,13 @@ class Magic
     end
 
     alias_method :fd, :descriptor
+
+    private
+
+    def default_paths
+      paths = Dir.glob(File.expand_path(File.join(File.dirname(__FILE__), "../ext/magic/share/*.mgc")))
+      paths.empty? ? nil : paths
+    end
   end
 
   private
