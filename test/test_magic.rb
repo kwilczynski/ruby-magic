@@ -461,7 +461,13 @@ class MagicTest < Test::Unit::TestCase
 
     with_fixtures do
       @magic.load('png-fake.magic')
+      assert_equal(['png-fake.magic'], @magic.paths)
+      assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
+    end
 
+    with_fixtures do
+      @magic.load('png-fake.magic', 'shell.magic')
+      assert_equal(['png-fake.magic', 'shell.magic'], @magic.paths)
       assert_match(%r{^Ruby Gem image}, @magic.file(Pathname.new('ruby.png')))
     end
   end
