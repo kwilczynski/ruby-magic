@@ -189,6 +189,14 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_paths_with_MAGIC_environment_variable
+    with_fixtures do
+      magic = with_env({"MAGIC" => "png-fake.magic"}) do
+        Magic.new
+      end
+
+      assert_equal(["png-fake.magic"], magic.paths)
+      assert_match(%r{^Ruby Gem image}, magic.file(Pathname.new('ruby.png')))
+    end
   end
 
   def test_magic_get_parameter_with_PARAM_INDIR_MAX
@@ -605,6 +613,21 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_MAGIC_environment_variable
+    original_paths = @magic.paths
+
+    with_fixtures do
+      with_env({"MAGIC" => "png-fake.magic"}) do
+        # assert on setup
+        magic = Magic.new
+        assert_equal(["png-fake.magic"], magic.paths)
+        assert_match(%r{^Ruby Gem image}, magic.file(Pathname.new('ruby.png')))
+
+        # verify that #load should override the existing @paths and MAGIC
+        magic.load(original_paths)
+        assert_equal(original_paths, magic.paths)
+        assert_match(%r{^PNG image data}, magic.file(Pathname.new('ruby.png')))
+      end
+    end
   end
 
   def test_magic_load_buffers

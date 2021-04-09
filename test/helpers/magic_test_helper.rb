@@ -44,4 +44,12 @@ module MagicTestHelpers
       yield(Dir.pwd)
     end
   end
+
+  def with_env(env, &blk)
+    before = ENV.to_h.dup
+    env.each { |k, v| ENV[k] = v }
+    yield
+  ensure
+    ENV.replace(before)
+  end
 end
