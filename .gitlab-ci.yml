@@ -1,0 +1,21 @@
+.test-template: &test
+  cache:
+    paths:
+      - vendor/ruby
+  before_script:
+    - gem install bundler --no-document
+    - bundle config set --local path 'vendor/bundle'
+    - bundle config set --local without 'development'
+    - bundle install -j $(nproc) --path vendor  # Install dependencies into ./vendor/ruby
+    - ruby -v                                   # Print out ruby version for debugging
+  script:
+    - bundle exec rake compile
+    - bundle exec rake test
+
+rspec-2.7:
+  image: "ruby:2.7"
+  <<: *test
+
+rspec-3.0:
+  image: "ruby:3.0"
+  <<: *test
