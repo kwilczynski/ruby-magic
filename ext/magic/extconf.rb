@@ -301,6 +301,14 @@ else
     $LIBS += " " + pkg_config('libmagic', 'libs --static')
     $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
   end
+
+  if cross_build_p
+    # database files will be packaged up by the cross-compiling callback in the ExtensionTask
+    to_path = File.join(PACKAGE_ROOT_DIR, "ext/magic/share")
+    FileUtils.rm_rf(to_path, secure: true)
+    FileUtils.mkdir(to_path)
+    FileUtils.cp_r(Dir[File.join(libmagic_recipe.path, 'share/misc/*.mgc')], to_path)
+  end
 end
 
 $CFLAGS += ' -std=c99'

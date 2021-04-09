@@ -12,7 +12,8 @@ RakeFileUtils.verbose_flag = false
 CLEAN.include FileList['**/*{.o,.so,.dylib,.bundle}'],
               FileList['**/extconf.h'],
               FileList['**/Makefile'],
-              FileList['pkg/']
+              FileList['pkg/'],
+              FileList['ext/magic/share/']
 
 CLOBBER.include FileList['**/tmp'],
                 FileList['**/*.log'],
@@ -70,6 +71,11 @@ Rake::ExtensionTask.new('magic', RUBY_MAGIC_GEM_SPEC) do |e|
   e.cross_compile = true
   e.cross_config_options << "--enable-cross-build"
   e.cross_platform = CROSS_RUBY_PLATFORMS
+  e.cross_compiling do |spec|
+    db_glob = "ext/magic/share/*.mgc"
+    raise "magic files are not present at #{db_glob}" if Dir[db_glob].empty?
+    Dir[db_glob].each { |db| spec.files << db }
+  end
 end
 
 namespace "gem" do
