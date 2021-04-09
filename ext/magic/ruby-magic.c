@@ -299,10 +299,7 @@ rb_mgc_get_paths(VALUE object)
 		return value;
 
 	cstring = magic_getpath_wrapper();
-	value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
-	RB_GC_GUARD(value);
-
-	return value;
+	return magic_set_paths(object, magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":")));
 }
 
 /*
@@ -487,14 +484,11 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 	ma.flags = magic_get_flags(object);
 
-	if (!RARRAY_EMPTY_P(arguments)) {
-		value = magic_join(arguments, CSTR2RVAL(":"));
-		ma.type.file.path = RVAL2CSTR(value);
+	if (RARRAY_EMPTY_P(arguments)) {
+		arguments = rb_mgc_get_paths(object);
 	}
-	else
-		ma.type.file.path = magic_getpath_wrapper();
-
-	magic_set_paths(object, RARRAY_EMPTY);
+	value = magic_join(arguments, CSTR2RVAL(":"));
+	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
 	if (ma.status < 0) {
