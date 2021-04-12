@@ -4,14 +4,7 @@ extern "C" {
 
 #include "functions.h"
 
-int check_fd(int fd);
-static int safe_dup(int fd);
-static int safe_close(int fd);
-static int safe_cloexec(int fd);
-int override_error_output(void *data);
-int restore_error_output(void *data);
-
-inline int
+static inline int
 check_fd(int fd)
 {
 	errno = 0;
@@ -89,7 +82,7 @@ error:
 	return -1;
 }
 
-int
+static int
 override_error_output(void *data)
 {
 	int local_errno;
@@ -146,7 +139,7 @@ error:
 	return -1;
 }
 
-int
+static int
 restore_error_output(void *data)
 {
 	int local_errno;
