@@ -3,7 +3,7 @@
 begin
   ::RUBY_VERSION =~ /(\d+\.\d+)/
   require_relative "magic/#{Regexp.last_match(1)}/magic"
-rescue LoadError => e
+rescue LoadError
   require_relative 'magic/magic'
 end
 
