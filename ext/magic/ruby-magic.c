@@ -294,15 +294,19 @@ rb_mgc_get_paths(VALUE object)
 
 	MAGIC_CHECK_OPEN(object);
 
+	/* always prefer the value cached in @paths */
 	value = rb_ivar_get(object, id_at_paths);
-	if (!NIL_P(value) && !RARRAY_EMPTY_P(value) && !getenv("MAGIC"))
+	if (!NIL_P(value) && !RARRAY_EMPTY_P(value)) {
 		return value;
+	}
 
-	cstring = magic_getpath_wrapper();
-	value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
-	RB_GC_GUARD(value);
-
-	return value;
+	/* use either the library method or our gem-specific default, and save the result in @paths */
+	value = rb_funcall(rb_cMagic, rb_intern("default_paths"), 0);
+	if (getenv("MAGIC") || NIL_P(value)) {
+		cstring = magic_getpath_wrapper();
+		value = magic_split(CSTR2RVAL(cstring), CSTR2RVAL(":"));
+	}
+	return magic_set_paths(object, value);
 }
 
 /*
@@ -487,14 +491,11 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 	ma.flags = magic_get_flags(object);
 
-	if (!RARRAY_EMPTY_P(arguments)) {
-		value = magic_join(arguments, CSTR2RVAL(":"));
-		ma.type.file.path = RVAL2CSTR(value);
+	if (RARRAY_EMPTY_P(arguments)) {
+		arguments = rb_mgc_get_paths(object);
 	}
-	else
-		ma.type.file.path = magic_getpath_wrapper();
-
-	magic_set_paths(object, RARRAY_EMPTY);
+	value = magic_join(arguments, CSTR2RVAL(":"));
+	ma.type.file.path = RVAL2CSTR(value);
 
 	MAGIC_SYNCHRONIZED(magic_load_internal, &ma);
 	if (ma.status < 0) {

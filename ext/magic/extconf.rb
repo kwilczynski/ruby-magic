@@ -301,6 +301,14 @@ else
     $LIBS += " " + pkg_config('libmagic', 'libs --static')
     $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
   end
+
+  if cross_build_p
+    # database files will be packaged up by the cross-compiling callback in the ExtensionTask
+    to_path = File.join(PACKAGE_ROOT_DIR, "ext/magic/share")
+    FileUtils.rm_rf(to_path, secure: true)
+    FileUtils.mkdir(to_path)
+    FileUtils.cp_r(Dir[File.join(libmagic_recipe.path, 'share/misc/*.mgc')], to_path)
+  end
 end
 
 $CFLAGS += ' -std=c99'
@@ -370,6 +378,13 @@ unless have_header('ruby.h')
       https://www.ruby-lang.org/en/documentation/installation
   EOS
 end
+
+# these are needed for `rb_thread_call_without_gvl` to be properly detected on some linux systems.
+# specifically, rake-compiler-dock's redhat-based image needs these.
+have_library('pthread')
+have_library('rt')
+have_library('dl')
+have_library('crypt')
 
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
