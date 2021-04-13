@@ -30,13 +30,6 @@ typedef struct save {
 	int status;
 } save_t;
 
-static int check_fd(int fd);
-static int safe_dup(int fd);
-static int safe_close(int fd);
-static int safe_cloexec(int fd);
-static int override_error_output(void *data);
-static int restore_error_output(void *data);
-
 extern magic_t magic_open_wrapper(int flags);
 extern void magic_close_wrapper(magic_t magic);
 

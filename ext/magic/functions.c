@@ -4,6 +4,13 @@ extern "C" {
 
 #include "functions.h"
 
+static int check_fd(int fd);
+static int safe_dup(int fd);
+static int safe_close(int fd);
+static int safe_cloexec(int fd);
+static int override_error_output(void *data);
+static int restore_error_output(void *data);
+
 static inline int
 check_fd(int fd)
 {

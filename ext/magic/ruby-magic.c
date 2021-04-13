@@ -4,6 +4,77 @@ extern "C" {
 
 #include "ruby-magic.h"
 
+static int rb_mgc_do_not_auto_load;
+static int rb_mgc_do_not_stop_on_error;
+static int rb_mgc_warning;
+
+static ID id_at_flags;
+static ID id_at_paths;
+
+static VALUE rb_cMagic;
+
+static VALUE rb_mgc_eError;
+static VALUE rb_mgc_eMagicError;
+static VALUE rb_mgc_eLibraryError;
+static VALUE rb_mgc_eNotImplementedError;
+static VALUE rb_mgc_eParameterError;
+static VALUE rb_mgc_eFlagsError;
+
+static const rb_data_type_t rb_magic_type;
+
+static VALUE magic_get_parameter_internal(void *data);
+static VALUE magic_set_parameter_internal(void *data);
+
+static VALUE magic_get_flags_internal(void *data);
+static VALUE magic_set_flags_internal(void *data);
+
+static VALUE magic_load_internal(void *data);
+static VALUE magic_load_buffers_internal(void *data);
+
+static VALUE magic_compile_internal(void *data);
+static VALUE magic_check_internal(void *data);
+
+static VALUE magic_file_internal(void *data);
+static VALUE magic_buffer_internal(void *data);
+static VALUE magic_descriptor_internal(void *data);
+
+static VALUE magic_close_internal(void *data);
+
+static void* nogvl_magic_load(void *data);
+static void* nogvl_magic_compile(void *data);
+static void* nogvl_magic_check(void *data);
+static void* nogvl_magic_file(void *data);
+static void* nogvl_magic_descriptor(void *data);
+
+static void* magic_library_open(void);
+static void magic_library_close(void *data);
+
+static VALUE magic_allocate(VALUE klass);
+static void magic_mark(void *data);
+static void magic_free(void *data);
+static size_t magic_size(const void *data);
+#if defined(HAVE_RUBY_GC_COMPACT)
+static void magic_compact(void *data);
+#endif
+
+static VALUE magic_exception_wrapper(VALUE value);
+static VALUE magic_exception(void *data);
+
+static VALUE magic_library_error(VALUE klass, void *data);
+static VALUE magic_generic_error(VALUE klass, int magic_errno,
+				 const char *magic_error);
+
+static VALUE magic_lock(VALUE object, VALUE (*function)(ANYARGS),
+			void *data);
+static VALUE magic_unlock(VALUE object);
+
+static VALUE magic_return(void *data);
+
+static int magic_get_flags(VALUE object);
+static int magic_set_flags(VALUE object, VALUE value);
+
+static VALUE magic_set_paths(VALUE object, VALUE value);
+
 /*
  * call-seq:
  *    Magic.do_not_auto_load -> boolean
