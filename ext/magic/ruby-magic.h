@@ -10,11 +10,8 @@ extern "C" {
 
 #define MAGIC_SYNCHRONIZED(f, d) magic_lock(object, (f), (d))
 
-#define MAGIC_OBJECT(o) \
-	TypedData_Get_Struct(object, magic_object_t, &rb_magic_type, (o))
-
-#define MAGIC_COOKIE(o, c) \
-	((c) = MAGIC_OBJECT((o))->cookie)
+#define MAGIC_OBJECT(o, t) \
+	TypedData_Get_Struct((o), rb_mgc_object_t, &rb_mgc_type, (t))
 
 #define MAGIC_CLOSED_P(o) RTEST(rb_mgc_close_p((o)))
 #define MAGIC_LOADED_P(o) RTEST(rb_mgc_load_p((o)))
@@ -27,32 +24,35 @@ extern "C" {
 		}					  \
 	} while(0)
 
+#define MAGIC_ERRORS(t) ruby_magic_errors[(t)]
+
 #define MAGIC_ARGUMENT_TYPE_ERROR(o, ...) \
-	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
+	rb_raise(rb_eTypeError, MAGIC_ERRORS(E_ARGUMENT_TYPE_INVALID), CLASS_NAME((o)), __VA_ARGS__)
 
 #define MAGIC_GENERIC_ERROR(k, e, m) \
-	rb_exc_raise(magic_generic_error((k), (e), error(m)))
+	rb_exc_raise(magic_generic_error((k), (e), MAGIC_ERRORS(m)))
 
 #define MAGIC_LIBRARY_ERROR(c) \
-	rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)))
+	rb_exc_raise(magic_library_error(rb_mgc_eMagicError, (c)->cookie))
 
 #define MAGIC_CHECK_INTEGER_TYPE(o) magic_check_type((o), T_FIXNUM)
 #define MAGIC_CHECK_STRING_TYPE(o)  magic_check_type((o), T_STRING)
 
+#define MAGIC_CHECK_ARRAY_OF_STRINGS(o) \
+	magic_check_type_array_of_strings((o))
+
 #define MAGIC_CHECK_ARGUMENT_MISSING(t, o)					     \
 	do {									     \
 		if ((t) < (o))							     \
-			rb_raise(rb_eArgError, error(E_ARGUMENT_MISSING), (t), (o)); \
+			rb_raise(rb_eArgError, MAGIC_ERRORS(E_ARGUMENT_MISSING), (t), (o)); \
 	} while(0)
 
 #define MAGIC_CHECK_ARRAY_EMPTY(o)							  \
 	do {										  \
 		if (RARRAY_EMPTY_P(o))							  \
-			rb_raise(rb_eArgError, "%s", error(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
+			rb_raise(rb_eArgError, "%s", MAGIC_ERRORS(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
 	} while(0)
 
-#define MAGIC_CHECK_ARRAY_OF_STRINGS(o) \
-	magic_check_type_array_of_strings((o))
 
 #define MAGIC_CHECK_OPEN(o)						  \
 	do {								  \
@@ -76,9 +76,7 @@ extern "C" {
 #define MAGIC_DEFINE_PARAMETER(c) \
 	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
 
-#define error(t) errors[(t)]
-
-enum error {
+enum ruby_magic_error {
 	E_UNKNOWN = 0,
 	E_NOT_ENOUGH_MEMORY,
 	E_ARGUMENT_MISSING,
@@ -95,49 +93,52 @@ enum error {
 	E_FLAG_INVALID_TYPE
 };
 
-typedef struct parameter {
-	size_t value;
-	int tag;
-} parameter_t;
+typedef struct magic_object rb_mgc_object_t;
+typedef struct magic_arguments rb_mgc_arguments_t;
+typedef struct magic_error rb_mgc_error_t;
 
-typedef union file {
+struct parameter {
+	int tag;
+	size_t value;
+};
+
+union file {
 	const char *path;
 	int fd;
-} file_t;
+};
 
-typedef struct buffers {
+struct buffers {
 	size_t count;
 	size_t *sizes;
 	void **pointers;
-} buffers_t;
+};
 
-typedef struct magic_object {
+struct magic_object {
 	magic_t cookie;
 	VALUE mutex;
 	unsigned int database_loaded:1;
 	unsigned int stop_on_errors:1;
-} magic_object_t;
+};
 
-typedef struct magic_arguments {
+struct magic_arguments {
+	rb_mgc_object_t *magic_object;
 	union {
-		file_t file;
-		parameter_t parameter;
-		buffers_t buffers;
-	} type;
-	magic_t cookie;
+		struct parameter parameter;
+		union file file;
+		struct buffers buffers;
+	};
 	const char *result;
-	int flags;
 	int status;
-	unsigned int stop_on_errors:1;
-} magic_arguments_t;
+	int flags;
+};
 
-typedef struct magic_exception {
+struct magic_error {
 	const char *magic_error;
 	VALUE klass;
 	int magic_errno;
-} magic_exception_t;
+};
 
-static const char *errors[] = {
+static const char *ruby_magic_errors[] = {
 	[E_UNKNOWN]			= "an unknown error has occurred",
 	[E_NOT_ENOUGH_MEMORY]		= "cannot allocate memory",
 	[E_ARGUMENT_MISSING]		= "wrong number of arguments (given %d, expected %d)",
@@ -156,7 +157,7 @@ static const char *errors[] = {
 };
 
 #if defined(MAGIC_CUSTOM_CHECK_TYPE)
-static const char *ruby_types[] = {
+static const char *magic_ruby_types[] = {
 	"", /* Not an object */
 	[T_OBJECT]	= "Object",
 	[T_CLASS]	= "Class",
@@ -188,7 +189,7 @@ magic_ruby_type_name(int type)
 {
 	const char *name;
 
-	if (type >= ARRAY_SIZE(ruby_types))
+	if (type >= ARRAY_SIZE(magic_ruby_types))
 		return NULL;
 
 	name = ruby_types[type];
@@ -232,11 +233,13 @@ magic_check_ruby_type(VALUE object, int type)
 
 	name = magic_ruby_type_name(type);
 	if (name)
-		rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_INVALID),
+		rb_raise(rb_eTypeError,
+			 MAGIC_ERRORS(E_ARGUMENT_TYPE_INVALID),
 			 magic_ruby_class_name(object),
 			 name);
 error:
-	rb_raise(rb_eTypeError, error(E_ARGUMENT_TYPE_UNKNOWN),
+	rb_raise(rb_eTypeError,
+		 MAGIC_ERRORS(E_ARGUMENT_TYPE_UNKNOWN),
 		 object_type,
 		 type);
 }
@@ -334,7 +337,7 @@ magic_check_type_array_of_strings(VALUE object)
 		value = RARRAY_AREF(object, (long)i);
 		if (NIL_P(value) || !STRING_P(value))
 			rb_raise(rb_eTypeError,
-				 error(E_ARGUMENT_TYPE_ARRAY_STRINGS),
+				 MAGIC_ERRORS(E_ARGUMENT_TYPE_ARRAY_STRINGS),
 				 CLASS_NAME(value));
 	}
 }
