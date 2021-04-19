@@ -614,6 +614,8 @@ rb_mgc_load(VALUE object, VALUE arguments)
 
 	value = magic_join(arguments, CSTR2RVAL(":"));
 
+	magic_set_paths(object, RARRAY_EMPTY);
+
 	mga = (rb_mgc_arguments_t) {
 		.magic_object = mgc,
 		.file = {
