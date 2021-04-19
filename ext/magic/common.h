@@ -87,11 +87,13 @@ extern "C" {
 #define ARRAY_P(x)   (RB_TYPE_P((x), T_ARRAY))
 #define FILE_P(x)    (RB_TYPE_P((x), T_FILE))
 
-#define RVAL2CBOOL(x) (RTEST(x))
-#define CBOOL2RVAL(x) ((x) ? Qtrue : Qfalse)
+#define RVAL2CBOOL(b) (RTEST(b))
+#define CBOOL2RVAL(b) ((b) ? Qtrue : Qfalse)
 
-#define RVAL2CSTR(x) (NIL_P(x) ? NULL : StringValueCStr(x))
-#define CSTR2RVAL(x) ((x) == NULL ? Qnil : rb_str_new2(x))
+#define RVAL2CSTR(s) (NIL_P(s) ? NULL : StringValueCStr(s))
+#define CSTR2RVAL(s) ((s) == NULL ? Qnil : rb_str_new2(s))
+
+#define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 
 #define RARRAY_EMPTY	  rb_ary_new()
 #define RARRAY_EMPTY_P(a) (RARRAY_LEN(a) == 0)

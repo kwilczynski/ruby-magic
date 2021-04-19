@@ -613,6 +613,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 		arguments = rb_mgc_get_paths(object);
 
 	value = magic_join(arguments, CSTR2RVAL(":"));
+	RB_GC_GUARD(value);
 
 	magic_set_paths(object, RARRAY_EMPTY);
 
@@ -633,8 +634,9 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	mgc->database_loaded = 1;
 
 	value = magic_split(CSTR2RVAL(mga.file.path), CSTR2RVAL(":"));
-	magic_set_paths(object, value);
 	RB_GC_GUARD(value);
+
+	magic_set_paths(object, value);
 
 	return Qnil;
 }
@@ -1550,13 +1552,19 @@ magic_return(void *data)
 		separator = CSTR2RVAL(MAGIC_EXTENSION_SEPARATOR);
 	}
 
+	RB_GC_GUARD(separator);
+
 	if (mga->flags & (MAGIC_CONTINUE | MAGIC_EXTENSION)) {
 		array = magic_split(string, separator);
 		RB_GC_GUARD(array);
-		return (RARRAY_LEN(array) > 1) ? array : magic_shift(array);
+
+		if (RARRAY_LEN(array) > 1)
+			return magic_strip_array(array);
+
+		string = magic_shift(array);
 	}
 
-	return string;
+	return magic_strip(string);
 }
 
 static inline int

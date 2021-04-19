@@ -246,6 +246,14 @@ error:
 #endif /* MAGIC_CUSTOM_CHECK_TYPE */
 
 static inline VALUE
+magic_strip(VALUE v)
+{
+	return (ARRAY_P(v) || STRING_P(v)) ?	       \
+		rb_funcall(v, rb_intern("strip"), 0) : \
+		Qnil;
+}
+
+static inline VALUE
 magic_shift(VALUE v)
 {
 	return ARRAY_P(v) ?			       \
@@ -275,6 +283,29 @@ magic_flatten(VALUE v)
 	return ARRAY_P(v) ?				 \
 		rb_funcall(v, rb_intern("flatten"), 0) : \
 		Qnil;
+}
+
+static inline VALUE
+magic_strip_array(VALUE value) {
+	VALUE array = rb_ary_new();
+	VALUE entry = Qundef;
+
+	for (int i = 0; i < RARRAY_LEN(value); i++) {
+		entry = rb_ary_entry(value, i);
+		if (NIL_P(entry))
+			continue;
+
+		if (STRING_P(entry)) {
+			if (RSTRING_EMPTY_P(entry))
+				continue;
+
+			entry = magic_strip(entry);
+		}
+
+		rb_ary_push(array, entry);
+	}
+
+	return array;
 }
 
 static int
