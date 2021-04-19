@@ -1,28 +1,25 @@
-language: ruby
 dist: bionic
 
 cache:
   bundler: true
-  directories:
-    - "${HOME}/cache"
 
-bundler_args: --jobs 3 --retry 5
+compiler:
+  - gcc
+  - clang
 
+language: ruby
 rvm:
-  - '2.5'
-  - '2.6'
-  - '2.7'
-  - '3.0'
-  - 'truffleruby-head'
+  - 2.5
+  - 2.6
+  - 2.7
+  - 3.0
+  - truffleruby-head
 
 env:
   matrix:
-    - COMPILER=gcc
-    - COMPILER=clang
-    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --disable-static"
-    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --disable-static"
-    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
-    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
+    - RAKE_COMPILER_OPTIONS="-- --enable-static"
+    - RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
 
 branches:
   only:
@@ -34,10 +31,6 @@ notifications:
     on_failure: always
 
 before_install:
-  - gem install bundler
-  - bundle config set --local path 'vendor/bundle'
-  - bundle config set --local without 'development'
-  - export CC="$(which $COMPILER)"
   - if [[ $RAKE_COMPILER_OPTIONS =~ use-system-libraries ]]; then sudo apt update && sudo apt install libmagic1 libmagic-dev; fi
 
 before_script:
