@@ -1405,7 +1405,7 @@ magic_exception(void *data)
 	rb_mgc_error_t *mge = data;
 	VALUE object = Qundef;
 
-	assert(e != NULL && \
+	assert(mge != NULL && \
 	       "Must be a valid pointer to `rb_mgc_error_t' type");
 
 	object = rb_protect(magic_exception_wrapper, (VALUE)mge, &exception);
