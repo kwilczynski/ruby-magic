@@ -3,10 +3,6 @@ dist: bionic
 cache:
   bundler: true
 
-compiler:
-  - gcc
-  - clang
-
 language: ruby
 rvm:
   - 2.5
@@ -17,9 +13,12 @@ rvm:
 
 env:
   matrix:
-    - RAKE_COMPILER_OPTIONS="-- --enable-static"
-    - RAKE_COMPILER_OPTIONS="-- --disable-static"
-    - RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --enable-static"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --enable-static"
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --disable-static"
+    - COMPILER=gcc RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
+    - COMPILER=clang RAKE_COMPILER_OPTIONS="-- --use-system-libraries"
 
 branches:
   only:
@@ -31,6 +30,7 @@ notifications:
     on_failure: always
 
 before_install:
+  - export CC="$(which $COMPILER)"
   - if [[ $RAKE_COMPILER_OPTIONS =~ use-system-libraries ]]; then sudo apt update && sudo apt install libmagic1 libmagic-dev; fi
 
 before_script:
