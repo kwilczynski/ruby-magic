@@ -9,7 +9,7 @@ extern "C" {
 
 #define MAGIC_FUNCTION(f, r, x, ...)			 \
 	do {						 \
-		if ((x) & MAGIC_DEBUG)			 \
+		if ((x) & (MAGIC_DEBUG | MAGIC_CHECK))   \
 			r = f(__VA_ARGS__);		 \
 		else {					 \
 			save_t __##f;			 \

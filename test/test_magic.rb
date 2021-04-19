@@ -288,11 +288,33 @@ class MagicTest < Test::Unit::TestCase
     assert_equal(Magic::NONE, @magic.flags)
   end
 
+  def test_magic_flags_with_DEBUG_flag
+    output = capture_stderr do
+      @magic.flags = Magic::DEBUG
+    end
+
+    assert_kind_of(Integer, @magic.flags)
+    assert_equal(Magic::DEBUG, @magic.flags)
+
+    assert_match(%r{^.+warning: Magic::DEBUG flag is set;}, output)
+  end
+
   def test_magic_flags_with_MIME_TYPE_flag
     @magic.flags = 0x000010
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::MIME_TYPE, @magic.flags)
+  end
+
+  def test_magic_flags_with_CHECK_flag
+    output = capture_stderr do
+      @magic.flags = Magic::CHECK
+    end
+
+    assert_kind_of(Integer, @magic.flags)
+    assert_equal(Magic::CHECK, @magic.flags)
+
+    assert_match(%r{^.+warning: Magic::CHECK flag is set;}, output)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
@@ -584,7 +606,9 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_load_with_DEBUG_flag
-    @magic.flags = Magic::DEBUG
+    capture_stderr do
+      @magic.flags = Magic::DEBUG
+    end
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::DEBUG, @magic.flags)
@@ -659,10 +683,14 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_check_with_DEBUG_flag
-    @magic.flags = Magic::DEBUG
+    output = capture_stderr(children: true) do
+      @magic.flags = Magic::DEBUG
+    end
 
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::DEBUG, @magic.flags)
+
+    assert_match(%r{^.+warning: Magic::DEBUG flag is set;}, output)
 
     output = capture_stderr(children: true) do
       with_fixtures do

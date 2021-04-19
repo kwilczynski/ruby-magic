@@ -522,6 +522,8 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 	int local_errno;
 	rb_mgc_object_t *mgc;
 	rb_mgc_arguments_t mga;
+	const char *klass = "Magic";
+	const char *flag = NULL;
 
 	MAGIC_CHECK_INTEGER_TYPE(value);
 
@@ -532,6 +534,24 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 		.magic_object = mgc,
 		.flags = NUM2INT(value),
 	};
+
+	if (mga.flags < 0)
+		MAGIC_GENERIC_ERROR(rb_mgc_eFlagsError, EINVAL,
+				    E_FLAG_INVALID_TYPE);
+
+	if (mga.flags & MAGIC_DEBUG)
+		flag = "DEBUG";
+	else if (mga.flags & MAGIC_CHECK)
+		flag = "CHECK";
+
+	if (flag) {
+		if (!NIL_P(object))
+			klass = rb_obj_classname(object);
+
+		MAGIC_WARNING(0, "%s::%s flag is set; verbose information will "
+			         "now be printed to the standard error output",
+				 klass, flag);
+	}
 
 	MAGIC_SYNCHRONIZED(magic_set_flags_internal, &mga);
 	local_errno = errno;
@@ -585,8 +605,8 @@ rb_mgc_load(VALUE object, VALUE arguments)
 			klass = rb_obj_classname(object);
 
 		MAGIC_WARNING(2, "%s::do_not_auto_load is set; using %s#load "
-				  "will load Magic database from a file",
-				  klass, klass);
+				 "will load Magic database from a file",
+				 klass, klass);
 	}
 
 	if (RARRAY_EMPTY_P(arguments))
