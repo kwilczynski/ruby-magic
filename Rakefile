@@ -111,6 +111,34 @@ namespace "gem" do
   task "native" => CROSS_RUBY_PLATFORMS
 end
 
+def add_file_to_gem(relative_source_path)
+  dest_path = File.join(gem_build_path, relative_source_path)
+  dest_dir = File.dirname(dest_path)
+
+  mkdir_p dest_dir unless Dir.exist?(dest_dir)
+  rm_f dest_path if File.exist?(dest_path)
+  safe_ln relative_source_path, dest_path
+
+  RUBY_MAGIC_GEM_SPEC.files << relative_source_path
+end
+
+def gem_build_path
+  File.join "pkg", RUBY_MAGIC_GEM_SPEC.full_name
+end
+
+def add_libmagic_and_patches
+  dependencies = YAML.load_file(File.join(File.dirname(__FILE__), "dependencies.yml"))
+  archive = File.join("ports", "archives", "file-#{dependencies["libmagic"]["version"]}.tar.gz")
+  add_file_to_gem archive
+
+  patches = Dir['patches/**/*.patch']
+  patches.each { |patch| add_file_to_gem patch }
+end
+
+task gem_build_path do
+  add_libmagic_and_patches
+end
+
 task('default').clear
 
 task default: %w[lint test]
