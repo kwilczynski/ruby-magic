@@ -296,7 +296,7 @@ class MagicTest < Test::Unit::TestCase
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::DEBUG, @magic.flags)
 
-    assert_match(%r{^.+warning: Magic::DEBUG flag is set;}, output)
+    assert_match(%r{^(.+)?Magic::DEBUG flag is set;}, output)
   end
 
   def test_magic_flags_with_MIME_TYPE_flag
@@ -314,7 +314,7 @@ class MagicTest < Test::Unit::TestCase
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::CHECK, @magic.flags)
 
-    assert_match(%r{^.+warning: Magic::CHECK flag is set;}, output)
+    assert_match(%r{^(.+)?Magic::CHECK flag is set;}, output)
   end
 
   def test_magic_flags_with_MIME_ENCODING_flag
@@ -690,7 +690,7 @@ class MagicTest < Test::Unit::TestCase
     assert_kind_of(Integer, @magic.flags)
     assert_equal(Magic::DEBUG, @magic.flags)
 
-    assert_match(%r{^.+warning: Magic::DEBUG flag is set;}, output)
+    assert_match(%r{(.+)?Magic::DEBUG flag is set;}, output)
 
     output = capture_stderr(children: true) do
       with_fixtures do
