@@ -192,7 +192,7 @@ magic_ruby_type_name(int type)
 	if (type >= ARRAY_SIZE(magic_ruby_types))
 		return NULL;
 
-	name = ruby_types[type];
+	name = magic_ruby_types[type];
 	if (name)
 		return name;
 
