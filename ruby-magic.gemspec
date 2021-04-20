@@ -46,10 +46,7 @@ Gem::Specification.new do |s|
               README.md
               dependencies.yml
               kwilczynski-public.pem
-            ) + [
-              File.join("ports", "archives", "file-#{dependencies["libmagic"]["version"]}.tar.gz"),
-            ] +
-            Dir['patches/**/*.patch']
+            )
 
   s.require_paths << 'lib'
   s.extensions << 'ext/magic/extconf.rb'
