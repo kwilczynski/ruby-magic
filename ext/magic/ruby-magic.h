@@ -93,10 +93,6 @@ enum ruby_magic_error {
 	E_FLAG_INVALID_TYPE
 };
 
-typedef struct magic_object rb_mgc_object_t;
-typedef struct magic_arguments rb_mgc_arguments_t;
-typedef struct magic_error rb_mgc_error_t;
-
 struct parameter {
 	int tag;
 	size_t value;
@@ -113,14 +109,14 @@ struct buffers {
 	void **pointers;
 };
 
-struct magic_object {
+typedef struct magic_object {
 	magic_t cookie;
 	VALUE mutex;
 	unsigned int database_loaded:1;
 	unsigned int stop_on_errors:1;
-};
+} rb_mgc_object_t;
 
-struct magic_arguments {
+typedef struct magic_arguments {
 	rb_mgc_object_t *magic_object;
 	union {
 		struct parameter parameter;
@@ -130,13 +126,13 @@ struct magic_arguments {
 	const char *result;
 	int status;
 	int flags;
-};
+} rb_mgc_arguments_t;
 
-struct magic_error {
+typedef struct magic_error {
 	const char *magic_error;
 	VALUE klass;
 	int magic_errno;
-};
+} rb_mgc_error_t;
 
 static const char *ruby_magic_errors[] = {
 	[E_UNKNOWN]			= "an unknown error has occurred",
