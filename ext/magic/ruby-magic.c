@@ -71,7 +71,7 @@ static VALUE magic_unlock(VALUE object);
 static VALUE magic_return(void *data);
 
 static int magic_get_flags(VALUE object);
-static int magic_set_flags(VALUE object, VALUE value);
+static void magic_set_flags(VALUE object, int flags);
 
 static VALUE magic_set_paths(VALUE object, VALUE value);
 
@@ -215,7 +215,7 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 	mgc->mutex = rb_class_new_instance(0, 0, rb_const_get(rb_cObject,
 					   rb_intern("Mutex")));
 
-	magic_set_flags(object, INT2NUM(MAGIC_NONE));
+	magic_set_flags(object, MAGIC_NONE);
 	magic_set_paths(object, RARRAY_EMPTY);
 
 	if (rb_mgc_do_not_auto_load) {
@@ -1573,10 +1573,10 @@ magic_get_flags(VALUE object)
 	return NUM2INT(rb_ivar_get(object, id_at_flags));
 }
 
-static inline int
-magic_set_flags(VALUE object, VALUE value)
+static inline void
+magic_set_flags(VALUE object, int flags)
 {
-	return NUM2INT(rb_ivar_set(object, id_at_flags, value));
+	rb_ivar_set(object, id_at_flags, INT2NUM(flags));
 }
 
 static inline VALUE
