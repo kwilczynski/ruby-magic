@@ -17,6 +17,7 @@ class MagicTest < Test::Unit::TestCase
     [
       :open,
       :mime,
+      :mime_type,
       :type,
       :encoding,
       :compile,

@@ -101,6 +101,8 @@ class Magic
       open(Magic::MIME, &block)
     end
 
+    alias_method :mime_type, :mime
+
     #
     # call-seq:
     #    Magic.type                  -> self
