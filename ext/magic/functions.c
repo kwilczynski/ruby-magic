@@ -93,11 +93,11 @@ static int
 override_error_output(void *data)
 {
 	int local_errno;
-	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+	int flags = O_WRONLY | O_APPEND;
 	save_t *s = data;
 
 #if defined(HAVE_O_CLOEXEC)
-	mode |= O_CLOEXEC;
+	flags |= O_CLOEXEC;
 #endif
 
 	assert(s != NULL && \
@@ -116,7 +116,7 @@ override_error_output(void *data)
 		goto error;
 	}
 
-	s->file.new_fd = open("/dev/null", O_WRONLY | O_APPEND, mode);
+	s->file.new_fd = open("/dev/null", flags, 0222);
 	if (s->file.new_fd < 0) {
 		local_errno = errno;
 
