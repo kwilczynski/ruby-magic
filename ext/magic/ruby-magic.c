@@ -1518,8 +1518,7 @@ magic_return(void *data)
 	rb_mgc_arguments_t *mga = data;
 	const char *unknown = "???";
 	VALUE separator = Qundef;
-	VALUE array = Qundef;
-	VALUE string = Qundef;
+	VALUE array, string;
 
 	string = CSTR2RVAL(mga->result);
 	RB_GC_GUARD(string);

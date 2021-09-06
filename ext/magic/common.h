@@ -91,7 +91,7 @@ extern "C" {
 #define CBOOL2RVAL(b) ((b) ? Qtrue : Qfalse)
 
 #define RVAL2CSTR(s) (NIL_P(s) ? NULL : StringValueCStr(s))
-#define CSTR2RVAL(s) ((s) == NULL ? Qnil : rb_str_new2(s))
+#define CSTR2RVAL(s) ((s) == NULL ? Qnil : rb_str_new2((const char *)s))
 
 #define RSTRING_EMPTY_P(s) (RSTRING_LEN(s) == 0)
 
