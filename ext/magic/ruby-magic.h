@@ -22,7 +22,7 @@ extern "C" {
 			rb_mgc_warning |= BIT(i);	  \
 			rb_warn(__VA_ARGS__);		  \
 		}					  \
-	} while(0)
+	} while (0)
 
 #define MAGIC_ERRORS(t) ruby_magic_errors[(t)]
 
@@ -41,17 +41,17 @@ extern "C" {
 #define MAGIC_CHECK_ARRAY_OF_STRINGS(o) \
 	magic_check_type_array_of_strings((o))
 
-#define MAGIC_CHECK_ARGUMENT_MISSING(t, o)					     \
-	do {									     \
-		if ((t) < (o))							     \
+#define MAGIC_CHECK_ARGUMENT_MISSING(t, o)						    \
+	do {										    \
+		if ((t) < (o))								    \
 			rb_raise(rb_eArgError, MAGIC_ERRORS(E_ARGUMENT_MISSING), (t), (o)); \
-	} while(0)
+	} while (0)
 
-#define MAGIC_CHECK_ARRAY_EMPTY(o)							  \
-	do {										  \
-		if (RARRAY_EMPTY_P(o))							  \
+#define MAGIC_CHECK_ARRAY_EMPTY(o)								 \
+	do {											 \
+		if (RARRAY_EMPTY_P(o))								 \
 			rb_raise(rb_eArgError, "%s", MAGIC_ERRORS(E_ARGUMENT_TYPE_ARRAY_EMPTY)); \
-	} while(0)
+	} while (0)
 
 
 #define MAGIC_CHECK_OPEN(o)						  \
@@ -59,22 +59,22 @@ extern "C" {
 		if (MAGIC_CLOSED_P(o))					  \
 			MAGIC_GENERIC_ERROR(rb_mgc_eLibraryError, EFAULT, \
 					    E_MAGIC_LIBRARY_CLOSED);	  \
-	} while(0)
+	} while (0)
 
 #define MAGIC_CHECK_LOADED(o)						 \
 	do {								 \
 		if (!MAGIC_LOADED_P(o))					 \
 			MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EFAULT,	 \
 					    E_MAGIC_LIBRARY_NOT_LOADED); \
-	} while(0)
+	} while (0)
 
 #define MAGIC_STRINGIFY(s) #s
 
 #define MAGIC_DEFINE_FLAG(c) \
-	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c));
+	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(c), INT2NUM(MAGIC_##c))
 
 #define MAGIC_DEFINE_PARAMETER(c) \
-	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c));
+	rb_define_const(rb_cMagic, MAGIC_STRINGIFY(PARAM_##c), INT2NUM(MAGIC_PARAM_##c))
 
 enum ruby_magic_error {
 	E_UNKNOWN = 0,
@@ -134,7 +134,7 @@ typedef struct magic_error {
 	int magic_errno;
 } rb_mgc_error_t;
 
-static const char *ruby_magic_errors[] = {
+static const char * const ruby_magic_errors[] = {
 	[E_UNKNOWN]			= "an unknown error has occurred",
 	[E_NOT_ENOUGH_MEMORY]		= "cannot allocate memory",
 	[E_ARGUMENT_MISSING]		= "wrong number of arguments (given %d, expected %d)",
@@ -153,7 +153,7 @@ static const char *ruby_magic_errors[] = {
 };
 
 #if defined(MAGIC_CUSTOM_CHECK_TYPE)
-static const char *magic_ruby_types[] = {
+static const char * const magic_ruby_types[] = {
 	"", /* Not an object */
 	[T_OBJECT]	= "Object",
 	[T_CLASS]	= "Class",
@@ -244,47 +244,47 @@ error:
 static inline VALUE
 magic_strip(VALUE v)
 {
-	return (ARRAY_P(v) || STRING_P(v)) ?	       \
-		rb_funcall(v, rb_intern("strip"), 0) : \
+	return (ARRAY_P(v) || STRING_P(v)) ?
+		rb_funcall(v, rb_intern("strip"), 0) :
 		Qnil;
 }
 
 static inline VALUE
 magic_shift(VALUE v)
 {
-	return ARRAY_P(v) ?			       \
-		rb_funcall(v, rb_intern("shift"), 0) : \
+	return ARRAY_P(v) ?
+		rb_funcall(v, rb_intern("shift"), 0) :
 		Qnil;
 }
 
 static inline VALUE
 magic_split(VALUE a, VALUE b)
 {
-	return (STRING_P(a) && STRING_P(b)) ?		  \
-		rb_funcall(a, rb_intern("split"), 1, b) : \
+	return (STRING_P(a) && STRING_P(b)) ?
+		rb_funcall(a, rb_intern("split"), 1, b) :
 		Qnil;
 }
 
 static inline VALUE
 magic_join(VALUE a, VALUE b)
 {
-	return (ARRAY_P(a) && STRING_P(b)) ?		 \
-		rb_funcall(a, rb_intern("join"), 1, b) : \
+	return (ARRAY_P(a) && STRING_P(b)) ?
+		rb_funcall(a, rb_intern("join"), 1, b) :
 		Qnil;
 }
 
 static inline VALUE
 magic_flatten(VALUE v)
 {
-	return ARRAY_P(v) ?				 \
-		rb_funcall(v, rb_intern("flatten"), 0) : \
+	return ARRAY_P(v) ?
+		rb_funcall(v, rb_intern("flatten"), 0) :
 		Qnil;
 }
 
 static inline VALUE
 magic_strip_array(VALUE value) {
+	VALUE entry;
 	VALUE array = rb_ary_new();
-	VALUE entry = Qundef;
 
 	for (int i = 0; i < RARRAY_LEN(value); i++) {
 		entry = rb_ary_entry(value, i);
@@ -319,7 +319,9 @@ magic_fileno(VALUE object)
 		object = rb_convert_type(object, T_FILE, "IO", "to_io");
 
 	GetOpenFile(object, io);
-	if ((fd = FPTR_TO_FD(io)) < 0)
+
+	fd = FPTR_TO_FD(io);
+	if (fd < 0)
 		rb_raise(rb_eIOError, "closed stream");
 
 	return fd;
@@ -346,7 +348,7 @@ magic_path(VALUE object)
 static inline void
 magic_check_type(VALUE object, RVALUE_TYPE type)
 {
-	VALUE boolean = Qundef;
+	VALUE boolean;
 
 	boolean = rb_obj_is_kind_of(object, T_INTEGER);
 	if (type == T_FIXNUM && !RVAL2CBOOL(boolean))
@@ -358,7 +360,7 @@ magic_check_type(VALUE object, RVALUE_TYPE type)
 static inline void
 magic_check_type_array_of_strings(VALUE object)
 {
-	VALUE value = Qundef;
+	VALUE value;
 
 	for (int i = 0; i < RARRAY_LEN(object); i++) {
 		value = RARRAY_AREF(object, (long)i);

@@ -42,6 +42,7 @@ safe_dup(int fd)
 			goto error;
 		}
 	}
+
 	if (safe_cloexec(new_fd) < 0) {
 		local_errno = errno;
 		goto error;
@@ -78,6 +79,7 @@ safe_cloexec(int fd)
 		local_errno = errno;
 		goto error;
 	}
+
 	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0) {
 		local_errno = errno;
 		goto error;
@@ -100,7 +102,7 @@ override_error_output(void *data)
 	flags |= O_CLOEXEC;
 #endif
 
-	assert(s != NULL && \
+	assert(s != NULL &&
 	       "Must be a valid pointer to `save_t' type");
 
 	s->file.old_fd = -1;
@@ -128,10 +130,12 @@ override_error_output(void *data)
 		safe_close(s->file.old_fd);
 		goto error;
 	}
+
 	if (safe_cloexec(s->file.new_fd) < 0) {
 		local_errno = errno;
 		goto error;
 	}
+
 	if (dup2(s->file.new_fd, fileno(stderr)) < 0) {
 		local_errno = errno;
 		goto error;
@@ -152,7 +156,7 @@ restore_error_output(void *data)
 	int local_errno;
 	save_t *s = data;
 
-	assert(s != NULL && \
+	assert(s != NULL &&
 	       "Must be a valid pointer to `save_t' type");
 
 	if (s->file.old_fd < 0 && s->status != 0)
@@ -278,15 +282,21 @@ inline int
 magic_load_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
+
 	MAGIC_FUNCTION(magic_load, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
 inline int
-magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes, size_t count, int flags)
+magic_load_buffers_wrapper(magic_t magic, void **buffers, size_t *sizes,
+			   size_t count, int flags)
 {
 	int rv;
-	MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes, count);
+
+	MAGIC_FUNCTION(magic_load_buffers, rv, flags, magic, buffers, sizes,
+		       count);
+
 	return rv;
 }
 
@@ -294,7 +304,9 @@ inline int
 magic_compile_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
+
 	MAGIC_FUNCTION(magic_compile, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
@@ -302,15 +314,19 @@ inline int
 magic_check_wrapper(magic_t magic, const char *magic_file, int flags)
 {
 	int rv;
+
 	MAGIC_FUNCTION(magic_check, rv, flags, magic, magic_file);
+
 	return rv;
 }
 
 inline const char*
-magic_file_wrapper(magic_t magic, const char* filename, int flags)
+magic_file_wrapper(magic_t magic, const char *filename, int flags)
 {
 	const char *cstring;
+
 	MAGIC_FUNCTION(magic_file, cstring, flags, magic, filename);
+
 	return cstring;
 }
 
@@ -318,7 +334,9 @@ inline const char*
 magic_buffer_wrapper(magic_t magic, const void *buffer, size_t size, int flags)
 {
 	const char *cstring;
+
 	MAGIC_FUNCTION(magic_buffer, cstring, flags, magic, buffer, size);
+
 	return cstring;
 }
 

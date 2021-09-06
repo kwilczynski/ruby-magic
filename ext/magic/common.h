@@ -128,7 +128,7 @@ extern "C" {
 # define FPTR_TO_FD(p) (fileno(GetReadFile(p)))
 #endif /* GetReadFile */
 
-#define NOGVL_FUNCTION (VALUE (*)(void *))
+#define NOGVL_FUNCTION (VALUE(*)(void *))
 
 #if defined(HAVE_RB_THREAD_CALL_WITHOUT_GVL) && \
     defined(HAVE_RUBY_THREAD_H) && HAVE_RUBY_THREAD_H
@@ -153,8 +153,10 @@ fake_blocking_region(VALUE (*f)(ANYARGS), void *data)
 }
 # define NOGVL(f, d) \
 	fake_blocking_region(NOGVL_FUNCTION(f), (d))
-#endif /* HAVE_RB_THREAD_CALL_WITHOUT_GVL
-	  HAVE_RUBY_THREAD_H */
+#endif /*
+	* HAVE_RB_THREAD_CALL_WITHOUT_GVL
+	* HAVE_RUBY_THREAD_H
+	*/
 
 #if defined(__cplusplus)
 }

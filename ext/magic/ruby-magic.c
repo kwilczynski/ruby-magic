@@ -40,13 +40,13 @@ static VALUE magic_descriptor_internal(void *data);
 
 static VALUE magic_close_internal(void *data);
 
-static void* nogvl_magic_load(void *data);
-static void* nogvl_magic_compile(void *data);
-static void* nogvl_magic_check(void *data);
-static void* nogvl_magic_file(void *data);
-static void* nogvl_magic_descriptor(void *data);
+static void *nogvl_magic_load(void *data);
+static void *nogvl_magic_compile(void *data);
+static void *nogvl_magic_check(void *data);
+static void *nogvl_magic_file(void *data);
+static void *nogvl_magic_descriptor(void *data);
 
-static void* magic_library_open(void);
+static void *magic_library_open(void);
 static void magic_library_close(void *data);
 
 static VALUE magic_allocate(VALUE klass);
@@ -200,10 +200,10 @@ rb_mgc_initialize(VALUE object, VALUE arguments)
 		MAGIC_WARNING(0, "%s::new() does not take block; use %s::open() instead",
 				 klass, klass);
 
-	if(RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_STOP_ON_ERROR']")))
+	if (RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_STOP_ON_ERROR']")))
 		rb_mgc_do_not_stop_on_error = 1;
 
-	if(RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_AUTOLOAD']")))
+	if (RTEST(rb_eval_string("ENV['MAGIC_DO_NOT_AUTOLOAD']")))
 		rb_mgc_do_not_auto_load = 1;
 
 	MAGIC_OBJECT(object, mgc);
@@ -549,7 +549,7 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 			klass = rb_obj_classname(object);
 
 		MAGIC_WARNING(0, "%s::%s flag is set; verbose information will "
-			         "now be printed to the standard error output",
+				 "now be printed to the standard error output",
 				 klass, flag);
 	}
 
@@ -886,7 +886,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	if (!mga.result)
 		MAGIC_GENERIC_ERROR(rb_mgc_eMagicError, EINVAL, E_UNKNOWN);
 
-	assert(mga.result != NULL && \
+	assert(mga.result != NULL &&
 	       "Must be a valid pointer to `const char' type");
 
 	/*
@@ -895,7 +895,7 @@ rb_mgc_file(VALUE object, VALUE value)
 	 * string instead. Often this would indicate that an older version of the
 	 * Magic library is in use.
 	 */
-	assert(strncmp(mga.result, empty, strlen(empty)) != 0 && \
+	assert(strncmp(mga.result, empty, strlen(empty)) != 0 &&
 		       "Empty or invalid result");
 
 	return magic_return(&mga);
@@ -936,7 +936,7 @@ rb_mgc_buffer(VALUE object, VALUE value)
 	if (mga.status < 0)
 		MAGIC_LIBRARY_ERROR(mgc);
 
-	assert(mga.result != NULL && \
+	assert(mga.result != NULL &&
 	       "Must be a valid pointer to `const char' type");
 
 	return magic_return(&mga);
@@ -983,7 +983,7 @@ rb_mgc_descriptor(VALUE object, VALUE value)
 		MAGIC_LIBRARY_ERROR(mgc);
 	}
 
-	assert(mga.result != NULL && \
+	assert(mga.result != NULL &&
 	       "Must be a valid pointer to `const char' type");
 
 	return magic_return(&mga);
@@ -1012,8 +1012,8 @@ nogvl_magic_load(void *data)
 	magic_t cookie = mga->magic_object->cookie;
 
 	mga->status = magic_load_wrapper(cookie,
-				         mga->file.path,
-				         mga->flags);
+					 mga->file.path,
+					 mga->flags);
 
 	return NULL;
 }
@@ -1051,8 +1051,8 @@ nogvl_magic_file(void *data)
 	magic_t cookie = mga->magic_object->cookie;
 
 	mga->result = magic_file_wrapper(cookie,
-				         mga->file.path,
-				         mga->flags);
+					 mga->file.path,
+					 mga->flags);
 
 	mga->status = !mga->result ? -1 : 0;
 
@@ -1165,10 +1165,10 @@ magic_load_buffers_internal(void *data)
 	magic_t cookie = mga->magic_object->cookie;
 
 	mga->status = magic_load_buffers_wrapper(cookie,
-					         mga->buffers.pointers,
-					         mga->buffers.sizes,
-					         mga->buffers.count,
-					         mga->flags);
+						 mga->buffers.pointers,
+						 mga->buffers.sizes,
+						 mga->buffers.count,
+						 mga->flags);
 
 	return (VALUE)NULL;
 }
@@ -1317,7 +1317,7 @@ magic_library_close(void *data)
 {
 	rb_mgc_object_t *mgc = data;
 
-	assert(mgc != NULL && \
+	assert(mgc != NULL &&
 	       "Must be a valid pointer to `rb_mgc_object_t' type");
 
 	if (mgc->cookie)
@@ -1367,7 +1367,7 @@ magic_mark(void *data)
 {
 	rb_mgc_object_t *mgc = data;
 
-	assert(mgc != NULL && \
+	assert(mgc != NULL &&
 	       "Must be a valid pointer to `rb_mgc_object_t' type");
 
 	MAGIC_GC_MARK(mgc->mutex);
@@ -1378,7 +1378,7 @@ magic_free(void *data)
 {
 	rb_mgc_object_t *mgc = data;
 
-	assert(mgc != NULL && \
+	assert(mgc != NULL &&
 	       "Must be a valid pointer to `rb_mgc_object_t' type");
 
 	if (mgc->cookie)
@@ -1395,7 +1395,7 @@ magic_size(const void *data)
 {
 	const rb_mgc_object_t *mgc = data;
 
-	assert(mgc != NULL && \
+	assert(mgc != NULL &&
 	       "Must be a valid pointer to `rb_mgc_object_t' type");
 
 	return sizeof(*mgc);
@@ -1407,7 +1407,7 @@ magic_compact(void *data)
 {
 	rb_mgc_object_t *mgc = data;
 
-	assert(mgc != NULL && \
+	assert(mgc != NULL &&
 	       "Must be a valid pointer to `rb_mgc_object_t' type");
 
 	mgc->mutex = rb_gc_location(mgc->mutex);
@@ -1429,7 +1429,7 @@ magic_exception(void *data)
 	rb_mgc_error_t *mge = data;
 	VALUE object = Qundef;
 
-	assert(mge != NULL && \
+	assert(mge != NULL &&
 	       "Must be a valid pointer to `rb_mgc_error_t' type");
 
 	object = rb_protect(magic_exception_wrapper, (VALUE)mge, &exception);
@@ -1467,7 +1467,7 @@ magic_library_error(VALUE klass, void *data)
 
 	UNUSED(empty);
 
-	assert(cookie != NULL && \
+	assert(cookie != NULL &&
 	       "Must be a valid pointer to `magic_t' type");
 
 	mge = (rb_mgc_error_t) {
@@ -1482,7 +1482,7 @@ magic_library_error(VALUE klass, void *data)
 		mge.magic_error = message;
 	}
 
-	assert(strncmp(mge.magic_error, empty, strlen(empty)) != 0 && \
+	assert(strncmp(mge.magic_error, empty, strlen(empty)) != 0 &&
 		       "Empty or invalid error message");
 
 	return magic_exception(&mge);
