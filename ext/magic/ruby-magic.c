@@ -1332,7 +1332,7 @@ magic_allocate(VALUE klass)
 	int local_errno;
 	rb_mgc_object_t *mgc;
 
-	mgc = (rb_mgc_object_t *)ruby_xmalloc(sizeof(rb_mgc_object_t));
+	mgc = RB_ALLOC(rb_mgc_object_t);
 	local_errno = ENOMEM;
 
 	if (!mgc) {
