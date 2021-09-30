@@ -9,7 +9,7 @@ PACKAGE_ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'
 
 # The gem version constraint in the Rakefile is not respected at install time.
 # Keep this version in sync with the one in the Rakefile !
-REQUIRED_MINI_PORTILE_VERSION = "~> 2.5.0"
+REQUIRED_MINI_PORTILE_VERSION = "~> 2.6"
 
 MAGIC_HELP_MESSAGE = <<~HELP
   USAGE: ruby #{$0} [options]

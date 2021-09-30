@@ -54,5 +54,5 @@ Gem::Specification.new do |s|
   s.cert_chain  = [ 'kwilczynski-public.pem' ]
   s.signing_key = signing_key if File.exist?(signing_key)
 
-  s.add_runtime_dependency("mini_portile2", "~> 2.5.0") # keep version in sync with extconf.rb
+  s.add_runtime_dependency("mini_portile2", "~> 2.6") # keep version in sync with extconf.rb
 end
