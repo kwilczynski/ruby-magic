@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.1] - 2021-11-20
+
+### Fixed
+
+- Check for pkg-config when building static libraries.
+
+## [0.5.0] - 2021-09-30
+
+### Added
+
+- Introduce support for building native gems.
+
+### Changed
+
+- Relax mini_portile2 dependency.
+- Use RB_ALLOC() over calling ruby_xmalloc() directly
+- Address warnings reported by cppcheck.
+- Address code style that checkpatch.pl script reported.
+- Fix how flags are set for the open() function.
+- Clean up type definitions.
+- Add alias Magic::mime_type for Magic::mime.
+ - Make magic_set_flags() return void as its return value was never used.
+
+### Fixed
+
+- Fix truffleruby test failure
+- Fix --use-system-libraries not working with Rake install
+
 ## [0.2.0] - 2015-03-25
 ### Added
 
