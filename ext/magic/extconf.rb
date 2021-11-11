@@ -298,7 +298,11 @@ else
   if static_p
     ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
     # mkmf appends -- to the first option
-    $LIBS += " " + pkg_config('libmagic', 'libs --static')
+    pkg_config_flags = pkg_config('libmagic', 'libs --static')
+
+    raise 'Please install the `pkg-config` utility' unless pkg_config_flags
+
+    $LIBS += " " + pkg_config_flags
     $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
   end
 
