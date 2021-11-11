@@ -4,7 +4,7 @@ class Magic
   #
   # Current version of _Magic_.
   #
-  VERSION = '0.5.0'.freeze
+  VERSION = '0.5.1'.freeze
 
   class << self
     #
