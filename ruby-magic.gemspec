@@ -51,8 +51,10 @@ Gem::Specification.new do |s|
   s.require_paths << 'lib'
   s.extensions << 'ext/magic/extconf.rb'
 
-  s.cert_chain  = [ 'kwilczynski-public.pem' ]
-  s.signing_key = signing_key if File.exist?(signing_key)
+  if File.exist?(signing_key)
+    s.cert_chain  = ['kwilczynski-public.pem']
+    s.signing_key = signing_key
+  end
 
   s.add_runtime_dependency("mini_portile2", "~> 2.6") # keep version in sync with extconf.rb
 end
