@@ -4,7 +4,10 @@ begin
   ::RUBY_VERSION =~ /(\d+\.\d+)/
   require_relative "magic/#{Regexp.last_match(1)}/magic"
 rescue LoadError
-  require_relative 'magic/magic'
+  # use "require" instead of "require_relative" because non-native gems will place C extension files
+  # in Gem::BasicSpecification#extension_dir after compilation (during normal installation), which
+  # is in $LOAD_PATH but not necessarily relative to this file (see #21 and nokogiri#2300)
+  require 'magic/magic'
 end
 
 require_relative 'magic/version'
