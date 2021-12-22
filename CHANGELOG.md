@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.2] - 2021-12-22
+
+### Fixed
+
+- ext: load C extension files from non-native gems via "require"
+
 ## [0.5.1] - 2021-11-20
 
 ### Fixed
