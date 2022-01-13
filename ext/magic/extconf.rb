@@ -298,11 +298,12 @@ else
   if static_p
     ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
     # mkmf appends -- to the first option
-    pkg_config_flags = pkg_config('libmagic', 'libs --static')
+    pkg_config_flags = pkg_config('libmagic', 'libs')
 
     raise 'Please install the `pkg-config` utility' unless pkg_config_flags
 
     $LIBS += " " + pkg_config_flags
+    $LIBS += " -lz" # see https://github.com/kwilczynski/ruby-magic/issues/29
     $LIBS += " " + File.join(libmagic_recipe.path, 'lib', "libmagic.#{$LIBEXT}")
   end
 
