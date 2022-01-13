@@ -1,7 +1,15 @@
 # frozen_string_literal: true
 
+pkg_config_hack = Gem::Requirement.new("~> 3.1.0").satisfied_by?(Gem::Version.new(RUBY_VERSION))
+pkg_config_multiarg = Gem::Requirement.new(">= 3.1.0").satisfied_by?(Gem::Version.new(RUBY_VERSION))
+
 require 'find'
 require 'mkmf'
+if pkg_config_hack
+  # monkeypatch Ruby 3.1.0's MakeMakefile.pkg_config(), but this has been fixed in 3.2.0.dev.
+  # see https://bugs.ruby-lang.org/issues/18490 and https://github.com/ruby/ruby/pull/5436
+  require_relative 'mkmf-upstream'
+end
 require 'pathname'
 
 # helpful constants
@@ -297,9 +305,11 @@ else
 
   if static_p
     ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
-    # mkmf appends -- to the first option
-    pkg_config_flags = pkg_config('libmagic', 'libs --static')
-
+    pkg_config_flags = if pkg_config_multiarg
+      pkg_config('libmagic', 'libs', 'static')
+    else
+      pkg_config('libmagic', 'libs --static')
+    end
     raise 'Please install the `pkg-config` utility' unless pkg_config_flags
 
     $LIBS += " " + pkg_config_flags
