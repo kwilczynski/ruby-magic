@@ -12,22 +12,16 @@
     - bundle exec rake compile
     - bundle exec rake test
 
-rspec-2.5:
-  image: "ruby:2.5"
-  <<: *test
+default:
+  image: "ruby:${RUBY_VERSION}"
 
-rspec-2.6:
-  image: "ruby:2.6"
-  <<: *test
-
-rspec-2.7:
-  image: "ruby:2.7"
-  <<: *test
-
-rspec-3.0:
-  image: "ruby:3.0"
+rspec:
+  parallel:
+    matrix:
+      - RUBY_VERSION: [ "2.5", "2.6", "2.7", "3.0" ]
   <<: *test
 
 truffleruby:
   image: "flavorjones/truffleruby:buster"
+  allow_failure: true
   <<: *test
