@@ -3,8 +3,7 @@
     paths:
       - vendor/ruby
   before_script:
-    # bundler v2.3.5 appears to have some issues in CI
-    - gem install bundler -v 2.3.0 --no-document
+    - gem install bundler --no-document
     - bundle config set --local path 'vendor/bundle'
     - bundle config set --local without 'development'
     - bundle install -j $(nproc)
