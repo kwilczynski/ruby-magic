@@ -59,7 +59,7 @@ Gem::PackageTask.new(RUBY_MAGIC_GEM_SPEC) do |p|
 end
 
 CROSS_RUBY_PLATFORMS = ["x86_64-linux", "x86-linux"]
-CROSS_RUBY_VERSIONS = ["2.5.0", "2.6.0", "2.7.0", "3.0.0", "3.1.0"].join(":")
+CROSS_RUBY_VERSIONS = ["2.5.0", "2.6.0", "2.7.0", "3.0.0"].join(":")
 
 require "rake_compiler_dock"
 
