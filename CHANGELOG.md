@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-- Native gem support introduced for Ruby 3.1.
-
 ## [0.5.3] - 2021-12-22
 
 ### Fixed
