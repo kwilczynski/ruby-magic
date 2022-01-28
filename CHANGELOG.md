@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.4] - 2022-01-28
+
+### Added
+
+- Added a pessimistic version pin of `rake-compiler` and `rake-compiler-dock` versions in `Gemfile`.
+
+### Changed
+
+- Removed _RubyGems_ version pin from the Gem gemspec file.
+- Simplified the `.gitlab-ci.yml` used to run _CI_ remotely on _GitLab_.
+- Enabled verbose log when cross-compiling a native Ruby Gem using the `rake-compiler-dock` Gem. This allows for commands run to be shown.
+
+### Deprecated
+
+- Retired support for Ruby version 2.5 as it has reached _End of Life_ (EOL).
+
 ## [0.5.3] - 2021-12-22
 
 ### Fixed
@@ -93,6 +109,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - First version of Magic.
 
-[Unreleased]: https://github.com/kwilczynski/ruby-magic/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/kwilczynski/ruby-magic/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/kwilczynski/ruby-magic/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/kwilczynski/ruby-magic/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/kwilczynski/ruby-magic/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/kwilczynski/ruby-magic/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/kwilczynski/ruby-magic/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/kwilczynski/ruby-magic/compare/v0.3.2...v0.4.0
+[0.3.2]: https://github.com/kwilczynski/ruby-magic/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/kwilczynski/ruby-magic/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/kwilczynski/ruby-magic/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/kwilczynski/ruby-magic/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/kwilczynski/ruby-magic/compare/29e6c26...v0.1.0
