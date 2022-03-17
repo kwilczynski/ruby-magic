@@ -393,13 +393,6 @@ unless have_header('ruby.h')
   EOS
 end
 
-# these are needed for `rb_thread_call_without_gvl` to be properly detected on some linux systems.
-# specifically, rake-compiler-dock's redhat-based image needs these.
-have_library('pthread')
-have_library('rt')
-have_library('dl')
-have_library('crypt')
-
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
 
