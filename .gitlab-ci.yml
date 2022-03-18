@@ -25,3 +25,22 @@ truffleruby:
   image: "flavorjones/truffleruby:buster"
   allow_failure: true
   <<: *test
+
+gems:
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  variables:
+    DOCKER_VERSION: "20.10.1"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    RUBY_VERSION: "2.7"
+  stage: test
+  when: manual
+  <<: *test
+  script:
+    - apt update && apt-get install -y docker.io
+    - bundle exec rake gem:native
+  artifacts:
+    paths:
+      - pkg/*.gem
