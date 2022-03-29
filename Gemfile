@@ -3,7 +3,7 @@ gemspec
 
 gem 'rake'
 gem 'rake-compiler', '~> 1.1.7'
-gem 'rake-compiler-dock', '~> 1.2.0'
+gem 'rake-compiler-dock', '~> 1.2.1'
 gem 'rdoc'
 
 group :test do
