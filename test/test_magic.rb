@@ -931,6 +931,10 @@ class MagicTest < Test::Unit::TestCase
       defined?(GC.verify_compaction_references) == 'method',
       "Platform does not support GC.compact"
     )
-    GC.verify_compaction_references(double_heap: true, toward: :empty)
+    begin
+      GC.verify_compaction_references(double_heap: true, toward: :empty)
+    rescue NotImplementedError => e
+      omit(e)
+    end
   end
 end
