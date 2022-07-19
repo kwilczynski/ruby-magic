@@ -13,7 +13,7 @@ class Magic
     #
     # Example:
     #
-    #    Magic.version_array #=> [5, 39]
+    #    Magic.version_array #=> [5, 42]
     #
     # See also: Magic::version and Magic::version_string
     #
@@ -29,7 +29,7 @@ class Magic
     #
     # Example:
     #
-    #    Magic.version_string #=> "5.39"
+    #    Magic.version_string #=> "5.42"
     #
     # See also: Magic::version and Magic::version_array
     #

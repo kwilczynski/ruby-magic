@@ -286,7 +286,7 @@ else
 
   libmagic_recipe = process_recipe('libmagic', dependencies["libmagic"]["version"], static_p, cross_build_p) do |recipe|
     recipe.files = [{
-      url: "https://ruby-magic.s3.nl-ams.scw.cloud/file-#{recipe.version}.tar.gz",
+      url: "https://cdn.statically.io/gh/kwilczynski/ruby-magic/cdn/cdn/file-#{recipe.version}.tar.gz",
       sha256: dependencies["libmagic"]["sha256"],
     }]
   end

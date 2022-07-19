@@ -1,11 +1,11 @@
 libmagic:
-  version: "5.39"
-  sha256: "f05d286a76d9556243d0cb05814929c2ecf3a5ba07963f8f70bfaaa70517fad1"
+  version: "5.42"
+  sha256: "c076fb4d029c74073f15c43361ef572cfb868407d347190ba834af3b1639b0e4"
   #  Manually verified checksum:
   #
-  #    $ gpg --verify file-5.39.tar.gz.asc file-5.39.tar.gz
-  #    gpg: Signature made Mon Jun 15 02:06:08 2020 CEST
-  #    gpg:                using DSA key 0x71112AB16CB33B3A
+  #    $ gpg --verify file-5.42.tar.gz.asc file-5.42.tar.gz
+  #    gpg: Signature made Fri 10 Jun 2022 22:44:53 JST
+  #    gpg:                using DSA key BE04995BA8F90ED0C0C176C471112AB16CB33B3A
   #    gpg: Good signature from "Christos Zoulas (personal key) <christos@zoulas.com>" [unknown]
   #    gpg:                 aka "Christos Zoulas (NetBSD key) <christos@netbsd.org>" [unknown]
   #    gpg: WARNING: This key is not certified with a trusted signature!
