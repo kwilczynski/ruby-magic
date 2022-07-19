@@ -296,14 +296,24 @@ else
   $LDFLAGS += " -Wl,-rpath,#{libmagic_recipe.path}/lib"
 
   if static_p
-    ENV['PKG_CONFIG_PATH'] = "#{libmagic_recipe.path}/lib/pkgconfig"
-    pcfile = File.join(libmagic_recipe.path, "lib", "pkgconfig", "libmagic.pc")
-    if pkg_config(pcfile)
-      # see https://bugs.ruby-lang.org/issues/18490, broken in Ruby 3.1 but fixed in Ruby 3.2
-      flags = xpopen(["pkg-config", "--libs", "--static", pcfile], err: [:child, :out], &:read)
+    pkg_config_paths = [
+      "#{libmagic_recipe.path}/lib64/pkgconfig",
+      "#{libmagic_recipe.path}/lib32/pkgconfig",
+      "#{libmagic_recipe.path}/lib/pkgconfig"
+    ].join(':')
+
+    if ENV["PKG_CONFIG_PATH"]
+      pkg_config_paths = "#{ENV['PKG_CONFIG_PATH']}:#{pkg_config_paths}"
+    end
+
+    ENV['PKG_CONFIG_PATH'] = pkg_config_paths
+    pc_file = File.join(libmagic_recipe.path, "lib", "pkgconfig", "libmagic.pc")
+    if pkg_config(pc_file)
+      # See https://bugs.ruby-lang.org/issues/18490, broken in Ruby 3.1 but fixed in Ruby 3.2.
+      flags = xpopen(["pkg-config", "--libs", "--static", pc_file], err: [:child, :out], &:read)
       flags.split.each { |flag| append_ldflags(flag) } if $?.success?
     else
-      raise "Please install the `pkg-config` utility"
+      raise "Please install the `pkg-config` utility!"
     end
   end
 
