@@ -105,12 +105,16 @@ extern "C" {
 # define RVALUE_TYPE int
 #endif /* RUBY_API_VERSION_CODE > 20700 */
 
-#if RUBY_API_VERSION_CODE >= 20700
+#if RUBY_API_VERSION_CODE >= 20700 && \
+    HAVE_RB_GC_MARK_MOVABLE
 # define HAVE_RUBY_GC_COMPACT 1
 # define MAGIC_GC_MARK(x) rb_gc_mark_movable((x))
 #else
 # define MAGIC_GC_MARK(x) rb_gc_mark((x))
-#endif /* RUBY_API_VERSION_CODE >= 20700 */
+#endif /*
+	* RUBY_API_VERSION_CODE >= 20700
+	* HAVE_RB_GC_MARK_MOVABLE
+	*/
 
 #define CLASS_NAME(o) (NIL_P((o)) ? "nil" : rb_obj_classname((o)))
 

@@ -396,6 +396,7 @@ end
 
 have_func('rb_thread_call_without_gvl')
 have_func('rb_thread_blocking_region')
+have_func('rb_gc_mark_movable')
 
 unless have_header('magic.h')
   abort "\n" + (<<-EOS).gsub(/^[ ]{,3}/, '') + "\n"

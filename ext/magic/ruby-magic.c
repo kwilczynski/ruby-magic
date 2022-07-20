@@ -1594,7 +1594,9 @@ static const rb_data_type_t rb_mgc_type = {
 		.dcompact = magic_compact,
 #endif /* HAVE_RUBY_GC_COMPACT */
 	},
+#if defined(RUBY_TYPED_FREE_IMMEDIATELY)
 	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
+#endif /* RUBY_TYPED_FREE_IMMEDIATELY */
 };
 
 void
