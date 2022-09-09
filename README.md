@@ -38,7 +38,7 @@ the project.
 
 ## Copyright
 
-Copyright 2013-2021 Krzysztof Wilczyński
+Copyright 2013-2022 Krzysztof Wilczyński
 
 ## License
 
