@@ -31,7 +31,6 @@ Gem::Specification.new do |s|
     'source_code_uri'   => 'https://github.com/kwilczynski/ruby-magic',
     'changelog_uri'     => 'https://github.com/kwilczynski/ruby-magic/blob/master/CHANGELOG.md',
     'documentation_uri' => 'https://www.rubydoc.info/gems/ruby-magic',
-    'wiki_uri'          => 'https://github.com/kwilczynski/ruby-magic/wiki'
   }
 
   s.files = Dir['ext/**/*.{c,h,rb}'] +
