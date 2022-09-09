@@ -54,5 +54,5 @@ Gem::Specification.new do |s|
     s.signing_key = signing_key
   end
 
-  s.add_runtime_dependency("mini_portile2", "~> 2.6") # keep version in sync with extconf.rb
+  s.add_runtime_dependency("mini_portile2", "~> 2.8") # keep version in sync with extconf.rb
 end
