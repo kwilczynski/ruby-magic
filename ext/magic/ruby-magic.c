@@ -1344,6 +1344,9 @@ magic_allocate(VALUE klass)
 				    E_NOT_ENOUGH_MEMORY);
 	}
 
+	assert(mgc != NULL &&
+	       "Must be a valid pointer to `rb_mgc_object_t' type");
+
 	mgc->cookie = NULL;
 	mgc->mutex = Qundef;
 	mgc->database_loaded = 0;
