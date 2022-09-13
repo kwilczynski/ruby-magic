@@ -522,7 +522,7 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 	int local_errno;
 	rb_mgc_object_t *mgc;
 	rb_mgc_arguments_t mga;
-	const char *klass = "Magic";
+	const char *klass = NULL;
 	const char *flag = NULL;
 
 	MAGIC_CHECK_INTEGER_TYPE(value);
@@ -545,6 +545,7 @@ rb_mgc_set_flags(VALUE object, VALUE value)
 		flag = "CHECK";
 
 	if (flag) {
+		klass = "Magic";
 		if (!NIL_P(object))
 			klass = rb_obj_classname(object);
 
@@ -589,7 +590,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 {
 	rb_mgc_object_t *mgc;
 	rb_mgc_arguments_t mga;
-	const char *klass = "Magic";
+	const char *klass = NULL;
 	VALUE value = Qundef;
 
 	if (ARRAY_P(RARRAY_FIRST(arguments)))
@@ -601,6 +602,7 @@ rb_mgc_load(VALUE object, VALUE arguments)
 	MAGIC_OBJECT(object, mgc);
 
 	if (rb_mgc_do_not_auto_load) {
+		klass = "Magic";
 		if (!NIL_P(object))
 			klass = rb_obj_classname(object);
 
@@ -1516,7 +1518,7 @@ static VALUE
 magic_return(void *data)
 {
 	rb_mgc_arguments_t *mga = data;
-	const char *unknown = "???";
+	const char *unknown = NULL;
 	VALUE separator = Qundef;
 	VALUE array, string;
 
@@ -1545,6 +1547,7 @@ magic_return(void *data)
 		 * return an empty string, to indicate lack of results, rather
 		 * than a confusing string consisting of three questions marks.
 		 */
+		unknown = "???";
 		if (strncmp(mga->result, unknown, strlen(unknown)) == 0)
 			return CSTR2RVAL("");
 
