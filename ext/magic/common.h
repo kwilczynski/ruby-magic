@@ -81,6 +81,10 @@ extern "C" {
 # define MAGIC_NO_CHECK_JSON 0
 #endif /* MAGIC_NO_CHECK_JSON */
 
+#if !defined(MAGIC_NO_COMPRESS_FORK)
+# define MAGIC_NO_COMPRESS_FORK 0
+#endif /* MAGIC_NO_COMPRESS_FORK */
+
 #define DATA_P(x)    (RB_TYPE_P((x), T_DATA))
 #define BOOLEAN_P(x) (RB_TYPE_P((x), T_TRUE) || RB_TYPE_P((x), T_FALSE))
 #define STRING_P(x)  (RB_TYPE_P((x), T_STRING))

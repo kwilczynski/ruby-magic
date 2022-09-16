@@ -1779,6 +1779,10 @@ Init_magic(void)
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_COMPRESS);
 	/*
+	 * Do not allow decompression that needs to fork.
+	 */
+	MAGIC_DEFINE_FLAG(NO_COMPRESS_FORK);
+	/*
 	 * Do not look for, or inside tar archive files.
 	 */
 	MAGIC_DEFINE_FLAG(NO_CHECK_TAR);
