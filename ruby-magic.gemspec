@@ -27,10 +27,11 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.6.0'
 
   s.metadata = {
-    'bug_tracker_uri'   => 'https://github.com/kwilczynski/ruby-magic/issues',
-    'source_code_uri'   => 'https://github.com/kwilczynski/ruby-magic',
-    'changelog_uri'     => 'https://github.com/kwilczynski/ruby-magic/blob/master/CHANGELOG.md',
-    'documentation_uri' => 'https://www.rubydoc.info/gems/ruby-magic',
+    'bug_tracker_uri'       => 'https://github.com/kwilczynski/ruby-magic/issues',
+    'changelog_uri'         => 'https://github.com/kwilczynski/ruby-magic/blob/master/CHANGELOG.md',
+    'documentation_uri'     => 'https://www.rubydoc.info/gems/ruby-magic',
+    'source_code_uri'       => 'https://github.com/kwilczynski/ruby-magic',
+    'rubygems_mfa_required' => 'true'
   }
 
   s.files = Dir['ext/**/*.{c,h,rb}'] +
