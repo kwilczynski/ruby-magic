@@ -7,6 +7,7 @@ require 'rake/extensiontask'
 require 'rake/testtask'
 
 require 'rdoc/task'
+
 require 'rubocop/rake_task'
 
 RakeFileUtils.verbose_flag = false
@@ -31,14 +32,8 @@ RDoc::Task.new do |d|
   d.main = 'README.md'
   d.options << '--line-numbers'
   d.rdoc_dir = 'doc/rdoc'
-  d.rdoc_files.include FileList['ext/**/*.{c,h}', 'lib/**/*.rb']
+  d.rdoc_files.include FileList['ext/**/*.c', 'lib/**/*.rb']
   d.rdoc_files.include.add(%w[
-    AUTHORS
-    COPYRIGHT
-    LICENSE
-    NOTICE
-    CHANGELOG.md
-    CONTRIBUTORS.md
     README.md
   ])
 end

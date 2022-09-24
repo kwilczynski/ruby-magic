@@ -47,6 +47,12 @@ Gem::Specification.new do |s|
               kwilczynski-public.pem
             )
 
+  s.extra_rdoc_files = Dir['ext/**/*.c'] + %w(
+                         README.md
+                       )
+
+  s.rdoc_options = ['--main', 'README.md', '--line-numbers']
+
   s.require_paths << 'lib'
   s.extensions << 'ext/magic/extconf.rb'
 
