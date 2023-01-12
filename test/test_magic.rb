@@ -205,7 +205,10 @@ class MagicTest < Test::Unit::TestCase
   end
 
   def test_magic_get_parameter_with_PARAM_BYTES_MAX
-    assert_equal(1024 * 1024, @magic.get_parameter(Magic::PARAM_BYTES_MAX))
+    expected = 1024 * 1024
+    expected = expected * 7 if Magic.version > 543
+
+    assert_equal(expected, @magic.get_parameter(Magic::PARAM_BYTES_MAX))
   end
 
   def test_magic_get_parameter_lower_boundary
