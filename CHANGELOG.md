@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.5] - 2023-01-23
+
+### Changed
+
+- Update to latest libmagic version (5.44).
+- Update mini_portile2 to version 2.8.0.
+- Update RDoc in the Ruby gemspec and the Rake task.
+- Update PKG_CONFIG_PATH paths to include more platforms.
+- Add new library flag called MAGIC_NO_COMPRESS_FORK.
+- Add assert to ensure that the internal object is initialised.
+- Reduce scope of some string variables.
+- Relax rake-compiler and rake-compiler-dock dependencies.
+- Only enable support for the GC compaction when there is platform support.
+- Remove workaround for linux build per RCD.
+- Work around Ruby 3.1 pkg_config limitations.
+
 ## [0.5.4] - 2022-01-28
 
 ### Added
