@@ -1,7 +1,7 @@
 # File Magic in Ruby
 
-[![Gem Version](https://badge.fury.io/rb/ruby-magic.svg)](http://badge.fury.io/rb/ruby-magic)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Gem Version](http://badge.fury.io/rb/ruby-magic.svg)](http://badge.fury.io/rb/ruby-magic)
+[![License](http://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://opensource.org/licenses/Apache-2.0)
 
 ## Introduction
 
