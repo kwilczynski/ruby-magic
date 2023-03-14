@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-03-14
+
+### Added
+
+- Add --with-magic-flags option for building libmagic.
+
 ## [0.5.5] - 2023-01-23
 
 ### Changed
