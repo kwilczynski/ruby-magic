@@ -34,6 +34,9 @@ MAGIC_HELP_MESSAGE = <<~HELP
       --enable-cross-build
           Enable cross-build mode. (You probably do not want to set this manually.)
 
+      --with-magic-flags=<flags>
+            Build libmagic with these configure flags (such as --disable-zstdlib)
+
     Flags only used when using system libraries:
 
       Related to libmagic:
@@ -101,11 +104,16 @@ def process_recipe(name, version, static_p, cross_p)
       end
     end
 
-    recipe.configure_options = [
+    configure_options = [
       "--disable-silent-rules",
       "--disable-dependency-tracking",
       "--enable-fsect-man5"
     ]
+
+    libmagic_flags = with_config('magic-flags')
+    configure_options += libmagic_flags.split(' ') if libmagic_flags
+
+    recipe.configure_options = configure_options
 
     if static_p
       recipe.configure_options += [
