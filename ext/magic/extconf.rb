@@ -120,7 +120,7 @@ def process_recipe(name, version, static_p, cross_p)
         "--disable-shared",
         "--enable-static",
       ]
-      env["CFLAGS"] = concat_flags(env["CFLAGS"], "-fPIC")
+      append_cflags("-fPIC")
     else
       recipe.configure_options += [
         "--enable-shared",
@@ -332,30 +332,26 @@ else
   end
 end
 
-$CFLAGS += ' -std=c99'
+append_cflags('-std=c99')
 
 if RbConfig::CONFIG['CC'] =~ /gcc/
-  $CFLAGS += ' -O3' unless $CFLAGS =~ /-O\d/
+  append_cflags('-O3') unless $CFLAGS =~ /-O\d/
 end
 
-%w[
+append_cflags(%w[
   -Wcast-qual
   -Wwrite-strings
   -Wconversion
   -Wmissing-noreturn
   -Winline
-].select do |flag|
-  try_link('int main(void) { return 0; }', flag)
-end.each do |flag|
-  $CFLAGS += " " + flag
-end
+])
 
 unless darwin?
-  $LDFLAGS += ' -Wl,--as-needed -Wl,--exclude-libs,ALL'
+  append_ldflags(['-Wl,--as-needed', '-Wl,--exclude-libs,ALL'])
 end
 
 if windows?
-  $LDFLAGS += ' -static-libgcc'
+  append_ldflags('-static-libgcc')
 end
 
 unless have_header('ruby.h')
